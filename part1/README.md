@@ -64,6 +64,9 @@ Includes:
 - `Place`
 - `Review`
 - `Amenity`
+- `Booking`
+- `Photo`
+
 
 Details:
 - Attributes and methods
@@ -120,9 +123,9 @@ It will serve as the single source of truth to ensure consistency and clarity du
 
 ## 👤 Author
 
-* Valentin DUMONT - https://github.com/Proser-V *
-* Quentin LATASTE - https://github.com/loufi84 *
-* Developer Training Program - [Holberton School Dijon] *  
-* Date: June 2025 *
+*Valentin DUMONT - https://github.com/Proser-V*  
+*Quentin LATASTE - https://github.com/loufi84*  
+*Developer Training Program - [Holberton School Dijon]*  
+*Date: June 2025*
 
 ---
