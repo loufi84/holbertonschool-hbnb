@@ -64,6 +64,9 @@ Includes:
 - `Place`
 - `Review`
 - `Amenity`
+- `Booking`
+- `Photo`
+
 
 Details:
 - Attributes and methods
