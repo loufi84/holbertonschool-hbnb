@@ -1,0 +1,4 @@
+flask
+flask_restx
+flask_httpauth
+pydantic
