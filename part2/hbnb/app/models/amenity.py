@@ -7,5 +7,6 @@ from typing import Optional
 class Amenity(BaseModel):
     id: UUID
     name: str
+    description: str
     created_at: datetime
     updated_at: Optional[datetime] = None

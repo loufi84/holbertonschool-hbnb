@@ -1,16 +1,19 @@
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
-from app.models.place import Place
-from app.models.user import User
+
 
 
 class Review(BaseModel):
     id: UUID
-    text: str
-    rating: float
-    place: Place
-    user: User
+    comment: str
+    rating: float = Field(..., gt=0, lt=5)
+    place: UUID
+    user: UUID
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+    @field_validator('rating')
+    def round_one_decimal(cls, value):
+        return round(value, 1)
