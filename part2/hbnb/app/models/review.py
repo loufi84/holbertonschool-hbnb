@@ -17,3 +17,11 @@ class Review(BaseModel):
     @field_validator('rating')
     def round_one_decimal(cls, value):
         return round(value, 1)
+
+    def set_comment(self, comment):
+        self.comment = comment
+        self.updated_at = datetime.now(timezone.utc)
+
+    def set_rating(self, rating):
+        self.rating = rating
+        self.updated_at = datetime.now(timezone.utc)

@@ -15,3 +15,11 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
     photo_url: Optional[str] = None
+
+def set_first_name(self, first_name):
+    self.first_name = first_name
+    self.updated_at = datetime.now(timezone.utc)
+
+def set_last_name(self, last_name):
+    self.last_name = last_name
+    self.updated_at = datetime.now(timezone.utc)
