@@ -38,6 +38,26 @@ class UserList(Resource):
             'email': new_user.email
         }, 201
 
+    @api.doc(params={'email': 'Email of the user'})
+    @api.response(200, 'User not found')
+    @api.response(404, 'User not found')
+    def get(self):
+        """Retrieve user by email"""
+        email = request.args.get('email')
+        if not email:
+            return {'error': 'Email query required'}
+        
+        user = facade.get_user_by_email(email)
+        if not user:
+            return {'error': 'User not found'}, 404
+        
+        return {
+            'id': str(user.id),
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email
+        }, 200
+
 @api.route('/<user_id>')
 class UserResource(Resource):
     @api.response(200, 'user details retrieved successfully')
