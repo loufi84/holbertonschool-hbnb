@@ -7,7 +7,7 @@ from typing import Optional
 
 class Review(BaseModel):
     id: UUID
-    comment: str
+    comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
     place: UUID
     user: UUID
