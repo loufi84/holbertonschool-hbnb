@@ -3,13 +3,14 @@
 
 '''
 from app.persistence.repository import InMemoryRepository
-from app.models.amenity import Amenity, AmenityCreate
+from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
-from app.models.user import User, UserCreate
+from app.models.user import User
+from app.models.user import UserCreate
 from pydantic import ValidationError
+from uuid import UUID
 import hashlib
-
 
 class HBnBFacade:
     '''
