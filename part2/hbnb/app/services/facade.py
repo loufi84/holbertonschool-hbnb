@@ -3,6 +3,13 @@
 
 '''
 from app.persistence.repository import InMemoryRepository
+from app.models.amenity import Amenity
+from app.models.place import Place
+from app.models.review import Review
+from app.models.user import User
+from app.models import UserCreate
+from pydantic import ValidationError
+import hashlib
 
 
 class HBnBFacade:
@@ -11,12 +18,29 @@ class HBnBFacade:
     '''
     def __init__(self):
         self.user_repo = InMemoryRepository()
-        self.user_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
 
-    def creat_user(self, user_data):
-        pass
+    def create_user(self, user_data):
+        user_in = UserCreate(**user_data)
+        hashed_pw = hashlib.sha256(user_in.password.encode()).hexdigest()
+
+        user = User(
+            first_name=user_in.first_name,
+            last_name=user_in.last_name,
+            email=user_in.email,
+            hashed_password=hashed_pw
+        )
+        self.user_repo.add(user)
+        return user
+
+    
+    def get_user(self, user_id):
+        return self.user_repo.get(user_id)
+    
+    def get_user_by_email(self, email):
+        return self.user_repo.get_by_attribute('email', email)
 
     def get_place(self, place_id):
         pass

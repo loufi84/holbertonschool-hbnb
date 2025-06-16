@@ -25,3 +25,7 @@ class User(BaseModel):
     def set_last_name(self, last_name):
         self.last_name = last_name
         self.updated_at = datetime.now(timezone.utc)
+
+    class Config:
+        allow_mutation = True
+        arbitrary_types_allowed = True
