@@ -40,6 +40,20 @@ class HBnBFacade:
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
 
+    def update_user(self, user_id: UUID, update_data: dict):
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None
+        
+        if "password" in update_data:
+            update_data["hashed_password"] = hashlib.sha256(update_data.pop("password").encode()).hexdigest()
+
+        self.user_repo.update(user_id, update_data)
+        return user
+
+    def get_all_users(self):
+        return self.user_repo.get_all()
+
     def get_place(self, place_id):
         return self.place_repo.get(place_id)
 

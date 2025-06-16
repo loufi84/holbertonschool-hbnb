@@ -1,5 +1,6 @@
 flask
 flask_restx
 flask_httpauth
+flask_jwt_extended
 pydantic
 email-validator

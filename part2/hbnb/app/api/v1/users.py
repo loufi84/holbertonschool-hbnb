@@ -2,10 +2,10 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models.user import UserCreate
 from uuid import UUID
+from app.models.user import UserCreate
 
-api = Namespace('Users', description='User operations')
+api = Namespace('users', description='User operations')
 
 # Doc only, no validation here
 user_model = api.model('User', {
@@ -13,6 +13,14 @@ user_model = api.model('User', {
     'last_name': fields.String(required=True, description='Last name of user'),
     'email': fields.String(required=True, description='Email of user'),
     'password': fields.String(required=True, description='Password of user')
+})
+
+# User update
+user_update_model = api.model('UserUpdate', {
+    'first_name': fields.String(description='First name of user'),
+    'last_name': fields.String(description='Last name of user'),
+    'email': fields.String(description='Email of user'),
+    'password': fields.String(description='Password of user')
 })
 
 @api.route('/')
@@ -39,25 +47,26 @@ class UserList(Resource):
             'email': new_user.email
         }, 201
 
-    @api.doc(params={'email': 'Email of the user'})
-    @api.response(200, 'User not found')
+    @api.doc(params={'email': 'Filter user by email (optional)'})
+    @api.response(200, 'User(s) found')
     @api.response(404, 'User not found')
     def get(self):
-        """Retrieve user by email"""
+        """Get all users or by email query"""
         email = request.args.get('email')
-        if not email:
-            return {'error': 'Email query required'}
+        if email:
+            user = facade.get_user_by_email(email)
+            if not user:
+                return {'error': 'User not found'}, 404
         
-        user = facade.get_user_by_email(email)
-        if not user:
-            return {'error': 'User not found'}, 404
-        
-        return {
-            'id': str(user.id),
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email
-        }, 200
+            return {
+                'id': str(user.id),
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email
+            }, 200
+    
+        users = facade.get_all_users()
+        return [user.model_dump(mode='json') for user in users], 200
 
 @api.route('/<user_id>')
 class UserResource(Resource):
@@ -80,4 +89,33 @@ class UserResource(Resource):
             'firs_name': user.first_name,
             'last_name': user.last_name,
             'email': user.email
+        }, 200
+    
+    @api.expect(user_update_model, validate=True)
+    @api.response(200, 'User successfully updated')
+    @api.response(400, 'Invalid input or UUID format')
+    @api.response(404, 'User not found')
+    def put(self, user_id):
+        """Upadate an existing user"""
+        try:
+            user_uuid = UUID(user_id)
+        except TypeError:
+            return {'error': 'Invalid UUID format'}, 400
+
+        existing_user = facade.get_user(user_uuid)
+        if not existing_user:
+            return {'error': 'User not found'}, 404
+
+        update_data = request.json
+
+        try:
+            updated_user = facade.update_user(user_uuid, update_data)
+        except ValidationError as e:
+            return {'error': e.errors()}, 400
+
+        return {
+            'id': str(updated_user.id),
+            'first_name': updated_user.first_name,
+            'last_name': updated_user.last_name,
+            'email': updated_user.email
         }, 200

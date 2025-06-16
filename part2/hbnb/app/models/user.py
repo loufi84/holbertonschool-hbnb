@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime, timezone
 from typing import Optional, List
 
@@ -20,6 +20,10 @@ class User(BaseModel):
     photo_url: Optional[str] = None
     places: List[uuid.UUID] = Field(default_factory=list)
     reviews: List[uuid.UUID] = Field(default_factory=list)
+
+    model_config = ConfigDict(
+        json_encoders={datetime: lambda v: v.isoformat()}
+    )
 
     def set_first_name(self, first_name):
         self.first_name = first_name
