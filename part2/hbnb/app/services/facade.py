@@ -3,11 +3,10 @@
 
 '''
 from app.persistence.repository import InMemoryRepository
-from app.models.amenity import Amenity
+from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place
 from app.models.review import Review
-from app.models.user import User
-from app.models.user import UserCreate
+from app.models.user import User, UserCreate
 from pydantic import ValidationError
 import hashlib
 
@@ -42,4 +41,25 @@ class HBnBFacade:
         return self.user_repo.get_by_attribute('email', email)
 
     def get_place(self, place_id):
+        return self.place_repo.get(place_id)
+
+    def create_amenity(self, amenity_data):
+        amenity_in = AmenityCreate(**amenity_data)
+
+        amenity = Amenity(
+            name=amenity_in.name,
+            description=amenity_in.description
+        )
+
+        self.amenity_repo.add(amenity)
+        return amenity
+
+    def get_amenity(self, amenity_id):
+        return self.amenity_repo.get(amenity_id)
+
+    def get_all_amenities(self):
+        return list(self.amenity_repo)
+
+    def update_amenity(self, amenity_id, amenity_data):
+        # Placeholder for logic to update an amenity
         pass

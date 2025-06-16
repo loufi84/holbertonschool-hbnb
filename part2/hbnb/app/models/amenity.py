@@ -18,3 +18,7 @@ class Amenity(BaseModel):
     def set_description(self, description):
         self.description = description
         self.updated_at = datetime.now(timezone.utc)
+
+class AmenityCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=500)

@@ -4,6 +4,9 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 
+DEFAULT_USER_PHOTO_URL = "https://cdn0.iconfinder.com/data/icons/mobile-basic-vol-1/32/Profile-256.png"
+
+
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     first_name: str = Field(..., min_length=1, max_length=50)
