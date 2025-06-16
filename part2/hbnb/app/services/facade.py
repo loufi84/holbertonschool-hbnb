@@ -3,7 +3,7 @@
 
 '''
 from app.persistence.repository import InMemoryRepository
-from app.models.amenity import Amenity
+from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place
 from app.models.review import Review
 from app.models.user import User
@@ -73,8 +73,11 @@ class HBnBFacade:
         return self.amenity_repo.get(amenity_id)
 
     def get_all_amenities(self):
-        return list(self.amenity_repo)
+        return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
-        # Placeholder for logic to update an amenity
-        pass
+        amenity = self.amenity_repo.get(amenity_id)
+        if not amenity:
+            return None
+        self.amenity_repo.update(amenity_id, amenity_data)
+        return amenity

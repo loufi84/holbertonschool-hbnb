@@ -17,17 +17,17 @@ amenity_model = api.model('Amenity', {
 
 @api.route('/')
 class AmenityList(Resource):
-    @jwt_required()
+    # @jwt_required()
     @api.expect(amenity_model)
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Amenity already exists or invalid input data')
     @api.response(403, 'Admin privileges required')
     def post(self):
         """Register a new amenity"""
-        user_id = get_jwt_identity()
-        user = facade.get_user(user_id)
-        if not user or not user.is_admin:
-            return {"error": "Admin privileges required"}, 403
+        # user_id = get_jwt_identity()
+        # user = facade.get_user(user_id)
+        # if not user or not user.is_admin:
+        #    return {"error": "Admin privileges required"}, 403
 
         try:
             amenity_data = AmenityCreate(**request.json)
@@ -82,5 +82,24 @@ class AmenityResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, amenity_id):
         """Update an amenity's information"""
-        # Placeholder for the logic to update an amenity by ID
-        pass
+        try:
+            amenity_uuid = UUID(amenity_id)
+        except TypeError:
+            return {'error': 'Invalid UUID format'}, 400
+
+        existing_amenity = facade.get_amenity(amenity_uuid)
+        if not existing_amenity:
+            return {'error': 'User not found'}, 404
+
+        update_data = request.json
+
+        try:
+            updated_amenity = facade.update_amenity(amenity_uuid, update_data)
+        except ValidationError as e:
+            return {'error': e.errors()}, 400
+
+        return {
+            'id': str(updated_amenity.id), # UUID -> str pour le JSON
+            'name': updated_amenity.name,
+            'description': updated_amenity.description
+        }, 200
