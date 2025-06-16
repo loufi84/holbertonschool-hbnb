@@ -11,7 +11,8 @@ api = Namespace('users', description='User operations')
 user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of user'),
     'last_name': fields.String(required=True, description='Last name of user'),
-    'email': fields.String(required=True, description='Email of user')
+    'email': fields.String(required=True, description='Email of user'),
+    'password': fields.String(required=True, description='Password of user')
 })
 
 @api.route('/')
@@ -29,7 +30,7 @@ class UserList(Resource):
         if facade.get_user_by_email(user_data.email):
             return {'error': 'Email already registered'}, 400
 
-        new_user = facade.create_user(user_data.dict())
+        new_user = facade.create_user(user_data.model_dump())
 
         return {
             'id': str(new_user.id), # UUID -> str pour le JSON
@@ -67,7 +68,7 @@ class UserResource(Resource):
         """Get user details by ID"""
         try:
             user_uuid = UUID(user_id)
-        except ValueError:
+        except TypeError:
             return {'error': 'Invalid UUID format'}, 400
 
         user = facade.get_user(user_uuid)
