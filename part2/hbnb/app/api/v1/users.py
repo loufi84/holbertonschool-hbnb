@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from uuid import UUID
 from app.models.user import UserCreate
 
-api = Namespace('Users', description='User operations')
+api = Namespace('users', description='User operations')
 
 # Doc only, no validation here
 user_model = api.model('User', {

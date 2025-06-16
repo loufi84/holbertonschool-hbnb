@@ -7,7 +7,7 @@ from app.models.amenity import AmenityCreate
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
-api = Namespace('Amenities', description='Amenity operations')
+api = Namespace('amenities', description='Amenity operations')
 
 # Define the amenity model for input validation and documentation
 amenity_model = api.model('Amenity', {
