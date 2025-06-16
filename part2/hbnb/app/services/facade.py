@@ -7,7 +7,7 @@ from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
 from app.models.user import User
-from app.models import UserCreate
+from app.models.user import UserCreate
 from pydantic import ValidationError
 import hashlib
 

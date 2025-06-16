@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models import UserCreate
+from app.models.user import UserCreate
 from uuid import UUID
 
 api = Namespace('users', description='User operations')
@@ -38,7 +38,7 @@ class UserList(Resource):
             'email': new_user.email
         }, 201
 
-@api.route('</user_id>')
+@api.route('/<user_id>')
 class UserResource(Resource):
     @api.response(200, 'user details retrieved successfully')
     @api.response(404, 'User not found')
