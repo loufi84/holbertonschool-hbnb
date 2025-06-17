@@ -8,18 +8,23 @@ from uuid import UUID
 api = Namespace('places', description='Places operations')
 
 # Doc for places
-place_model = api.model('Place') {
+place_model = api.model('Place', {
     'title': fields.String(required=True, description='The title of the place'),
     'description': fields.String(required=True, description='The description of the place'),
     'price': fields.Float(required=True, description='The price of the place'),
     'latitude': fields.Float(required=True, description='The latitude of the place'),
     'longitude': fields.Float(required=True, description='The longitude of the place'),
     'rating': fields.Float(required=False, description='The rating of the place'),
-    'user_id': fields.String(required=True, description='The owner of the place'),
-    'reviews': fields.List(required=False, description='The list of reviews'),
-    'amenities': fields.List(required=False, description='The list of amenities'),
-    'photos': fields.List(required=False, description='The list of photos')
-}
+})
+
+place_update_model = api.model('PlaceUpdate', {
+    'title': fields.String(required=True, description='The title of the place'),
+    'description': fields.String(required=True, description='The description of the place'),
+    'price': fields.Float(required=True, description='The price of the place'),
+    'latitude': fields.Float(required=True, description='The latitude of the place'),
+    'longitude': fields.Float(required=True, description='The longitude of the place'),
+    'rating': fields.Float(required=False, description='The rating of the place'),
+})
 
 @api.route('/')
 class PlaceList(Resource):
@@ -31,9 +36,7 @@ class PlaceList(Resource):
             place_data = PlaceCreate(**request.json)
         except ValidationError as e:
             return {'error': e.errors()}, 400
-        
-        if facade.get_place:
-            return {'error': 'Place already exist'}, 400
+
         
         new_place = facade.create_place(place_data.model_dump())
 
@@ -45,3 +48,74 @@ class PlaceList(Resource):
             'latitude': new_place.latitude,
             'longitude': new_place.longitude
         }, 201
+
+@api.route('/<place_id>')
+class PlaceResource(Resource):
+    @api.doc(params={'id': 'Filter places by id (optional)'})
+    @api.response(200, 'Place(s) found')
+    @api.response(404, 'Place not found')
+    def get(self):
+        """Get all places or one by id"""
+        place_id = request.args.get('id')
+        if place_id:
+            try:
+                place_uuid = UUID(place_id)
+            except ValueError:
+                return {'error': 'invalid UUID format'}
+
+            place = facade.get_place(place_uuid)
+            if not place:
+                return {'error': 'Place not found'}, 404
+
+            return {
+                'id': str(place.id),
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude
+            }, 200
+
+        places = facade.place_repo.get_all()
+        places_list = []
+        for place in places:
+            places_list.append({
+                'id': str(place.id),
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+                'rating': place.rating
+            })
+        return places_list, 200
+    
+    @api.expect(place_update_model, validate=True)
+    @api.response(200, 'Place successfully updated')
+    @api.response(400, 'Invalid input or UUID')
+    @api.response(404, 'Place not found')
+    def put(self, place_id):
+        """Method to update a place"""
+        try:
+            place_uuid = UUID(place_id)
+        except ValueError:
+            return {'error': 'Invalid input or UUID'}, 400
+
+        existing_place = facade.get_place(place_uuid)
+        if not existing_place:
+            return {'error': 'Place not found'}, 404
+
+        update_data = request.json
+
+        try:
+            updated_place = facade.update_place(place_uuid, update_data)
+        except ValidationError as e:
+            return {'error': e.errors()}, 400
+
+        return {
+            'title': updated_place.title,
+            'description': updated_place.description,
+            'price': updated_place.price,
+            'latitude': updated_place.latitude,
+            'longitude': updated_place.longitude
+        }
