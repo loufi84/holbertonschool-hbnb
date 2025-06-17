@@ -9,7 +9,8 @@ from app.models.review import Review
 from app.models.place import Place, PlaceCreate
 from app.models.user import User, UserCreate
 from pydantic import ValidationError
-from uuid import UUID
+from uuid import UUID, uuid4
+from datetime import datetime, timezone
 import hashlib
 
 class HBnBFacade:
@@ -64,7 +65,14 @@ class HBnBFacade:
             price=place_in.price,
             latitude=place_in.latitude,
             longitude=place_in.longitude,
-            rating=place_in.rating
+            rating=place_in.rating,
+            id=uuid4(),
+            owner=uuid4(),
+            amenities=[],
+            created_at=datetime.now(timezone.utc),
+            updated_at=None,
+            photos=[],
+            reviews=[]
         )
         self.place_repo.add(place)
         return place
