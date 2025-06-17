@@ -25,10 +25,11 @@ class ReviewList(Resource):
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
     @api.response(403, 'User must visit the place to post a review')
+    @api.response(404, 'Place not found')
     def post(self):
         """Register a new review"""
         # user_id = get_jwt_identity()
-        user_id = request.json.get("user_id")
+        user_id = request.json.get("user_id") # A enlever si JWT
         place_id = request.json.get("place_id")
         place = facade.get_place(place_id)
         if not place:
@@ -37,7 +38,6 @@ class ReviewList(Resource):
             review_data = ReviewCreate(**request.json)
         except ValidationError as e:
             return {"error": e.errors()}, 400
-
         try:
             new_review = facade.create_review(review_data, user_id, place_id)
         except PermissionError as e:
@@ -52,39 +52,103 @@ class ReviewList(Resource):
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
         """Retrieve a list of all reviews"""
-        # Placeholder for logic to return a list of all reviews
-        pass
+        reviews_list = facade.get_all_reviews()
+        if not reviews_list:
+            return {"message": "No review yet"}, 200
+        return [
+            {
+                'id': str(review.id), # UUID -> str pour le JSON
+                'comment': review.comment,
+                'rating': review.rating,
+            } for review in reviews_list
+        ], 200
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
     @api.response(200, 'Review details retrieved successfully')
+    @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Review not found')
     def get(self, review_id):
         """Get review details by ID"""
-        # Placeholder for the logic to retrieve a review by ID
-        pass
+        try:
+            review_uuid = UUID(review_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+
+        review = facade.get_review(review_uuid)
+        if not review:
+            return {'error': 'Review not found'}, 404
+
+        return {
+                'id': str(review.id), # UUID -> str pour le JSON
+                'comment': review.comment,
+                'rating': review.rating,
+        }, 200
 
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
-    @api.response(400, 'Invalid input data')
+    @api.response(400, 'Invalid input data or UUID format')
     def put(self, review_id):
         """Update a review's information"""
-        # Placeholder for the logic to update a review by ID
-        pass
+        try:
+            review_uuid = UUID(review_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+
+        review = facade.get_review(review_uuid)
+        if not review:
+            return {'error': 'Review not found'}, 404
+
+        update_data = request.json
+
+        try:
+            updated_review = facade.update_review(review_uuid, update_data)
+        except ValidationError as e:
+            return {'error': e.errors()}, 400
+
+        return {
+            'id': str(updated_review.id), # UUID -> str pour le JSON
+            'comment': updated_review.comment,
+            'rating': updated_review.rating,
+        }, 200
 
     @api.response(200, 'Review deleted successfully')
+    @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review"""
-        # Placeholder for the logic to delete a review
-        pass
+        try:
+            review_uuid = UUID(review_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+
+        review_to_delete = facade.get_review(review_uuid)
+        if not review_to_delete:
+            return {'error': 'Review not found'}, 404
+
+        del review_to_delete
+        return {'Review deleted successfully'}, 200
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
+    @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all reviews for a specific place"""
-        # Placeholder for logic to return a list of reviews for a place
-        pass
+        try:
+            place_uuid = UUID(place_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+        review_list = facade.get_reviews_by_place(place_uuid)
+        if not review_list:
+            return {'message': 'No review for this place yet'}, 200
+
+        return [
+            {
+                'id': str(review.id), # UUID -> str pour le JSON
+                'comment': review.comment,
+                'rating': review.rating,
+            } for review in review_list
+        ], 200
