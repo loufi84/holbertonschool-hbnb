@@ -79,5 +79,10 @@ class HBnBFacade:
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
-        self.amenity_repo.update(amenity_id, amenity_data)
-        return amenity
+        try:
+            updated_amenity = amenity.copy(update=amenity_data)
+        except ValidationError as e:
+            raise e
+        
+        self.amenity_repo._storage[str(amenity_id)] = updated_amenity
+        return updated_amenity

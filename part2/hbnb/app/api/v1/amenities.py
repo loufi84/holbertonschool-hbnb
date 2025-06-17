@@ -89,7 +89,7 @@ class AmenityResource(Resource):
 
         existing_amenity = facade.get_amenity(amenity_uuid)
         if not existing_amenity:
-            return {'error': 'User not found'}, 404
+            return {'error': 'Amenity not found'}, 404
 
         update_data = request.json
 
