@@ -114,11 +114,15 @@ class HBnBFacade:
 
     def create_review(self, review_data, user_id, place_id):
         bookings = self.booking_repo.get_all()
-        has_booking = any(
-            booking.place == place_id and booking.user == user_id
+
+        has_valid_booking = any(
+            str(booking.place) == str(place_id)
+            and str(booking.user) == str(user_id)
+            and booking.status == BookingStatus.DONE
+            and booking.end_date < datetime.now(timezone.utc)
             for booking in bookings
             )
-        if not has_booking:
+        if not has_valid_booking:
             raise PermissionError("User must visit this place to post a review.")
         
         new_review  = Review(
@@ -142,12 +146,23 @@ class HBnBFacade:
         return [review for review in reviews if review.place == place_id]
 
     def update_review(self, review_id, review_data):
-        # Placeholder for logic to update a review
-        pass
+        review = self.review_repo.get(review_id)
+        if not review:
+            return None
+        try:
+            updated_review = review.copy(update=review_data)
+        except ValidationError as e:
+            raise e
+        
+        self.review_repo._storage[str(review_id)] = updated_review
+        return updated_review
 
     def delete_review(self, review_id):
-        # Placeholder for logic to delete a review
-        pass
+        review = self.review_repo.get(review_id)
+        if not review:
+            return None
+        self.review_repo.delete(review_id)
+        return ''
 
     def create_booking(self, user_id, place_id, booking_data):
         new_booking = Booking(

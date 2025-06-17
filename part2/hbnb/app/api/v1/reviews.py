@@ -126,8 +126,8 @@ class ReviewResource(Resource):
         if not review_to_delete:
             return {'error': 'Review not found'}, 404
 
-        del review_to_delete
-        return {'Review deleted successfully'}, 200
+        facade.delete_review(review_uuid)
+        return {'message': 'Review deleted successfully'}, 200
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
