@@ -3,27 +3,46 @@ from flask import request
 from app.services import facade
 from pydantic import ValidationError
 from uuid import UUID
-from app.models.amenity import AmenityCreate
+from app.models.review import ReviewCreate
+from app.models.booking import Booking
+from app.models.place import Place
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('reviews', description='Review operations')
 
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
-    'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
+    'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
     'user_id': fields.String(required=True, description='ID of the user'),
     'place_id': fields.String(required=True, description='ID of the place')
 })
 
 @api.route('/')
 class ReviewList(Resource):
+    @jwt_required()
     @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new review"""
-        # Placeholder for the logic to register a new review
-        pass
+        user_id = get_jwt_identity()
+        place_id = request.json.get("place_id")
+        place = facade.get_place(place_id)
+        if not place:
+            return {"error": "Place not found"}, 404
+        try:
+            review_data = ReviewCreate(**request.json)
+        except ValidationError as e:
+            return {"error": e.errors()}, 400
+
+
+        new_review = facade.create_review(review_data, user_id, place_id)
+        return {
+            'id': str(new_review.id), # UUID -> str pour le JSON
+            'comment': new_review.comment,
+            'rating': new_review.rating,
+        }, 201
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):

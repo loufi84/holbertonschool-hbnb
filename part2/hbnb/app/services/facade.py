@@ -5,7 +5,7 @@
 from app.persistence.repository import InMemoryRepository
 from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place
-from app.models.review import Review
+from app.models.review import Review, ReviewCreate
 from app.models.place import Place, PlaceCreate
 from app.models.user import User, UserCreate
 from pydantic import ValidationError
@@ -21,6 +21,7 @@ class HBnBFacade:
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
+        self.booking_repo = InMemoryRepository()
 
     def create_user(self, user_data):
         user_in = UserCreate(**user_data)
@@ -101,9 +102,24 @@ class HBnBFacade:
         self.amenity_repo._storage[str(amenity_id)] = updated_amenity
         return updated_amenity
 
-    def create_review(self, review_data):
-        # Placeholder for logic to create a review, including validation for user_id, place_id, and rating
-        pass
+    def create_review(self, review_data, user_id, place_id):
+        bookings = self.booking_repo.get_all()
+        has_booking = any(
+            booking.place == place_id and booking.user == user_id
+            for booking in bookings
+            )
+        if not has_booking:
+            raise PermissionError("User must visit this place to post a review.")
+        
+        new_review  = Review(
+        comment=review_data.comment,
+        rating=review_data.rating,
+        place=place_id,
+        user=user_id,
+        )
+        self.review_repo.add(new_review)
+        return new_review
+
 
     def get_review(self, review_id):
         # Placeholder for logic to retrieve a review by ID

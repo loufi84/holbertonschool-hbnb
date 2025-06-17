@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 from enum import Enum
 
@@ -37,7 +37,7 @@ class CreateBooking(BaseModel):
     start_date: datetime = Field(...)
     end_date: datetime = Field(...)
 
-    @root_validator
+    @model_validator
     def check_dates(cls, values):
         start = values.get("start_date")
         end = values.get("end_date")
