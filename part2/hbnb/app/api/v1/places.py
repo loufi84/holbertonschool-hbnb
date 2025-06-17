@@ -117,7 +117,7 @@ class PlaceResource(Resource):
             return {'error': 'Place not found'}, 404
         
         if self.owner_id != user_id:
-            return {'error': 'You must own this place to mdify it'}, 403
+            return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
 

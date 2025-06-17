@@ -14,8 +14,11 @@ api = Namespace('reviews', description='Review operations')
 review_model = api.model('Review', {
     'comment': fields.String(required=True, description='Text of the review'),
     'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
-    'user_id': fields.String(required=True, description='ID of the user'),
-    'place_id': fields.String(required=True, description='ID of the place')
+    })
+
+review_update_model = api.model('ReviewUpdate', {
+    'comment': fields.String(required=True, description='Text of the review'),
+    'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
 })
 
 @api.route('/')
@@ -29,7 +32,13 @@ class ReviewList(Resource):
     def post(self):
         """Register a new review"""
         user_id = get_jwt_identity()
-        place_id = request.json.get("place_id")
+        
+        last_booking = facade.get_last_completed_booking(user_id)
+        if not last_booking:
+            return {'error': 'No completed booking found'}, 403
+        place_id = last_booking.place
+        if not place_id:
+            return {'error': 'You must complete a booking to review a place'}, 403
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404

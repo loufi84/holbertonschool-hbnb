@@ -174,3 +174,26 @@ class HBnBFacade:
         )
         self.booking_repo.add(new_booking)
         return new_booking
+
+    def get_booking(self, booking_id):
+        pass
+
+    def get_booking_list_by_place(self, place_id):
+        pass
+
+    def get_booking_list_by_user(self, user_id):
+        return [
+            booking for booking in self.booking_repo._storage.values()
+            if str(booking.user) == str(user_id)
+            ]
+
+    def get_last_completed_booking(self, user_id):
+        bookings = self.get_booking_list_by_user(user_id)
+        completed = [
+            booking for booking in bookings
+            if booking.status == "DONE"
+        ]
+        if not completed:
+            raise PermissionError("No completed booking found")
+
+        return max(completed, key=lambda booking: booking.end_date)
