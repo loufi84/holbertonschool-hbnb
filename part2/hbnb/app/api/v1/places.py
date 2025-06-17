@@ -4,6 +4,8 @@ from app.services import facade
 from pydantic import ValidationError
 from app.models.place import PlaceCreate
 from uuid import UUID
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 
 api = Namespace('places', description='Places operations')
 
@@ -14,7 +16,6 @@ place_model = api.model('Place', {
     'price': fields.Float(required=True, description='The price of the place'),
     'latitude': fields.Float(required=True, description='The latitude of the place'),
     'longitude': fields.Float(required=True, description='The longitude of the place'),
-    'rating': fields.Float(required=False, description='The rating of the place'),
 })
 
 place_update_model = api.model('PlaceUpdate', {
@@ -23,22 +24,26 @@ place_update_model = api.model('PlaceUpdate', {
     'price': fields.Float(required=True, description='The price of the place'),
     'latitude': fields.Float(required=True, description='The latitude of the place'),
     'longitude': fields.Float(required=True, description='The longitude of the place'),
-    'rating': fields.Float(required=False, description='The rating of the place'),
 })
 
 @api.route('/')
 class PlaceList(Resource):
+    #@jwt_required()
     @api.expect(place_model, validate=True)
     @api.response(201, 'Place successfully created')
+    @api.response(403, 'User must be connected to create a place')
     @api.response(400, 'Invalid input')
     def post(self):
+        #user_id = get_jwt_identity()
         try:
             place_data = PlaceCreate(**request.json)
         except ValidationError as e:
             return {'error': e.errors()}, 400
 
-        
-        new_place = facade.create_place(place_data.model_dump())
+        place_dict = place_data.model_dump()
+        #place_dict['owner_id'] = user_id
+
+        new_place = facade.create_place(place_dict)
 
         return {
             'id': str(new_place.id),
@@ -91,12 +96,15 @@ class PlaceResource(Resource):
                 'longitude': place.longitude
             }, 200
     
+    #@jwt_required()
     @api.expect(place_update_model, validate=True)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
+    @api.response(403, 'Forbidden')
     @api.response(404, 'Place not found')
     def put(self, place_id):
         """Method to update a place"""
+        #user_id = get_jwt_identity()
         try:
             place_uuid = UUID(place_id)
         except ValueError:
@@ -105,6 +113,9 @@ class PlaceResource(Resource):
         existing_place = facade.get_place(place_uuid)
         if not existing_place:
             return {'error': 'Place not found'}, 404
+        
+        #if self.owner_id != user_id:
+            #return {'error': 'You must own this place to mdify it'}, 403
 
         update_data = request.json
 
