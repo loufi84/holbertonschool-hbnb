@@ -66,3 +66,11 @@ class Place(BaseModel):
         else:
             total = sum(review.rating for review in self.reviews)
             self.rating = round(total / len(self.reviews), 1)
+
+class PlaceCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=1000)
+    price: float
+    latitude: float
+    longitude: float
+    rating: float = 0.0

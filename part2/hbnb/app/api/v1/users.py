@@ -12,7 +12,8 @@ user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of user'),
     'last_name': fields.String(required=True, description='Last name of user'),
     'email': fields.String(required=True, description='Email of user'),
-    'password': fields.String(required=True, description='Password of user')
+    'password': fields.String(required=True, description='Password of user'),
+    'photo': fields.String(required=False, description='The user profile photo')
 })
 
 # User update

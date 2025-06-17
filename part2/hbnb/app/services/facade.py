@@ -6,8 +6,8 @@ from app.persistence.repository import InMemoryRepository
 from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place
 from app.models.review import Review
-from app.models.user import User
-from app.models.user import UserCreate
+from app.models.place import Place, PlaceCreate
+from app.models.user import User, UserCreate
 from pydantic import ValidationError
 from uuid import UUID
 import hashlib
@@ -54,6 +54,20 @@ class HBnBFacade:
 
     def get_all_users(self):
         return self.user_repo.get_all()
+
+    def create_place(self, place_data):
+        place_in = PlaceCreate(**place_data)
+
+        place = Place (
+            title=place_in.title,
+            description=place_in.description,
+            price=place_in.price,
+            latitude=place_in.latitude,
+            longitude=place_in.longitude,
+            rating=place_in.rating
+        )
+        self.place_repo.add(place)
+        return place
 
     def get_place(self, place_id):
         return self.place_repo.get(place_id)
