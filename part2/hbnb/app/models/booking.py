@@ -12,13 +12,13 @@ class BookingStatus(str, Enum):
 
 
 class Booking(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
     status: BookingStatus = Field(default=BookingStatus.DONE, strict=True) # DONE Provisoirement, sinon PENDING
     place: uuid.UUID
     user: uuid.UUID
     start_date: datetime = Field(...)
     end_date: datetime = Field(...)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None
 
     def set_status(self, status):
@@ -32,6 +32,7 @@ class Booking(BaseModel):
     def set_end_date(self, end_date):
             self.end_date = end_date
             self.updated_at = datetime.now(timezone.utc)
+
 
 class CreateBooking(BaseModel):
     start_date: datetime = Field(...)

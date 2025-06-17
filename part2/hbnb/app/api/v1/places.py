@@ -28,20 +28,21 @@ place_update_model = api.model('PlaceUpdate', {
 
 @api.route('/')
 class PlaceList(Resource):
-    #@jwt_required()
+    @jwt_required()
     @api.expect(place_model, validate=True)
     @api.response(201, 'Place successfully created')
     @api.response(403, 'User must be connected to create a place')
     @api.response(400, 'Invalid input')
+    @api.response(401, 'Unauthorized')
     def post(self):
-        #user_id = get_jwt_identity()
+        user_id = get_jwt_identity()
         try:
             place_data = PlaceCreate(**request.json)
         except ValidationError as e:
             return {'error': e.errors()}, 400
 
         place_dict = place_data.model_dump()
-        #place_dict['owner_id'] = user_id
+        place_dict['owner_id'] = user_id
 
         new_place = facade.create_place(place_dict)
 
@@ -51,7 +52,8 @@ class PlaceList(Resource):
             'description': new_place.description,
             'price': new_place.price,
             'latitude': new_place.latitude,
-            'longitude': new_place.longitude
+            'longitude': new_place.longitude,
+            'owner_id': user_id
         }, 201
     
     @api.response(200, 'Places found')
@@ -96,7 +98,7 @@ class PlaceResource(Resource):
                 'longitude': place.longitude
             }, 200
     
-    #@jwt_required()
+    @jwt_required()
     @api.expect(place_update_model, validate=True)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
@@ -104,7 +106,7 @@ class PlaceResource(Resource):
     @api.response(404, 'Place not found')
     def put(self, place_id):
         """Method to update a place"""
-        #user_id = get_jwt_identity()
+        user_id = get_jwt_identity()
         try:
             place_uuid = UUID(place_id)
         except ValueError:
@@ -114,8 +116,8 @@ class PlaceResource(Resource):
         if not existing_place:
             return {'error': 'Place not found'}, 404
         
-        #if self.owner_id != user_id:
-            #return {'error': 'You must own this place to mdify it'}, 403
+        if self.owner_id != user_id:
+            return {'error': 'You must own this place to mdify it'}, 403
 
         update_data = request.json
 

@@ -20,7 +20,7 @@ review_model = api.model('Review', {
 
 @api.route('/')
 class ReviewList(Resource):
-    # @jwt_required()
+    @jwt_required()
     @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
@@ -28,8 +28,7 @@ class ReviewList(Resource):
     @api.response(404, 'Place not found')
     def post(self):
         """Register a new review"""
-        # user_id = get_jwt_identity()
-        user_id = request.json.get("user_id") # A enlever si JWT
+        user_id = get_jwt_identity()
         place_id = request.json.get("place_id")
         place = facade.get_place(place_id)
         if not place:

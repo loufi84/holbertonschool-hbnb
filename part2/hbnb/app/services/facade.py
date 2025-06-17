@@ -8,6 +8,7 @@ from app.models.place import Place
 from app.models.review import Review, ReviewCreate
 from app.models.place import Place, PlaceCreate
 from app.models.user import User, UserCreate
+from app.models.booking import Booking, BookingStatus
 from pydantic import ValidationError
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
@@ -67,6 +68,7 @@ class HBnBFacade:
             latitude=place_in.latitude,
             longitude=place_in.longitude,
             rating=place_in.rating,
+            owner_id=place_data['owner_id']
         )
         self.place_repo.add(place)
         return place
@@ -146,3 +148,14 @@ class HBnBFacade:
     def delete_review(self, review_id):
         # Placeholder for logic to delete a review
         pass
+
+    def create_booking(self, user_id, place_id, booking_data):
+        new_booking = Booking(
+            place=place_id,
+            user=user_id,
+            start_date=booking_data.start_date,
+            end_date=booking_data.end_date,
+            status=BookingStatus.DONE
+        )
+        self.booking_repo.add(new_booking)
+        return new_booking
