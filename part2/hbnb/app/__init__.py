@@ -11,6 +11,7 @@ from app.api.v1.reviews import api as reviews_ns
 from flask_jwt_extended import JWTManager
 
 
+
 def create_app():
     print("create_app() called")
     app = Flask(__name__)
@@ -23,7 +24,7 @@ def create_app():
     api = Api(app, version='1.0', title='HBnB API',
               description='HBnB Application API', doc='/docs')
 
-    app.config['JWT_SECRET_KEY'] = 'super-secret-key'
+    app.config['JWT_SECRET_KEY'] = 'a-string-secret-at-least-256-bits-long'
     jwt = JWTManager(app)
 
     api.add_namespace(users_ns, path='/api/v1/users')
