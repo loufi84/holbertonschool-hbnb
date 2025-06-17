@@ -50,7 +50,10 @@ class InMemoryRepository(Repository):
     def update(self, obj_id, data):
         obj = self.get(obj_id)
         if obj:
-            obj.update(data)
+            updated_obj = obj.copy(update=data)
+            self._storage[str(obj_id)] = updated_obj
+            return updated_obj
+        return None
 
     def delete(self, obj_id):
         key = str(obj_id)

@@ -37,7 +37,7 @@ class CreateBooking(BaseModel):
     start_date: datetime = Field(...)
     end_date: datetime = Field(...)
 
-    @model_validator
+    @model_validator(mode='before')
     def check_dates(cls, values):
         start = values.get("start_date")
         end = values.get("end_date")

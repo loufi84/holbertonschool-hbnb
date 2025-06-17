@@ -1,4 +1,4 @@
-from uuid import UUID
+import uuid
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime, timezone
@@ -7,13 +7,13 @@ from app.models.review import Review
 
 DEFAULT_PLACE_PHOTO_URL = "https://static.vecteezy.com/system/resources/previews/006/059/989/large_2x/crossed-camera-icon-avoid-taking-photos-image-is-not-available-illustration-free-vector.jpg"
 class Place(BaseModel):
-    id: UUID
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1, max_length=1000)
     price: float = Field(..., ge=0)  # ge=0 = greater or equal to 0
     latitude: float = Field(..., ge=-90, le=90) # le=90 = less or equal to 90
     longitude: float = Field(..., ge=-180, le=180)
-    owner: UUID
+    owner: str = Field(default_factory=lambda: str(uuid.uuid4()))
     amenities: List[Amenity] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None

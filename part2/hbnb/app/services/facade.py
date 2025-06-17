@@ -67,13 +67,6 @@ class HBnBFacade:
             latitude=place_in.latitude,
             longitude=place_in.longitude,
             rating=place_in.rating,
-            id=uuid4(),
-            owner=uuid4(),
-            amenities=[],
-            created_at=datetime.now(timezone.utc),
-            updated_at=None,
-            photos=[],
-            reviews=[]
         )
         self.place_repo.add(place)
         return place
@@ -85,8 +78,8 @@ class HBnBFacade:
         place = self.place_repo.get(place_id)
         if not place:
             return None
-        self.place_repo.update(place_id, update_data)
-        return place
+        updated_place = self.place_repo.update(place_id, update_data)
+        return updated_place
 
     def create_amenity(self, amenity_data):
         amenity_in = AmenityCreate(**amenity_data)

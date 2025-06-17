@@ -48,34 +48,10 @@ class PlaceList(Resource):
             'latitude': new_place.latitude,
             'longitude': new_place.longitude
         }, 201
-
-@api.route('/<place_id>')
-class PlaceResource(Resource):
-    @api.doc(params={'id': 'Filter places by id (optional)'})
-    @api.response(200, 'Place(s) found')
-    @api.response(404, 'Place not found')
+    
+    @api.response(200, 'Places found')
+    @api.response(404, 'No places found')
     def get(self):
-        """Get all places or one by id"""
-        place_id = request.args.get('id')
-        if place_id:
-            try:
-                place_uuid = UUID(place_id)
-            except ValueError:
-                return {'error': 'invalid UUID format'}
-
-            place = facade.get_place(place_uuid)
-            if not place:
-                return {'error': 'Place not found'}, 404
-
-            return {
-                'id': str(place.id),
-                'title': place.title,
-                'description': place.description,
-                'price': place.price,
-                'latitude': place.latitude,
-                'longitude': place.longitude
-            }, 200
-
         places = facade.place_repo.get_all()
         places_list = []
         for place in places:
@@ -89,6 +65,31 @@ class PlaceResource(Resource):
                 'rating': place.rating
             })
         return places_list, 200
+
+@api.route('/<place_id>')
+class PlaceResource(Resource):
+    @api.response(200, 'Place(s) found')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """Get a place by ID"""
+        if place_id:
+            try:
+                place_uuid = UUID(place_id)
+            except ValueError:
+                return {'error': 'invalid UUID format'}
+
+            place = facade.get_place(place_uuid)
+            if not place:
+                return {'error': 'Place not found'}, 404
+
+            return {
+                'place_id': str(place.id),
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude
+            }, 200
     
     @api.expect(place_update_model, validate=True)
     @api.response(200, 'Place successfully updated')
