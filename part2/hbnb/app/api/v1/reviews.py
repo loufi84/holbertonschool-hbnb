@@ -12,7 +12,7 @@ api = Namespace('reviews', description='Review operations')
 
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
-    'text': fields.String(required=True, description='Text of the review'),
+    'comment': fields.String(required=True, description='Text of the review'),
     'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
     'user_id': fields.String(required=True, description='ID of the user'),
     'place_id': fields.String(required=True, description='ID of the place')
@@ -20,13 +20,15 @@ review_model = api.model('Review', {
 
 @api.route('/')
 class ReviewList(Resource):
-    @jwt_required()
+    # @jwt_required()
     @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'User must visit the place to post a review')
     def post(self):
         """Register a new review"""
-        user_id = get_jwt_identity()
+        # user_id = get_jwt_identity()
+        user_id = request.json.get("user_id")
         place_id = request.json.get("place_id")
         place = facade.get_place(place_id)
         if not place:
@@ -36,8 +38,11 @@ class ReviewList(Resource):
         except ValidationError as e:
             return {"error": e.errors()}, 400
 
+        try:
+            new_review = facade.create_review(review_data, user_id, place_id)
+        except PermissionError as e:
+            return {"error": str(e)}, 403
 
-        new_review = facade.create_review(review_data, user_id, place_id)
         return {
             'id': str(new_review.id), # UUID -> str pour le JSON
             'comment': new_review.comment,
