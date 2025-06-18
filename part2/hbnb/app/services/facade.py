@@ -61,14 +61,22 @@ class HBnBFacade:
     def create_place(self, place_data):
         place_in = PlaceCreate(**place_data)
 
-        place = Place (
-            title=place_in.title,
-            description=place_in.description,
-            price=place_in.price,
-            latitude=place_in.latitude,
-            longitude=place_in.longitude,
-            rating=place_in.rating,
-            owner_id=place_data['owner_id']
+        amenities = []
+        for amenity_id in place_in.amenity_ids or []:
+            amenity = self.get_amenity(str(amenity_id))
+            if not amenity:
+                raise Exception(f'Amenity {amenity_id} not found')
+            amenities.append(amenity)
+
+        place = Place(
+        id=str(uuid4()),
+        title=place_in.title,
+        description=place_in.description,
+        price=place_in.price,
+        latitude=place_in.latitude,
+        longitude=place_in.longitude,
+        owner_id=place_in.owner_id,
+        amenities=amenities
         )
         self.place_repo.add(place)
         return place
