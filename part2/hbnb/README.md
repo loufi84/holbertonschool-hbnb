@@ -33,6 +33,7 @@ By the end of this phase, we aim to:
 
 🗂 Project Structure  
 
+```
 hbnb/  
 ├── app/  
 │   ├── __init__.py  
@@ -63,6 +64,7 @@ hbnb/
 ├── requirements.txt  
 ├── README.md  
 ├── tests/  
+```
 
 🔧 Technologies  
 	•	Python 3.x  
