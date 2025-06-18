@@ -228,14 +228,3 @@ class HBnBFacade:
             return updated_booking
         else:
             return {"error": "Only the owner of a place can update a booking"}, 403
-
-    def cancel_booking(self, booking_id, place_id, user_id):
-        booking = self.booking_repo.get(booking_id)
-        if not booking:
-            return None
-        place = self.place_repo.get(place_id)
-        if str(place.owner_id) == str(user_id):
-            self.booking_repo.delete(booking_id)
-            return ''
-        else:
-            return {"error": "Only the owner of a place can delete a booking"}, 403
