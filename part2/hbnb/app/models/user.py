@@ -1,5 +1,6 @@
 import uuid
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import field_validator, model_validator
 from datetime import datetime, timezone
 from typing import Optional, List
 
@@ -51,17 +52,13 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=1, max_length=50)
 
-    @model_validator(mode='before')
+    @field_validator('first_name', 'last_name', 'password')
     @classmethod
-    def check_for_blanks(cls, values):
-        for field_name in ['first_name', 'last_name', 'password']:
-            value = values.get(field_name)
-            if value is None or not value.strip():
-                raise ValueError(
-                    f"{field_name} cannot be empty or just whitespace"
-                    )
-            values[field_name] = value.strip()
-        return values
+    def no_blank_strings(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError("Field cannot be empty or just whitespace")
+        return value
 
 
 class LoginRequest(BaseModel):

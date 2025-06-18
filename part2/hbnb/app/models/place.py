@@ -90,14 +90,10 @@ class PlaceCreate(BaseModel):
     def round_price(cls, v):
         return round(v, 2)
 
-    @model_validator(mode='before')
+    @field_validator('title', 'description')
     @classmethod
-    def check_for_blanks(cls, values):
-        for field_name in ['title', 'description']:
-            value = values.get(field_name)
-            if value is None or not value.strip():
-                raise ValueError(
-                    f"{field_name} cannot be empty or just whitespace"
-                    )
-            values[field_name] = value.strip()
-        return values
+    def no_blank_strings(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError("Field cannot be empty or just whitespace")
+        return value

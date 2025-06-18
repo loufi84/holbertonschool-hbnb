@@ -30,7 +30,10 @@ class ReviewList(Resource):
         """Register a new review"""
         user_id = get_jwt_identity()
 
-        last_booking = facade.get_last_completed_booking(user_id)
+        try:
+            last_booking = facade.get_last_completed_booking(user_id)
+        except PermissionError as e:
+            return {'error': str(e)}, 403
         if not last_booking:
             return {'error': 'No completed booking found'}, 403
         place_id = last_booking.place

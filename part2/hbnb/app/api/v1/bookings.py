@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
 from datetime import datetime, timezone
+from dateutil.parser import isoparse
 
 api = Namespace('bookings', description='Booking operations')
 
@@ -38,20 +39,21 @@ class BookingList(Resource):
         user_id = get_jwt_identity()
         data = request.json
 
-        if 'start_date' in data:
-            data['start_date'] = datetime.fromisoformat(data['start_date'])
-
-        if 'end_date' in data:
-            data['end_date'] = datetime.fromisoformat(data['end_date'])
         try:
             place_id = uuid.UUID(data.get("place_id"))
-            booking_data = CreateBooking(
-                start_date=data.get("start_date"),
-                end_date=data.get("end_date")
-            )
-        except (ValidationError, ValueError) as e:
+            booking_data = CreateBooking(**data)
+        except ValidationError as e:
+            return {'errors': str(e.errors()[0]['msg'])}, 400
+        except ValueError as e:
             return {'error': str(e)}, 400
 
+        booking_list = facade.get_booking_list_by_place(place_id)
+        for booking in booking_list:
+            if (
+                booking.start_date < booking_data.end_date
+                and booking_data.start_date < booking.end_date
+                ):
+                return {"error": "Already booked"}, 400
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
         return new_booking.model_dump(mode="json"), 201
@@ -130,11 +132,9 @@ class BookingResource(Resource):
 
         try:
             if update_data.get('start_date'):
-                update_data['start_date'] = datetime.fromisoformat(
-                    update_data['start_date'])
+                update_data['start_date'] = isoparse(update_data['start_date'])
             if update_data.get('end_date'):
-                update_data['end_date'] = datetime.fromisoformat(
-                    update_data['end_date'])
+                update_data['end_date'] = isoparse(update_data['end_date'])
         except ValueError as e:
             return {'error': 'Invalid date format'}, 400
 
