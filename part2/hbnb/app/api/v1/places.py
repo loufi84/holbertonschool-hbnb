@@ -61,7 +61,8 @@ class PlaceList(Resource):
                 for amenity in place.amenities:
                     amenities.append({
                         'id': str(amenity.id),
-                        'name': amenity.name
+                        'name': amenity.name,
+                        'description': amenity.description
                     })
                 places_list.append({
                     'id': str(place.id),
@@ -90,10 +91,15 @@ class PlaceResource(Resource):
             if not place:
                 return {'error': 'Place not found'}, 404
 
-            amenities_list = [
-                {'id': str(amenity.id), 'name': amenity.name}
-                for amenity in place.amenities
-            ]
+            amenities = []
+            for amenity in place.amenities:
+                amenities.append({
+                    'id': str(amenity.id),
+                    'title': amenity.title,
+                    'description': amenity.description
+                })
+
+
             return {
                 'place_id': str(place.id),
                 'title': place.title,
@@ -101,7 +107,7 @@ class PlaceResource(Resource):
                 'price': place.price,
                 'latitude': place.latitude,
                 'longitude': place.longitude,
-                'amenities': amenities_list
+                'amenities': amenities
             }, 200
     
     @jwt_required()
