@@ -16,10 +16,6 @@ review_model = api.model('Review', {
     'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
     })
 
-review_update_model = api.model('ReviewUpdate', {
-    'comment': fields.String(required=True, description='Text of the review'),
-    'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
-})
 
 @api.route('/')
 class ReviewList(Resource):
