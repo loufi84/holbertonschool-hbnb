@@ -105,7 +105,7 @@ class UserResource(Resource):
     @api.response(400, 'Invalid input or UUID format')
     @api.response(404, 'User not found')
     def put(self, user_id):
-        """Upadate an existing user"""
+        """Update an existing user"""
         try:
             user_uuid = UUID(user_id)
         except TypeError:
@@ -137,6 +137,7 @@ class Login(Resource):
     @api.response(401, 'Bad credentials')
     @api.response(404, 'User not found')
     def post(self):
+        """Login the user"""
         data = request.json
         try:
             login_data = LoginRequest(**data)

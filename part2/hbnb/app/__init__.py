@@ -28,7 +28,7 @@ def create_app():
             'type': 'apiKey',
             'in': 'header',
             'name': 'Authorization',
-            'description': 'Enter Bearer <JWT>'
+            'description': "Enter 'Bearer' + your token here"
         }
     }
 

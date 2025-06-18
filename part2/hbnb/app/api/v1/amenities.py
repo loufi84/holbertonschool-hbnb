@@ -46,6 +46,7 @@ class AmenityList(Resource):
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
+        """Get a list of amenities"""
         amenity_list = facade.get_all_amenities()
         return [
             {

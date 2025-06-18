@@ -9,16 +9,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('places', description='Places operations')
 
-# Doc for places
+# Model for places creation and update
 place_model = api.model('Place', {
-    'title': fields.String(required=True, description='The title of the place'),
-    'description': fields.String(required=True, description='The description of the place'),
-    'price': fields.Float(required=True, description='The price of the place'),
-    'latitude': fields.Float(required=True, description='The latitude of the place'),
-    'longitude': fields.Float(required=True, description='The longitude of the place'),
-})
-
-place_update_model = api.model('PlaceUpdate', {
     'title': fields.String(required=True, description='The title of the place'),
     'description': fields.String(required=True, description='The description of the place'),
     'price': fields.Float(required=True, description='The price of the place'),
@@ -35,6 +27,7 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input')
     @api.response(401, 'Unauthorized')
     def post(self):
+        """Create a new place"""
         user_id = get_jwt_identity()
         try:
             place_data = PlaceCreate(**request.json)
@@ -59,6 +52,7 @@ class PlaceList(Resource):
     @api.response(200, 'Places found')
     @api.response(404, 'No places found')
     def get(self):
+        """Get a list of all places"""
         places = facade.place_repo.get_all()
         places_list = []
         for place in places:
@@ -99,7 +93,7 @@ class PlaceResource(Resource):
             }, 200
     
     @jwt_required()
-    @api.expect(place_update_model, validate=True)
+    @api.expect(place_model, validate=True)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
     @api.response(403, 'Forbidden')
