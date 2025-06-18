@@ -27,6 +27,15 @@ class ReviewCreate(BaseModel):
     comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
 
+    @field_validator('comment')
+    @classmethod
+    def check_for_blanks(cls, value):
+        if value is None or not value.strip():
+            raise ValueError(
+                f"Comment cannot be empty or just whitespace"
+                )
+        return value.strip()
+
     @field_validator('rating')
     def round_one_decimal(cls, value):
         return round(value, 1)

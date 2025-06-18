@@ -60,6 +60,7 @@ class UserCreate(BaseModel):
                 raise ValueError(
                     f"{field_name} cannot be empty or just whitespace"
                     )
+            values[field_name] = value.strip()
         return values
 
 

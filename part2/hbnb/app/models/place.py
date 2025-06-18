@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, List
 from datetime import datetime, timezone
 from app.models.amenity import Amenity
@@ -89,3 +89,15 @@ class PlaceCreate(BaseModel):
     @classmethod
     def round_price(cls, v):
         return round(v, 2)
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_for_blanks(cls, values):
+        for field_name in ['title', 'description']:
+            value = values.get(field_name)
+            if value is None or not value.strip():
+                raise ValueError(
+                    f"{field_name} cannot be empty or just whitespace"
+                    )
+            values[field_name] = value.strip()
+        return values

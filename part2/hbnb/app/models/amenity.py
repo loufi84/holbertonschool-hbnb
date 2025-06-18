@@ -24,3 +24,15 @@ class Amenity(BaseModel):
 class AmenityCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1, max_length=500)
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_for_blanks(cls, values):
+        for field_name in ['name', 'description']:
+            value = values.get(field_name)
+            if value is None or not value.strip():
+                raise ValueError(
+                    f"{field_name} cannot be empty or just whitespace"
+                    )
+            values[field_name] = value.strip()
+        return values
