@@ -176,10 +176,16 @@ class HBnBFacade:
         return new_booking
 
     def get_booking(self, booking_id):
-        pass
+        return self.booking_repo.get(booking_id)
+
+    def get_all_bookings(self):
+        return self.booking_repo.get_all()
 
     def get_booking_list_by_place(self, place_id):
-        pass
+        return [
+            booking for booking in self.booking_repo._storage.values()
+            if str(booking.place) == str(place_id)
+            ]
 
     def get_booking_list_by_user(self, user_id):
         return [
@@ -197,3 +203,32 @@ class HBnBFacade:
             raise PermissionError("No completed booking found")
 
         return max(completed, key=lambda booking: booking.end_date)
+
+    def update_booking(self, booking_id, booking_data):
+        booking = self.booking_repo.get(booking_id)
+        if not booking:
+            return None
+        place_id = booking.place
+        place = self.place_repo.get(place_id)
+        user_id = booking.user
+        if str(place.owner_id) == str(user_id):
+            try:
+                updated_booking = booking.copy(update=booking_data)
+            except ValidationError as e:
+                raise e
+            
+            self.booking_repo._storage[str(booking_id)] = updated_booking
+            return updated_booking
+        else:
+            return {"error": "Only the owner of a place can update a booking"}, 403
+
+    def cancel_booking(self, booking_id, place_id, user_id):
+        booking = self.booking_repo.get(booking_id)
+        if not booking:
+            return None
+        place = self.place_repo.get(place_id)
+        if str(place.owner_id) == str(user_id):
+            self.booking_repo.delete(booking_id)
+            return ''
+        else:
+            return {"error": "Only the owner of a place can delete a booking"}, 403
