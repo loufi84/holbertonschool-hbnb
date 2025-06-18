@@ -3,9 +3,12 @@ from flask import request
 from app.services import facade
 from pydantic import ValidationError
 from uuid import UUID
-from app.models.user import UserCreate
+from app.models.user import UserCreate, LoginRequest
+from flask_jwt_extended import create_access_token
+import hashlib
 
 api = Namespace('users', description='User operations')
+api = Namespace('auth', description='Authentication operations')
 
 # Doc only, no validation here
 user_model = api.model('User', {
@@ -21,6 +24,12 @@ user_update_model = api.model('UserUpdate', {
     'last_name': fields.String(description='Last name of user'),
     'email': fields.String(description='Email of user'),
     'password': fields.String(description='Password of user')
+})
+
+# User login
+login_model = api.model('Login', {
+    'email': fields.String(required=True, description='User email'),
+    'password': fields.String(required=True, description='User password')
 })
 
 @api.route('/')
@@ -119,3 +128,27 @@ class UserResource(Resource):
             'last_name': updated_user.last_name,
             'email': updated_user.email
         }, 200
+
+@api.route('/login')
+class Login(Resource):
+    @api.expect(login_model, validate=True)
+    @api.response(201, 'Token created')
+    @api.response(400, 'Pydantic validation error')
+    @api.response(401, 'Bad credentials')
+    @api.response(404, 'User not found')
+    def post(self):
+        data = request.json
+        try:
+            login_data = LoginRequest(**data)
+        except ValidationError as e:
+            return {'error': e.errors()}, 400
+        
+        user = facade.get_user_by_email(login_data.email)
+        if not user:
+            return {'error': 'User not found'}, 404
+        hashed_input_pw = hashlib.sha256(login_data.password.encode()).hexdigest()
+        if user.hashed_password != hashed_input_pw:
+            return {'error': 'Invalide password or email'}, 401
+        
+        access_token = create_access_token(identity=str(user.id))
+        return {'access token': access_token}, 201
