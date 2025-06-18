@@ -116,7 +116,7 @@ class PlaceResource(Resource):
         if not existing_place:
             return {'error': 'Place not found'}, 404
         
-        if self.owner_id != user_id:
+        if existing_place.owner_id != user_id:
             return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
@@ -133,3 +133,26 @@ class PlaceResource(Resource):
             'latitude': updated_place.latitude,
             'longitude': updated_place.longitude
         }
+    
+    @jwt_required()
+    @api.response(200, 'Place successfully deleted')
+    @api.response(400, 'Invalid ID')
+    @api.response(401, 'Invalid credentials')
+    @api.response(404, 'Place not found')
+    def delete(self, place_id):
+        """Method to delete a place"""
+        user_id = get_jwt_identity()
+        try:
+            place_uuid = UUID(place_id)
+        except ValidationError as e:
+            return {'error': e.errors()}, 400
+        
+        existing_place = facade.get_place(place_uuid)
+        if not existing_place:
+            return {'error': 'Place not found'}, 404
+        
+        if existing_place.owner_id != user_id:
+            return {'error': 'You must own the place to delete it'}, 403
+        
+        facade.delete_place(place_uuid)
+        return {'message': 'Place deleted successfully'}, 200
