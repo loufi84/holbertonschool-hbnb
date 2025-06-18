@@ -13,7 +13,7 @@ class BookingStatus(str, Enum):
 
 class Booking(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    status: BookingStatus = Field(default=BookingStatus.DONE, strict=True) # DONE Provisoirement, sinon PENDING
+    status: BookingStatus = Field(default=BookingStatus.PENDING, strict=True)
     place: uuid.UUID
     user: uuid.UUID
     start_date: datetime = Field(...)

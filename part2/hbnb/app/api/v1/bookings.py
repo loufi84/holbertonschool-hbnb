@@ -16,9 +16,9 @@ booking_model = api.model('Booking', {
     'end_date': fields.DateTime(required=True, description='End date')
 })
 
-booking_update_model = api.model('Booking', {
-    'start_date': fields.DateTime(required=True, description='Start date'),
-    'end_date': fields.DateTime(required=True, description='End date'),
+booking_update_model = api.model('BookingUpdate', {
+    'start_date': fields.DateTime(required=False, description='Start date'),
+    'end_date': fields.DateTime(required=False, description='End date'),
     'status': fields.String(
     required=False,
     description='Booking status (editable only by owner)',
@@ -37,6 +37,11 @@ class BookingList(Resource):
         user_id = get_jwt_identity()
         data = request.json
 
+        if 'start_date' in data:
+            data['start_date'] = datetime.fromisoformat(data['start_date'])
+
+        if 'end_date' in data:
+            data['end_date'] = datetime.fromisoformat(data['end_date'])
         try:
             place_id = uuid.UUID(data.get("place_id"))
             booking_data = CreateBooking(
@@ -64,10 +69,10 @@ class BookingList(Resource):
                 booking.set_status("DONE")
             booking_list.append({
                 'id': str(booking.id),
-                'place_id': booking.place,
-                'user_id': booking.user,
-                'start_date': booking.start_date,
-                'end_date': booking.end_date,
+                'place_id': str(booking.place),
+                'user_id': str(booking.user),
+                'start_date': booking.start_date.isoformat(),
+                'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
             })
         return booking_list, 200
@@ -95,10 +100,10 @@ class BookingResource(Resource):
             booking.set_status("DONE")
         return {
                 'id': str(booking.id), # UUID -> str pour le JSON
-                'user_id': booking.user,
-                'place_id': booking.place,
-                'start_date': booking.start_date,
-                'end_date': booking.end_date,
+                'user_id': str(booking.user),
+                'place_id': str(booking.place),
+                'start_date': booking.start_date.isoformat(),
+                'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
         }, 200
 
@@ -121,9 +126,17 @@ class BookingResource(Resource):
         current_user = get_jwt_identity()
         update_data = request.json
 
+        try:
+            if update_data.get('start_date'):
+                update_data['start_date'] = datetime.fromisoformat(update_data['start_date'])
+            if update_data.get('end_date'):
+                update_data['end_date'] = datetime.fromisoformat(update_data['end_date'])
+        except ValueError as e:
+            return {'error': 'Invalid date format'}, 400
+
         if "status" in update_data:
             place = facade.get_place(booking.place)
-            if not place or str(place.owner) != str(current_user):
+            if not place or str(place.owner_id) != str(current_user):
                 return {
                     'error': 'Only the owner of a place can update the status'
                     }, 403
@@ -132,12 +145,14 @@ class BookingResource(Resource):
             updated_booking = facade.update_booking(booking_uuid, update_data)
         except ValidationError as e:
             return {'error': e.errors()}, 400
+        except PermissionError as e:
+            return {'error': str(e)}, 403
 
         return [
             {
                 'id': str(updated_booking.id), # UUID -> str pour le JSON
-                'start_date': updated_booking.start_date,
-                'end_date': updated_booking.end_date,
+                'start_date': updated_booking.start_date.isoformat(),
+                'end_date': updated_booking.end_date.isoformat(),
                 'status': updated_booking.status,
             }
         ], 200
@@ -154,7 +169,7 @@ class PlaceBookingList(Resource):
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
         bookings = facade.get_booking_list_by_place(place_uuid)
-        if not booking_list:
+        if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
         booking_list = []
@@ -164,10 +179,10 @@ class PlaceBookingList(Resource):
                 booking.set_status("DONE")
             booking_list.append({
                 'id': str(booking.id),
-                'place_id': booking.place,
-                'user_id': booking.user,
-                'start_date': booking.start_date,
-                'end_date': booking.end_date,
+                'place_id': str(booking.place),
+                'user_id': str(booking.user),
+                'start_date': booking.start_date.isoformat(),
+                'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
             })
         return booking_list, 200
@@ -193,10 +208,10 @@ class UserBookingList(Resource):
                 booking.set_status("DONE")
             booking_list.append({
                 'id': str(booking.id),
-                'place_id': booking.place,
-                'user_id': booking.user,
-                'start_date': booking.start_date,
-                'end_date': booking.end_date,
+                'place_id': str(booking.place),
+                'user_id': str(booking.user),
+                'start_date': booking.start_date.isoformat(),
+                'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
             })
         return booking_list, 200

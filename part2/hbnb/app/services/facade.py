@@ -177,7 +177,7 @@ class HBnBFacade:
             user=user_id,
             start_date=booking_data.start_date,
             end_date=booking_data.end_date,
-            status=BookingStatus.DONE
+            status=BookingStatus.PENDING
         )
         self.booking_repo.add(new_booking)
         return new_booking
@@ -218,13 +218,15 @@ class HBnBFacade:
         place_id = booking.place
         place = self.place_repo.get(place_id)
         user_id = booking.user
-        if str(place.owner_id) == str(user_id):
+
+        if 'status' in booking_data:
+            if str(place.owner_id) != str(user_id):
+                raise PermissionError("Only the owner of a place can update the status")
+                
             try:
                 updated_booking = booking.copy(update=booking_data)
             except ValidationError as e:
                 raise e
-            
-            self.booking_repo._storage[str(booking_id)] = updated_booking
-            return updated_booking
-        else:
-            return {"error": "Only the owner of a place can update a booking"}, 403
+        
+        self.booking_repo._storage[str(booking_id)] = updated_booking
+        return updated_booking
