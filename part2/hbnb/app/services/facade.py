@@ -55,7 +55,7 @@ class HBnBFacade:
                 update_data.pop("password").encode()).hexdigest()
 
         self.user_repo.update(user_id, update_data)
-        return user
+        return self.user_repo.get(user_id)
 
     def get_all_users(self):
         return self.user_repo.get_all()

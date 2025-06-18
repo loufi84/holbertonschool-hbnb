@@ -25,6 +25,19 @@ place_model = api.model('Place', {
                                description='List of amenity IDs')
 })
 
+place_model_update = api.model('PlaceUpdate', {
+    'title': fields.String(required=False,
+                           description='The title of the place'),
+    'description': fields.String(required=False,
+                                 description='The description of the place'),
+    'price': fields.Float(required=False, description='The price of the place'),
+    'latitude': fields.Float(required=False,
+                             description='The latitude of the place'),
+    'longitude': fields.Float(required=False,
+                              description='The longitude of the place'),
+    'amenity_ids': fields.List(fields.String, required=False,
+                               description='List of amenity IDs')
+})
 
 @api.route('/')
 class PlaceList(Resource):
@@ -45,7 +58,13 @@ class PlaceList(Resource):
             return {'error': e.errors()}, 400
         except Exception as e:
             return {'error': str(e)}, 500
-
+        amenities = []
+        for amenity in new_place.amenities:
+            amenities.append({
+                'id': str(amenity.id),
+                'name': amenity.name,
+                'description': amenity.description
+            })
         return {
             'id': new_place.id,
             'title': new_place.title,
@@ -53,7 +72,8 @@ class PlaceList(Resource):
             'price': new_place.price,
             'latitude': new_place.latitude,
             'longitude': new_place.longitude,
-            'owner_id': new_place.owner_id
+            'owner_id': new_place.owner_id,
+            'amenities': amenities
         }, 201
 
     @api.response(200, 'Places found')
@@ -102,7 +122,7 @@ class PlaceResource(Resource):
             for amenity in place.amenities:
                 amenities.append({
                     'id': str(amenity.id),
-                    'title': amenity.title,
+                    'name': amenity.name,
                     'description': amenity.description
                 })
 
@@ -117,7 +137,7 @@ class PlaceResource(Resource):
             }, 200
 
     @jwt_required()
-    @api.expect(place_model, validate=True)
+    @api.expect(place_model_update, validate=True)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
     @api.response(403, 'Forbidden')
@@ -138,18 +158,27 @@ class PlaceResource(Resource):
             return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
-
+        amenities = []
+        for amenity in existing_place.amenities:
+            amenities.append({
+                'id': str(amenity.id),
+                'name': amenity.name,
+                'description': amenity.description
+            })
         try:
             updated_place = facade.update_place(place_uuid, update_data)
         except ValidationError as e:
             return {'error': e.errors()}, 400
 
         return {
+            'id': updated_place.id,
             'title': updated_place.title,
             'description': updated_place.description,
             'price': updated_place.price,
             'latitude': updated_place.latitude,
-            'longitude': updated_place.longitude
+            'longitude': updated_place.longitude,
+            'owner_id': updated_place.owner_id,
+            'amenities': amenities
         }
 
     @jwt_required()

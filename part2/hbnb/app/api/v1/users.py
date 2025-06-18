@@ -21,10 +21,12 @@ user_model = api.model('User', {
 
 # User update
 user_update_model = api.model('UserUpdate', {
-    'first_name': fields.String(description='First name of user'),
-    'last_name': fields.String(description='Last name of user'),
-    'email': fields.String(description='Email of user'),
-    'password': fields.String(description='Password of user')
+    'first_name': fields.String(required=False,
+                                description='First name of user'),
+    'last_name': fields.String(required=False,
+                                description='Last name of user'),
+    'email': fields.String(required=False, description='Email of user'),
+    'password': fields.String(required=False, description='Password of user')
 })
 
 # User login
@@ -103,7 +105,7 @@ class UserResource(Resource):
             'email': user.email
         }, 200
 
-    @api.expect(user_update_model, validate=True)
+    @api.expect(user_update_model)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input or UUID format')
     @api.response(404, 'User not found')
