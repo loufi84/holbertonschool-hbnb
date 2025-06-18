@@ -2,12 +2,13 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models.place import PlaceCreate
+from app.models.place import PlaceCreate, Place
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 api = Namespace('places', description='Places operations')
+
 
 # Model for places creation and update
 place_model = api.model('Place', {
@@ -16,6 +17,7 @@ place_model = api.model('Place', {
     'price': fields.Float(required=True, description='The price of the place'),
     'latitude': fields.Float(required=True, description='The latitude of the place'),
     'longitude': fields.Float(required=True, description='The longitude of the place'),
+    'amenity_ids': fields.List(fields.String, required=False, description='List of amenity IDs')
 })
 
 @api.route('/')
@@ -29,24 +31,23 @@ class PlaceList(Resource):
     def post(self):
         """Create a new place"""
         user_id = get_jwt_identity()
+        data = request.json
+        data['owner_id'] = user_id
         try:
-            place_data = PlaceCreate(**request.json)
+            new_place = facade.create_place(data)
         except ValidationError as e:
             return {'error': e.errors()}, 400
-
-        place_dict = place_data.model_dump()
-        place_dict['owner_id'] = user_id
-
-        new_place = facade.create_place(place_dict)
+        except Exception as e:
+            return {'error': str(e)}, 500
 
         return {
-            'id': str(new_place.id),
+            'id': new_place.id,
             'title': new_place.title,
             'description': new_place.description,
             'price': new_place.price,
             'latitude': new_place.latitude,
             'longitude': new_place.longitude,
-            'owner_id': user_id
+            'owner_id': new_place.owner_id
         }, 201
     
     @api.response(200, 'Places found')
@@ -56,15 +57,21 @@ class PlaceList(Resource):
         places = facade.place_repo.get_all()
         places_list = []
         for place in places:
-            places_list.append({
-                'id': str(place.id),
-                'title': place.title,
-                'description': place.description,
-                'price': place.price,
-                'latitude': place.latitude,
-                'longitude': place.longitude,
-                'rating': place.rating
-            })
+                amenities = []
+                for amenity in place.amenities:
+                    amenities.append({
+                        'id': str(amenity.id),
+                        'name': amenity.name
+                    })
+                places_list.append({
+                    'id': str(place.id),
+                    'title': place.title,
+                    'description': place.description,
+                    'price': place.price,
+                    'latitude': place.latitude,
+                    'longitude': place.longitude,
+                    'amenities': amenities
+                })
         return places_list, 200
 
 @api.route('/<place_id>')
@@ -83,13 +90,18 @@ class PlaceResource(Resource):
             if not place:
                 return {'error': 'Place not found'}, 404
 
+            amenities_list = [
+                {'id': str(amenity.id), 'name': amenity.name}
+                for amenity in place.amenities
+            ]
             return {
                 'place_id': str(place.id),
                 'title': place.title,
                 'description': place.description,
                 'price': place.price,
                 'latitude': place.latitude,
-                'longitude': place.longitude
+                'longitude': place.longitude,
+                'amenities': amenities_list
             }, 200
     
     @jwt_required()

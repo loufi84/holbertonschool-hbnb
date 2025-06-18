@@ -61,14 +61,22 @@ class HBnBFacade:
     def create_place(self, place_data):
         place_in = PlaceCreate(**place_data)
 
-        place = Place (
-            title=place_in.title,
-            description=place_in.description,
-            price=place_in.price,
-            latitude=place_in.latitude,
-            longitude=place_in.longitude,
-            rating=place_in.rating,
-            owner_id=place_data['owner_id']
+        amenities = []
+        for amenity_id in place_in.amenity_ids or []:
+            amenity = self.get_amenity(str(amenity_id))
+            if not amenity:
+                raise Exception(f'Amenity {amenity_id} not found')
+            amenities.append(amenity)
+
+        place = Place(
+        id=str(uuid4()),
+        title=place_in.title,
+        description=place_in.description,
+        price=place_in.price,
+        latitude=place_in.latitude,
+        longitude=place_in.longitude,
+        owner_id=place_in.owner_id,
+        amenities=amenities
         )
         self.place_repo.add(place)
         return place
@@ -76,11 +84,40 @@ class HBnBFacade:
     def get_place(self, place_id):
         return self.place_repo.get(place_id)
     
-    def update_place(self, place_id: UUID, update_data: dict):
+    def update_place(self, place_id: str, update_data: dict) -> Place:
         place = self.place_repo.get(place_id)
         if not place:
-            return None
-        updated_place = self.place_repo.update(place_id, update_data)
+            raise Exception("Place not found")
+
+        if "amenity_ids" in update_data:
+            current_amenity_ids = {str(a.id) for a in place.amenities}
+            new_amenity_ids = set(update_data["amenity_ids"])
+
+            to_add = new_amenity_ids - current_amenity_ids
+            to_remove = current_amenity_ids - new_amenity_ids
+
+            # Commencer avec les amenities actuelles en retirant celles à supprimer
+            updated_amenities = [a for a in place.amenities if str(a.id) not in to_remove]
+
+            # Ajouter les nouvelles amenities
+            for amenity_id in to_add:
+                amenity = self.get_amenity(amenity_id)
+                if not amenity:
+                    raise Exception(f"Amenity {amenity_id} not found")
+                updated_amenities.append(amenity)
+
+            update_data.pop('amenity_ids')
+            update_data['amenities'] = updated_amenities
+
+        update_fields = {}
+        for key, value in update_data.items():
+            if hasattr(place, key):
+                update_fields[key] = value
+
+        update_fields["updated_at"] = datetime.now(timezone.utc)
+
+        updated_place = self.place_repo.update(place_id, update_fields)
+
         return updated_place
 
     def delete_place(self, place_id):

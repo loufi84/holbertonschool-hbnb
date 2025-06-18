@@ -74,6 +74,8 @@ class PlaceCreate(BaseModel):
     latitude: float = Field(..., ge=-90, le=90) # le=90 = less or equal to 90
     longitude: float = Field(..., ge=-180, le=180)
     rating: float = 0.0
+    owner_id: str
+    amenity_ids: Optional[List[uuid.UUID]] = []
 
     @field_validator('price')
     @classmethod
