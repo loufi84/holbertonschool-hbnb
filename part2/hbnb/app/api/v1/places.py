@@ -9,16 +9,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('places', description='Places operations')
 
-# Doc for places
+# Model for places creation and update
 place_model = api.model('Place', {
-    'title': fields.String(required=True, description='The title of the place'),
-    'description': fields.String(required=True, description='The description of the place'),
-    'price': fields.Float(required=True, description='The price of the place'),
-    'latitude': fields.Float(required=True, description='The latitude of the place'),
-    'longitude': fields.Float(required=True, description='The longitude of the place'),
-})
-
-place_update_model = api.model('PlaceUpdate', {
     'title': fields.String(required=True, description='The title of the place'),
     'description': fields.String(required=True, description='The description of the place'),
     'price': fields.Float(required=True, description='The price of the place'),
@@ -101,7 +93,7 @@ class PlaceResource(Resource):
             }, 200
     
     @jwt_required()
-    @api.expect(place_update_model, validate=True)
+    @api.expect(place_model, validate=True)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
     @api.response(403, 'Forbidden')

@@ -70,7 +70,12 @@ class Place(BaseModel):
 class PlaceCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1, max_length=1000)
-    price: float
-    latitude: float
-    longitude: float
+    price: float = Field(..., ge=0)  # ge=0 = greater or equal to 0
+    latitude: float = Field(..., ge=-90, le=90) # le=90 = less or equal to 90
+    longitude: float = Field(..., ge=-180, le=180)
     rating: float = 0.0
+
+    @field_validator('price')
+    @classmethod
+    def round_price(cls, v):
+        return round(v, 2)
