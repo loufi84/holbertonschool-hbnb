@@ -13,7 +13,8 @@ api = Namespace('reviews', description='Review operations')
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
     'comment': fields.String(required=True, description='Text of the review'),
-    'rating': fields.Float(required=True, description='Rating of the place (1-5)'),
+    'rating': fields.Float(required=True,
+                           description='Rating of the place (1-5)'),
     })
 
 
@@ -28,13 +29,14 @@ class ReviewList(Resource):
     def post(self):
         """Register a new review"""
         user_id = get_jwt_identity()
-        
+
         last_booking = facade.get_last_completed_booking(user_id)
         if not last_booking:
             return {'error': 'No completed booking found'}, 403
         place_id = last_booking.place
         if not place_id:
-            return {'error': 'You must complete a booking to review a place'}, 403
+            return {'error': 'You must complete a '
+                    'booking to review a place'}, 403
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
@@ -48,7 +50,7 @@ class ReviewList(Resource):
             return {"error": str(e)}, 403
 
         return {
-            'id': str(new_review.id), # UUID -> str pour le JSON
+            'id': str(new_review.id),  # UUID -> str pour le JSON
             'comment': new_review.comment,
             'rating': new_review.rating,
         }, 201
@@ -61,11 +63,12 @@ class ReviewList(Resource):
             return {"message": "No review yet"}, 200
         return [
             {
-                'id': str(review.id), # UUID -> str pour le JSON
+                'id': str(review.id),  # UUID -> str pour le JSON
                 'comment': review.comment,
                 'rating': review.rating,
             } for review in reviews_list
         ], 200
+
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
@@ -84,7 +87,7 @@ class ReviewResource(Resource):
             return {'error': 'Review not found'}, 404
 
         return {
-                'id': str(review.id), # UUID -> str pour le JSON
+                'id': str(review.id),  # UUID -> str pour le JSON
                 'comment': review.comment,
                 'rating': review.rating,
         }, 200
@@ -112,7 +115,7 @@ class ReviewResource(Resource):
             return {'error': e.errors()}, 400
 
         return {
-            'id': str(updated_review.id), # UUID -> str pour le JSON
+            'id': str(updated_review.id),  # UUID -> str pour le JSON
             'comment': updated_review.comment,
             'rating': updated_review.rating,
         }, 200
@@ -134,6 +137,7 @@ class ReviewResource(Resource):
         facade.delete_review(review_uuid)
         return {'message': 'Review deleted successfully'}, 200
 
+
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
@@ -151,7 +155,7 @@ class PlaceReviewList(Resource):
 
         return [
             {
-                'id': str(review.id), # UUID -> str pour le JSON
+                'id': str(review.id),  # UUID -> str pour le JSON
                 'comment': review.comment,
                 'rating': review.rating,
             } for review in review_list

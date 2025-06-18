@@ -4,14 +4,14 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 
-
 class Review(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
     place: uuid.UUID
     user: uuid.UUID
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
 
     def set_comment(self, comment):
@@ -21,6 +21,7 @@ class Review(BaseModel):
     def set_rating(self, rating):
         self.rating = rating
         self.updated_at = datetime.now(timezone.utc)
+
 
 class ReviewCreate(BaseModel):
     comment: str = Field(..., min_length=1, max_length=1000)

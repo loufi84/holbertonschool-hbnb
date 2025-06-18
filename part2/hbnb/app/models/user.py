@@ -4,7 +4,10 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 
-DEFAULT_USER_PHOTO_URL = "https://cdn0.iconfinder.com/data/icons/mobile-basic-vol-1/32/Profile-256.png"
+DEFAULT_USER_PHOTO_URL = (
+    "https://cdn0.iconfinder.com/data/icons"
+    "/mobile-basic-vol-1/32/Profile-256.png"
+)
 
 
 class User(BaseModel):
@@ -15,7 +18,8 @@ class User(BaseModel):
     hashed_password: str
     is_active: bool = True  # Desactivate an account without being deleted
     is_admin: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
     photo_url: Optional[str] = None
     places: List[uuid.UUID] = Field(default_factory=list)
@@ -33,11 +37,13 @@ class User(BaseModel):
         self.last_name = last_name
         self.updated_at = datetime.now(timezone.utc)
 
+
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
     password: str
+
 
 class LoginRequest(BaseModel):
     email: EmailStr

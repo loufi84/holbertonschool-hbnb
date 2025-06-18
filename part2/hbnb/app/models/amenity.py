@@ -8,7 +8,8 @@ class Amenity(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1, max_length=500)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
 
     def set_name(self, name):
@@ -18,6 +19,7 @@ class Amenity(BaseModel):
     def set_description(self, description):
         self.description = description
         self.updated_at = datetime.now(timezone.utc)
+
 
 class AmenityCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)

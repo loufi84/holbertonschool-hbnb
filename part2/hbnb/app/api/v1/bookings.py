@@ -20,11 +20,12 @@ booking_update_model = api.model('BookingUpdate', {
     'start_date': fields.DateTime(required=False, description='Start date'),
     'end_date': fields.DateTime(required=False, description='End date'),
     'status': fields.String(
-    required=False,
-    description='Booking status (editable only by owner)',
-    enum=['PENDING', 'DONE', 'CANCELLED'],
-    ),
+        required=False,
+        description='Booking status (editable only by owner)',
+        enum=['PENDING', 'DONE', 'CANCELLED'],
+        ),
 })
+
 
 @api.route('/')
 class BookingList(Resource):
@@ -50,7 +51,7 @@ class BookingList(Resource):
             )
         except (ValidationError, ValueError) as e:
             return {'error': str(e)}, 400
-        
+
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
         return new_booking.model_dump(mode="json"), 201
@@ -77,6 +78,7 @@ class BookingList(Resource):
             })
         return booking_list, 200
 
+
 @api.route('/<booking_id>')
 class BookingResource(Resource):
     @api.response(200, 'Booking details retrieved successfully')
@@ -99,7 +101,7 @@ class BookingResource(Resource):
         ):
             booking.set_status("DONE")
         return {
-                'id': str(booking.id), # UUID -> str pour le JSON
+                'id': str(booking.id),  # UUID -> str pour le JSON
                 'user_id': str(booking.user),
                 'place_id': str(booking.place),
                 'start_date': booking.start_date.isoformat(),
@@ -128,9 +130,11 @@ class BookingResource(Resource):
 
         try:
             if update_data.get('start_date'):
-                update_data['start_date'] = datetime.fromisoformat(update_data['start_date'])
+                update_data['start_date'] = datetime.fromisoformat(
+                    update_data['start_date'])
             if update_data.get('end_date'):
-                update_data['end_date'] = datetime.fromisoformat(update_data['end_date'])
+                update_data['end_date'] = datetime.fromisoformat(
+                    update_data['end_date'])
         except ValueError as e:
             return {'error': 'Invalid date format'}, 400
 
@@ -150,12 +154,13 @@ class BookingResource(Resource):
 
         return [
             {
-                'id': str(updated_booking.id), # UUID -> str pour le JSON
+                'id': str(updated_booking.id),  # UUID -> str pour le JSON
                 'start_date': updated_booking.start_date.isoformat(),
                 'end_date': updated_booking.end_date.isoformat(),
                 'status': updated_booking.status,
             }
         ], 200
+
 
 @api.route('/places/<place_id>/booking')
 class PlaceBookingList(Resource):
@@ -186,6 +191,7 @@ class PlaceBookingList(Resource):
                 'status': booking.status,
             })
         return booking_list, 200
+
 
 @api.route('/users/<user_id>/booking')
 class UserBookingList(Resource):

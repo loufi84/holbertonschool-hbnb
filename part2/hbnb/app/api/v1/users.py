@@ -12,7 +12,8 @@ api = Namespace('auth', description='Authentication operations')
 
 # Doc only, no validation here
 user_model = api.model('User', {
-    'first_name': fields.String(required=True, description='First name of user'),
+    'first_name': fields.String(required=True,
+                                description='First name of user'),
     'last_name': fields.String(required=True, description='Last name of user'),
     'email': fields.String(required=True, description='Email of user'),
     'password': fields.String(required=True, description='Password of user'),
@@ -32,6 +33,7 @@ login_model = api.model('Login', {
     'password': fields.String(required=True, description='User password')
 })
 
+
 @api.route('/')
 class UserList(Resource):
     @api.expect(user_model, validate=True)
@@ -50,7 +52,7 @@ class UserList(Resource):
         new_user = facade.create_user(user_data.model_dump())
 
         return {
-            'id': str(new_user.id), # UUID -> str pour le JSON
+            'id': str(new_user.id),  # UUID -> str pour le JSON
             'first_name': new_user.first_name,
             'last_name': new_user.last_name,
             'email': new_user.email
@@ -66,16 +68,17 @@ class UserList(Resource):
             user = facade.get_user_by_email(email)
             if not user:
                 return {'error': 'User not found'}, 404
-        
+
             return {
                 'id': str(user.id),
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'email': user.email
             }, 200
-    
+
         users = facade.get_all_users()
         return [user.model_dump(mode='json') for user in users], 200
+
 
 @api.route('/<user_id>')
 class UserResource(Resource):
@@ -99,7 +102,7 @@ class UserResource(Resource):
             'last_name': user.last_name,
             'email': user.email
         }, 200
-    
+
     @api.expect(user_update_model, validate=True)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input or UUID format')
@@ -129,6 +132,7 @@ class UserResource(Resource):
             'email': updated_user.email
         }, 200
 
+
 @api.route('/login')
 class Login(Resource):
     @api.expect(login_model, validate=True)
@@ -143,13 +147,14 @@ class Login(Resource):
             login_data = LoginRequest(**data)
         except ValidationError as e:
             return {'error': e.errors()}, 400
-        
+
         user = facade.get_user_by_email(login_data.email)
         if not user:
             return {'error': 'User not found'}, 404
-        hashed_input_pw = hashlib.sha256(login_data.password.encode()).hexdigest()
+        hashed_input_pw = hashlib.sha256(
+            login_data.password.encode()).hexdigest()
         if user.hashed_password != hashed_input_pw:
             return {'error': 'Invalide password or email'}, 401
-        
+
         access_token = create_access_token(identity=str(user.id))
         return {'access token': access_token}, 201

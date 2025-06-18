@@ -7,7 +7,8 @@ from abc import ABC, abstractmethod
 
 class Repository(ABC):
     '''
-    
+    This class defines the base in memory repositories
+    to test the API before database implementation
     '''
     @abstractmethod
     def add(self, obj):

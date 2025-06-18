@@ -30,8 +30,8 @@ class Booking(BaseModel):
         self.updated_at = datetime.now(timezone.utc)
 
     def set_end_date(self, end_date):
-            self.end_date = end_date
-            self.updated_at = datetime.now(timezone.utc)
+        self.end_date = end_date
+        self.updated_at = datetime.now(timezone.utc)
 
 
 class CreateBooking(BaseModel):

@@ -12,13 +12,19 @@ api = Namespace('places', description='Places operations')
 
 # Model for places creation and update
 place_model = api.model('Place', {
-    'title': fields.String(required=True, description='The title of the place'),
-    'description': fields.String(required=True, description='The description of the place'),
+    'title': fields.String(required=True,
+                           description='The title of the place'),
+    'description': fields.String(required=True,
+                                 description='The description of the place'),
     'price': fields.Float(required=True, description='The price of the place'),
-    'latitude': fields.Float(required=True, description='The latitude of the place'),
-    'longitude': fields.Float(required=True, description='The longitude of the place'),
-    'amenity_ids': fields.List(fields.String, required=False, description='List of amenity IDs')
+    'latitude': fields.Float(required=True,
+                             description='The latitude of the place'),
+    'longitude': fields.Float(required=True,
+                              description='The longitude of the place'),
+    'amenity_ids': fields.List(fields.String, required=False,
+                               description='List of amenity IDs')
 })
+
 
 @api.route('/')
 class PlaceList(Resource):
@@ -49,7 +55,7 @@ class PlaceList(Resource):
             'longitude': new_place.longitude,
             'owner_id': new_place.owner_id
         }, 201
-    
+
     @api.response(200, 'Places found')
     @api.response(404, 'No places found')
     def get(self):
@@ -57,23 +63,24 @@ class PlaceList(Resource):
         places = facade.place_repo.get_all()
         places_list = []
         for place in places:
-                amenities = []
-                for amenity in place.amenities:
-                    amenities.append({
-                        'id': str(amenity.id),
-                        'name': amenity.name,
-                        'description': amenity.description
-                    })
-                places_list.append({
-                    'id': str(place.id),
-                    'title': place.title,
-                    'description': place.description,
-                    'price': place.price,
-                    'latitude': place.latitude,
-                    'longitude': place.longitude,
-                    'amenities': amenities
+            amenities = []
+            for amenity in place.amenities:
+                amenities.append({
+                    'id': str(amenity.id),
+                    'name': amenity.name,
+                    'description': amenity.description
                 })
+            places_list.append({
+                'id': str(place.id),
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+                'amenities': amenities
+            })
         return places_list, 200
+
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
@@ -99,7 +106,6 @@ class PlaceResource(Resource):
                     'description': amenity.description
                 })
 
-
             return {
                 'place_id': str(place.id),
                 'title': place.title,
@@ -109,7 +115,7 @@ class PlaceResource(Resource):
                 'longitude': place.longitude,
                 'amenities': amenities
             }, 200
-    
+
     @jwt_required()
     @api.expect(place_model, validate=True)
     @api.response(200, 'Place successfully updated')
@@ -127,7 +133,7 @@ class PlaceResource(Resource):
         existing_place = facade.get_place(place_uuid)
         if not existing_place:
             return {'error': 'Place not found'}, 404
-        
+
         if existing_place.owner_id != user_id:
             return {'error': 'You must own this place to modify it'}, 403
 
@@ -145,7 +151,7 @@ class PlaceResource(Resource):
             'latitude': updated_place.latitude,
             'longitude': updated_place.longitude
         }
-    
+
     @jwt_required()
     @api.response(200, 'Place successfully deleted')
     @api.response(400, 'Invalid ID')
@@ -158,13 +164,13 @@ class PlaceResource(Resource):
             place_uuid = UUID(place_id)
         except ValidationError as e:
             return {'error': e.errors()}, 400
-        
+
         existing_place = facade.get_place(place_uuid)
         if not existing_place:
             return {'error': 'Place not found'}, 404
-        
+
         if existing_place.owner_id != user_id:
             return {'error': 'You must own the place to delete it'}, 403
-        
+
         facade.delete_place(place_uuid)
         return {'message': 'Place deleted successfully'}, 200

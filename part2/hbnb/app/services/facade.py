@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 '''
 
 '''
@@ -14,9 +13,11 @@ from uuid import UUID, uuid4
 from datetime import datetime, timezone
 import hashlib
 
+
 class HBnBFacade:
     '''
-    
+    This is the class defining the facade of the application.
+    It contains all the base operations used by services.
     '''
     def __init__(self):
         self.user_repo = InMemoryRepository()
@@ -48,9 +49,10 @@ class HBnBFacade:
         user = self.user_repo.get(user_id)
         if not user:
             return None
-        
+
         if "password" in update_data:
-            update_data["hashed_password"] = hashlib.sha256(update_data.pop("password").encode()).hexdigest()
+            update_data["hashed_password"] = hashlib.sha256(
+                update_data.pop("password").encode()).hexdigest()
 
         self.user_repo.update(user_id, update_data)
         return user
@@ -69,21 +71,21 @@ class HBnBFacade:
             amenities.append(amenity)
 
         place = Place(
-        id=str(uuid4()),
-        title=place_in.title,
-        description=place_in.description,
-        price=place_in.price,
-        latitude=place_in.latitude,
-        longitude=place_in.longitude,
-        owner_id=place_in.owner_id,
-        amenities=amenities
+            id=str(uuid4()),
+            title=place_in.title,
+            description=place_in.description,
+            price=place_in.price,
+            latitude=place_in.latitude,
+            longitude=place_in.longitude,
+            owner_id=place_in.owner_id,
+            amenities=amenities
         )
         self.place_repo.add(place)
         return place
 
     def get_place(self, place_id):
         return self.place_repo.get(place_id)
-    
+
     def update_place(self, place_id: str, update_data: dict) -> Place:
         place = self.place_repo.get(place_id)
         if not place:
@@ -96,8 +98,9 @@ class HBnBFacade:
             to_add = new_amenity_ids - current_amenity_ids
             to_remove = current_amenity_ids - new_amenity_ids
 
-            # Commencer avec les amenities actuelles en retirant celles à supprimer
-            updated_amenities = [a for a in place.amenities if str(a.id) not in to_remove]
+            # Delete unused amenities
+            updated_amenities = [a for a in place.amenities if str(
+                a.id) not in to_remove]
 
             # Ajouter les nouvelles amenities
             for amenity_id in to_add:
@@ -152,7 +155,7 @@ class HBnBFacade:
             updated_amenity = amenity.copy(update=amenity_data)
         except ValidationError as e:
             raise e
-        
+
         self.amenity_repo._storage[str(amenity_id)] = updated_amenity
         return updated_amenity
 
@@ -167,17 +170,16 @@ class HBnBFacade:
             for booking in bookings
             )
         if not has_valid_booking:
-            raise PermissionError("User must visit this place to post a review.")
-        
-        new_review  = Review(
-        comment=review_data.comment,
-        rating=review_data.rating,
-        place=place_id,
-        user=user_id,
+            raise PermissionError("User must visit the place to post review.")
+
+        new_review = Review(
+            comment=review_data.comment,
+            rating=review_data.rating,
+            place=place_id,
+            user=user_id,
         )
         self.review_repo.add(new_review)
         return new_review
-
 
     def get_review(self, review_id):
         return self.review_repo.get(review_id)
@@ -197,7 +199,7 @@ class HBnBFacade:
             updated_review = review.copy(update=review_data)
         except ValidationError as e:
             raise e
-        
+
         self.review_repo._storage[str(review_id)] = updated_review
         return updated_review
 
@@ -258,12 +260,13 @@ class HBnBFacade:
 
         if 'status' in booking_data:
             if str(place.owner_id) != str(user_id):
-                raise PermissionError("Only the owner of a place can update the status")
-                
+                raise PermissionError("Only the"
+                                      "owner of a place can update the status")
+
             try:
                 updated_booking = booking.copy(update=booking_data)
             except ValidationError as e:
                 raise e
-        
+
         self.booking_repo._storage[str(booking_id)] = updated_booking
         return updated_booking
