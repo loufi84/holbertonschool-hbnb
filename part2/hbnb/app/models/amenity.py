@@ -1,12 +1,26 @@
 from pydantic import BaseModel, Field
-from uuid import UUID
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
 
 class Amenity(BaseModel):
-    id: UUID
-    name: str
-    description: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=500)
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
+
+    def set_name(self, name):
+        self.name = name
+        self.updated_at = datetime.now(timezone.utc)
+
+    def set_description(self, description):
+        self.description = description
+        self.updated_at = datetime.now(timezone.utc)
+
+
+class AmenityCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=500)
