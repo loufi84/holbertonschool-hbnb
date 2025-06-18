@@ -30,7 +30,8 @@ place_model_update = api.model('PlaceUpdate', {
                            description='The title of the place'),
     'description': fields.String(required=False,
                                  description='The description of the place'),
-    'price': fields.Float(required=False, description='The price of the place'),
+    'price': fields.Float(required=False,
+                          description='The price of the place'),
     'latitude': fields.Float(required=False,
                              description='The latitude of the place'),
     'longitude': fields.Float(required=False,
@@ -38,6 +39,7 @@ place_model_update = api.model('PlaceUpdate', {
     'amenity_ids': fields.List(fields.String, required=False,
                                description='List of amenity IDs')
 })
+
 
 @api.route('/')
 class PlaceList(Resource):

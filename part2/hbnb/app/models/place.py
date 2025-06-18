@@ -14,7 +14,7 @@ DEFAULT_PLACE_PHOTO_URL = (
 
 class Place(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str = Field(..., min_length=1, max_length=100)
+    title: str = Field(..., min_length=1, max_length=50)
     description: str = Field(..., min_length=1, max_length=1000)
     price: float = Field(..., ge=0)  # ge=0 = greater or equal to 0
     latitude: float = Field(..., ge=-90, le=90)  # le=90 = less or equal to 90
@@ -30,7 +30,7 @@ class Place(BaseModel):
 
     @field_validator("photos")
     @classmethod
-    def set_default_photo(cls, photos_list: List[str]):
+    def set_default_photo(cls, photos_list):
         if not photos_list:
             return [DEFAULT_PLACE_PHOTO_URL]
         return photos_list

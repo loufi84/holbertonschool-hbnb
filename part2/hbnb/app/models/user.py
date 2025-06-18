@@ -29,6 +29,13 @@ class User(BaseModel):
         json_encoders={datetime: lambda v: v.isoformat()}
     )
 
+    @field_validator("photo_url")
+    @classmethod
+    def set_default_photo(cls, photo_url):
+        if not photo_url:
+            return DEFAULT_USER_PHOTO_URL
+        return photo_url
+
     def set_first_name(self, first_name):
         self.first_name = first_name
         self.updated_at = datetime.now(timezone.utc)
@@ -39,10 +46,21 @@ class User(BaseModel):
 
 
 class UserCreate(BaseModel):
-    first_name: str
-    last_name: str
+    first_name: str = Field(..., min_length=1, max_length=50)
+    last_name: str = Field(..., min_length=1, max_length=50)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=1, max_length=50)
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_for_blanks(cls, values):
+        for field_name in ['first_name', 'last_name', 'password']:
+            value = values.get(field_name)
+            if value is None or not value.strip():
+                raise ValueError(
+                    f"{field_name} cannot be empty or just whitespace"
+                    )
+        return values
 
 
 class LoginRequest(BaseModel):
