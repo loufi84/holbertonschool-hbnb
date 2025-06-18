@@ -35,6 +35,7 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input')
     @api.response(401, 'Unauthorized')
     def post(self):
+        """Create a new place"""
         user_id = get_jwt_identity()
         try:
             place_data = PlaceCreate(**request.json)
@@ -59,6 +60,7 @@ class PlaceList(Resource):
     @api.response(200, 'Places found')
     @api.response(404, 'No places found')
     def get(self):
+        """Get a list of all places"""
         places = facade.place_repo.get_all()
         places_list = []
         for place in places:

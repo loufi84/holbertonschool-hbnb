@@ -137,6 +137,7 @@ class Login(Resource):
     @api.response(401, 'Bad credentials')
     @api.response(404, 'User not found')
     def post(self):
+        """Login the user"""
         data = request.json
         try:
             login_data = LoginRequest(**data)
