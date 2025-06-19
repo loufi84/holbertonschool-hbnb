@@ -145,6 +145,8 @@ class BookingResource(Resource):
                 return {
                     'error': 'Only the owner of a place can update the status'
                     }, 403
+            if update_data['status'] not in ("DONE", "PENDING", "CANCELED"):
+                return {'error': "Status must be DONE, PENDING, or CANCELED"}, 400
 
         try:
             updated_booking = facade.update_booking(booking_uuid, update_data)

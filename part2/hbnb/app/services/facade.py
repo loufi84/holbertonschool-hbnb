@@ -247,11 +247,14 @@ class HBnBFacade:
             if str(place.owner_id) != str(user_id):
                 raise PermissionError("Only the"
                                       "owner of a place can update the status")
+            if booking_data['status'] not in ("DONE", "PENDING", "CANCELED"):
+                raise ValueError("Status must be DONE, PENDING, or CANCELED")
 
-            try:
-                updated_booking = booking.copy(update=booking_data)
-            except ValidationError as e:
-                raise e
+
+        try:
+            updated_booking = booking.copy(update=booking_data)
+        except ValidationError as e:
+            raise e
 
         self.booking_repo._storage[str(booking_id)] = updated_booking
         return updated_booking
