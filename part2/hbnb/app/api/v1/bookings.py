@@ -53,7 +53,7 @@ class BookingList(Resource):
             if (
                 booking.start_date < booking_data.end_date
                 and booking_data.start_date < booking.end_date
-                ):
+               ):
                 return {"error": "Already booked"}, 400
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
