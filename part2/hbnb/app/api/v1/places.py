@@ -44,7 +44,7 @@ place_model_update = api.model('PlaceUpdate', {
 @api.route('/')
 class PlaceList(Resource):
     @jwt_required()
-    @api.expect(place_model, validate=True)
+    @api.expect(place_model)
     @api.response(201, 'Place successfully created')
     @api.response(403, 'User must be connected to create a place')
     @api.response(400, 'Invalid input')
@@ -139,7 +139,7 @@ class PlaceResource(Resource):
             }, 200
 
     @jwt_required()
-    @api.expect(place_model_update, validate=True)
+    @api.expect(place_model_update)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
     @api.response(403, 'Forbidden')
