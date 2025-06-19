@@ -53,6 +53,8 @@ class ReviewList(Resource):
                 )
         except PermissionError as e:
             return {"error": str(e)}, 403
+        except ValueError as e:
+            return {"error": str(e)}, 400
 
         return {
             'id': str(new_review.id),  # UUID -> str pour le JSON
