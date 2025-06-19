@@ -15,13 +15,19 @@ def client(app):
     return app.test_client()
 
 @pytest.fixture
+def user_id():
+    return uuid.uuid4()
+
+@pytest.fixture
 def user_token(app):
     with app.app_context():
-        access_token = create_access_token(identity={"id": str(uuid.uuid4()), "admin": False})
-    return access_token
+        user_id = str(uuid.uuid4())
+        access_token = create_access_token(identity=user_id)
+    return access_token, user_id
 
 @pytest.fixture
 def admin_token(app):
     with app.app_context():
-        access_token = create_access_token(identity={"id": str(uuid.uuid4()), "admin": True})
+        admin_id = str(uuid.uuid4())
+        access_token = create_access_token(identity=admin_id)
     return access_token
