@@ -1,6 +1,4 @@
-import json
 import uuid
-import pytest
 from unittest.mock import patch, MagicMock
 
 @patch('app.api.v1.places.facade')

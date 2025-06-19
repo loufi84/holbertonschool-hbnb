@@ -1,0 +1,203 @@
+import uuid
+from unittest.mock import patch, MagicMock
+
+@patch('app.api.v1.reviews.facade')
+def test_create_review(mock_facade, client, user_token):
+    token, user_id = user_token
+
+    # Mock booking
+    booking_id = uuid.uuid4()
+    mock_booking = MagicMock()
+    mock_booking.id = booking_id
+    mock_booking.status = "DONE"
+    mock_booking.place = uuid.uuid4()
+
+    # Mock review creation
+    mock_review = MagicMock()
+    mock_review.id = uuid.uuid4()
+    mock_review.comment = "Excellent stay"
+    mock_review.rating = 4.5
+
+    mock_facade.get_booking.return_value = mock_booking
+    mock_facade.create_review.return_value = mock_review
+
+    payload = {
+        "booking": str(booking_id),
+        "comment": "Excellent stay",
+        "rating": 4.5
+    }
+
+    response = client.post(
+        '/api/v1/reviews/',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data['comment'] == "Excellent stay"
+    assert data['rating'] == 4.5
+
+@patch('app.api.v1.reviews.facade')
+def test_create_review_booking_not_done(mock_facade, client, user_token):
+    token, user_id = user_token
+
+    booking_id = uuid.uuid4()
+    mock_booking = MagicMock()
+    mock_booking.id = booking_id
+    mock_booking.status = "PENDING"
+    mock_booking.place = uuid.uuid4()
+
+    mock_facade.get_booking.return_value = mock_booking
+
+    payload = {
+        "booking": str(booking_id),
+        "comment": "Excellent stay",
+        "rating": 4.5
+    }
+
+    response = client.post(
+        '/api/v1/reviews/',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == 403
+    assert "Booking not completed" in response.get_json()['error']
+
+@patch('app.api.v1.reviews.facade')
+def test_create_review_invalid_booking_uuid(mock_facade, client, user_token):
+    token, user_id = user_token
+
+    payload = {
+        "booking": "invalid-uuid",
+        "comment": "Excellent stay",
+        "rating": 4.5
+    }
+
+    response = client.post(
+        '/api/v1/reviews/',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == 400
+    assert "Invalid booking UUID format" in response.get_json()['error']
+
+@patch('app.api.v1.reviews.facade')
+def test_get_reviews(mock_facade, client):
+    mock_review = MagicMock()
+    mock_review.id = uuid.uuid4()
+    mock_review.comment = "Nice place"
+    mock_review.rating = 5.0
+
+    mock_facade.get_all_reviews.return_value = [mock_review]
+
+    response = client.get('/api/v1/reviews/')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]['comment'] == "Nice place"
+
+@patch('app.api.v1.reviews.facade')
+def test_get_review_by_id(mock_facade, client):
+    review_id = uuid.uuid4()
+    mock_review = MagicMock()
+    mock_review.id = review_id
+    mock_review.comment = "Awesome"
+    mock_review.rating = 4.8
+
+    mock_facade.get_review.return_value = mock_review
+
+    response = client.get(f'/api/v1/reviews/{review_id}')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['comment'] == "Awesome"
+    assert data['rating'] == 4.8
+
+@patch('app.api.v1.reviews.facade')
+def test_get_review_by_id_invalid_uuid(mock_facade, client):
+    response = client.get('/api/v1/reviews/invalid-uuid')
+    assert response.status_code == 400
+    assert "Invalid UUID format" in response.get_json()['error']
+
+@patch('app.api.v1.reviews.facade')
+def test_update_review(mock_facade, client):
+    review_id = uuid.uuid4()
+
+    mock_existing_review = MagicMock()
+    mock_existing_review.id = review_id
+    mock_existing_review.comment = "Good"
+    mock_existing_review.rating = 4.0
+
+    mock_updated_review = MagicMock()
+    mock_updated_review.id = review_id
+    mock_updated_review.comment = "Excellent update"
+    mock_updated_review.rating = 5.0
+
+    mock_facade.get_review.return_value = mock_existing_review
+    mock_facade.update_review.return_value = mock_updated_review
+
+    payload = {
+        "booking": str(uuid.uuid4()),  # still required in input model
+        "comment": "Excellent update",
+        "rating": 5.0
+    }
+
+    response = client.put(
+        f'/api/v1/reviews/{review_id}',
+        json=payload
+    )
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['comment'] == "Excellent update"
+    assert data['rating'] == 5.0
+
+@patch('app.api.v1.reviews.facade')
+def test_update_review_invalid_uuid(mock_facade, client):
+    response = client.put('/api/v1/reviews/invalid-uuid', json={})
+    assert response.status_code == 400
+    assert "Invalid UUID format" in response.get_json()['error']
+
+@patch('app.api.v1.reviews.facade')
+def test_delete_review(mock_facade, client):
+    review_id = uuid.uuid4()
+    mock_review = MagicMock()
+    mock_review.id = review_id
+
+    mock_facade.get_review.return_value = mock_review
+
+    response = client.delete(f'/api/v1/reviews/{review_id}')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['message'] == "Review deleted successfully"
+
+@patch('app.api.v1.reviews.facade')
+def test_delete_review_invalid_uuid(mock_facade, client):
+    response = client.delete('/api/v1/reviews/invalid-uuid')
+    assert response.status_code == 400
+    assert "Invalid UUID format" in response.get_json()['error']
+
+@patch('app.api.v1.reviews.facade')
+def test_get_reviews_by_place(mock_facade, client):
+    place_id = uuid.uuid4()
+
+    mock_review = MagicMock()
+    mock_review.id = uuid.uuid4()
+    mock_review.comment = "Perfect stay"
+    mock_review.rating = 5.0
+
+    mock_facade.get_reviews_by_place.return_value = [mock_review]
+
+    response = client.get(f'/api/v1/reviews/places/{place_id}/reviews')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]['comment'] == "Perfect stay"
+
+@patch('app.api.v1.reviews.facade')
+def test_get_reviews_by_place_invalid_uuid(mock_facade, client):
+    response = client.get('/api/v1/reviews/places/invalid-uuid/reviews')
+    assert response.status_code == 400
+    assert "Invalid UUID format" in response.get_json()['error']

@@ -30,4 +30,4 @@ def admin_token(app):
     with app.app_context():
         admin_id = str(uuid.uuid4())
         access_token = create_access_token(identity=admin_id)
-    return access_token
+    return access_token, admin_token
