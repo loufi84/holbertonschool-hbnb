@@ -149,6 +149,7 @@ def test_login_success(client, mocker):
 
     payload = {
         "email": "jeann@example.com",
+
         "password": password
     }
 
