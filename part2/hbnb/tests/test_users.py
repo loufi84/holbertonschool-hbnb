@@ -3,9 +3,9 @@ import hashlib
 
 def test_create_user_success(client, mocker):
     user_data = {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john.doe@example.com",
+        "first_name": "Jeanne",
+        "last_name": "Oscur",
+        "email": "j.oscur@example.com",
         "password": "secret123"
     }
 
@@ -25,9 +25,9 @@ def test_create_user_success(client, mocker):
 
 def test_create_user_email_exists(client, mocker):
     user_data = {
-        "first_name": "Jane",
-        "last_name": "Doe",
-        "email": "jane@example.com",
+        "first_name": "Jean",
+        "last_name": "Peuplu",
+        "email": "jean@example.com",
         "password": "pass"
     }
     # Simule qu'un user existe déjà
@@ -41,8 +41,8 @@ def test_create_user_email_exists(client, mocker):
 
 def test_get_all_users(client, mocker):
     # Simule plusieurs users retournés par facade
-    user1 = mocker.Mock(id=uuid.uuid4(), first_name="John", last_name="Doe", email="john@example.com")
-    user2 = mocker.Mock(id=uuid.uuid4(), first_name="Jane", last_name="Doe", email="jane@example.com")
+    user1 = mocker.Mock(id=uuid.uuid4(), first_name="Sylvain", last_name="Téhain", email="sylvain@example.com")
+    user2 = mocker.Mock(id=uuid.uuid4(), first_name="Le", last_name="Caillou", email="RoCk@example.com")
 
     user1.model_dump.return_value = {
         "id": str(user1.id),
@@ -66,7 +66,7 @@ def test_get_all_users(client, mocker):
 
 def test_get_user_by_id_success(client, mocker):
     user_id = uuid.uuid4()
-    user = mocker.Mock(id=user_id, first_name="John", last_name="Doe", email="john@example.com")
+    user = mocker.Mock(id=user_id, first_name="Lily", last_name="Putien", email="lily@example.com")
     mocker.patch("app.api.v1.users.facade.get_user", return_value=user)
 
     response = client.get(f'/api/v1/users/{user_id}')
@@ -83,8 +83,8 @@ def test_get_user_by_id_not_found(client, mocker):
 
 def test_update_user_success(client, mocker):
     user_id = uuid.uuid4()
-    existing_user = mocker.Mock(id=user_id, first_name="John", last_name="Doe", email="john@example.com")
-    updated_user = mocker.Mock(id=user_id, first_name="Johnny", last_name="Doe", email="john@example.com")
+    existing_user = mocker.Mock(id=user_id, first_name="Jean-Philipe", last_name="Smedt", email="jean@example.com")
+    updated_user = mocker.Mock(id=user_id, first_name="Johnny", last_name="Halliday", email="ahquecoucou@example.com")
 
     mocker.patch("app.api.v1.users.facade.get_user", return_value=existing_user)
     mocker.patch("app.api.v1.users.facade.update_user", return_value=updated_user)
@@ -102,7 +102,7 @@ def test_login_success(client, mocker):
     mocker.patch("app.api.v1.users.facade.get_user_by_email", return_value=user)
 
     payload = {
-        "email": "john@example.com",
+        "email": "jeann@example.com",
         "password": password
     }
 

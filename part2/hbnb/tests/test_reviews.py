@@ -15,16 +15,16 @@ def test_create_review(mock_facade, client, user_token):
     # Mock review creation
     mock_review = MagicMock()
     mock_review.id = uuid.uuid4()
-    mock_review.comment = "Excellent stay"
-    mock_review.rating = 4.5
+    mock_review.comment = "C'était vraiment naze, lol"
+    mock_review.rating = 0.2
 
     mock_facade.get_booking.return_value = mock_booking
     mock_facade.create_review.return_value = mock_review
 
     payload = {
         "booking": str(booking_id),
-        "comment": "Excellent stay",
-        "rating": 4.5
+        "comment": "C'était vraiment naze, lol",
+        "rating": 0.2
     }
 
     response = client.post(
@@ -35,8 +35,8 @@ def test_create_review(mock_facade, client, user_token):
 
     assert response.status_code == 201
     data = response.get_json()
-    assert data['comment'] == "Excellent stay"
-    assert data['rating'] == 4.5
+    assert data['comment'] == "C'était vraiment naze, lol"
+    assert data['rating'] == 0.2
 
 @patch('app.api.v1.reviews.facade')
 def test_create_review_booking_not_done(mock_facade, client, user_token):
@@ -52,7 +52,7 @@ def test_create_review_booking_not_done(mock_facade, client, user_token):
 
     payload = {
         "booking": str(booking_id),
-        "comment": "Excellent stay",
+        "comment": "Le rat de la cuisine m'a bien tenu compagnie",
         "rating": 4.5
     }
 
@@ -71,8 +71,8 @@ def test_create_review_invalid_booking_uuid(mock_facade, client, user_token):
 
     payload = {
         "booking": "invalid-uuid",
-        "comment": "Excellent stay",
-        "rating": 4.5
+        "comment": "Là j'avoue, j'ai plus d'idées. Tant pis.",
+        "rating": 3.2
     }
 
     response = client.post(
@@ -88,8 +88,8 @@ def test_create_review_invalid_booking_uuid(mock_facade, client, user_token):
 def test_get_reviews(mock_facade, client):
     mock_review = MagicMock()
     mock_review.id = uuid.uuid4()
-    mock_review.comment = "Nice place"
-    mock_review.rating = 5.0
+    mock_review.comment = "C'était presque pas chiant comme la mort!"
+    mock_review.rating = 4.9
 
     mock_facade.get_all_reviews.return_value = [mock_review]
 
@@ -97,23 +97,23 @@ def test_get_reviews(mock_facade, client):
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]['comment'] == "Nice place"
+    assert data[0]['comment'] == "C'était presque pas chiant comme la mort!"
 
 @patch('app.api.v1.reviews.facade')
 def test_get_review_by_id(mock_facade, client):
     review_id = uuid.uuid4()
     mock_review = MagicMock()
     mock_review.id = review_id
-    mock_review.comment = "Awesome"
-    mock_review.rating = 4.8
+    mock_review.comment = "Au secours, il y a un gobelin dans les toilettes"
+    mock_review.rating = 2.1
 
     mock_facade.get_review.return_value = mock_review
 
     response = client.get(f'/api/v1/reviews/{review_id}')
     assert response.status_code == 200
     data = response.get_json()
-    assert data['comment'] == "Awesome"
-    assert data['rating'] == 4.8
+    assert data['comment'] == "Au secours, il y a un gobelin dans les toilettes"
+    assert data['rating'] == 2.1
 
 @patch('app.api.v1.reviews.facade')
 def test_get_review_by_id_invalid_uuid(mock_facade, client):
@@ -127,12 +127,12 @@ def test_update_review(mock_facade, client):
 
     mock_existing_review = MagicMock()
     mock_existing_review.id = review_id
-    mock_existing_review.comment = "Good"
+    mock_existing_review.comment = "Ouais pas mal"
     mock_existing_review.rating = 4.0
 
     mock_updated_review = MagicMock()
     mock_updated_review.id = review_id
-    mock_updated_review.comment = "Excellent update"
+    mock_updated_review.comment = "En fait c'était cool"
     mock_updated_review.rating = 5.0
 
     mock_facade.get_review.return_value = mock_existing_review
@@ -140,7 +140,7 @@ def test_update_review(mock_facade, client):
 
     payload = {
         "booking": str(uuid.uuid4()),  # still required in input model
-        "comment": "Excellent update",
+        "comment": "En fait c'était cool",
         "rating": 5.0
     }
 
@@ -151,7 +151,7 @@ def test_update_review(mock_facade, client):
 
     assert response.status_code == 200
     data = response.get_json()
-    assert data['comment'] == "Excellent update"
+    assert data['comment'] == "En fait c'était cool"
     assert data['rating'] == 5.0
 
 @patch('app.api.v1.reviews.facade')
@@ -185,8 +185,8 @@ def test_get_reviews_by_place(mock_facade, client):
 
     mock_review = MagicMock()
     mock_review.id = uuid.uuid4()
-    mock_review.comment = "Perfect stay"
-    mock_review.rating = 5.0
+    mock_review.comment = "C'était vraiment un hôtel ça???"
+    mock_review.rating = 0.9
 
     mock_facade.get_reviews_by_place.return_value = [mock_review]
 
@@ -194,7 +194,7 @@ def test_get_reviews_by_place(mock_facade, client):
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]['comment'] == "Perfect stay"
+    assert data[0]['comment'] == "C'était vraiment un hôtel ça???"
 
 @patch('app.api.v1.reviews.facade')
 def test_get_reviews_by_place_invalid_uuid(mock_facade, client):
