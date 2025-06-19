@@ -6,7 +6,7 @@ It defines the CRUD methods for the users.
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from pydantic import ValidationError
+from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
 from app.models.user import User, UserCreate, LoginRequest
 from flask_jwt_extended import create_access_token
@@ -127,10 +127,11 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
 
         update_data = request.json
-        try:
-            User(email=update_data["email"])
-        except ValidationError:
-            return {"error": "Invalid email format"}, 400
+        if "email" in update_data:
+            try:
+                TypeAdapter(EmailStr).validate_python(update_data["email"])
+            except ValidationError:
+                return {"error": "Invalid email format"}, 400
         try:
             updated_user = facade.update_user(user_uuid, update_data)
         except ValidationError as e:
