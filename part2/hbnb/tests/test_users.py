@@ -43,6 +43,8 @@ def test_create_user_success(client, mocker):
     assert response.status_code == 201
     data = response.get_json()
     assert data["email"] == user_data["email"]
+    assert data["first_name"] == user_data["first_name"]
+    assert data["last_name"] == user_data["last_name"]
 
 
 def test_create_user_email_exists(client, mocker):

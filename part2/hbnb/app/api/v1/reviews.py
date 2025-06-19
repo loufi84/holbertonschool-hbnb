@@ -132,10 +132,12 @@ class ReviewResource(Resource):
             'rating': updated_review.rating,
         }, 200
 
+    @jwt_required()
     @api.response(200, 'Review deleted successfully')
     @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
+        user_id = get_jwt_identity()
         """Delete a review"""
         try:
             review_uuid = uuid.UUID(review_id)
@@ -145,6 +147,10 @@ class ReviewResource(Resource):
         review_to_delete = facade.get_review(review_uuid)
         if not review_to_delete:
             return {'error': 'Review not found'}, 404
+        
+        if user_id != str(review_to_delete.user):
+            return {'error': "You must be the review's"
+                    " creator to delete it"}, 403
 
         facade.delete_review(review_uuid)
         return {'message': 'Review deleted successfully'}, 200
@@ -153,7 +159,7 @@ class ReviewResource(Resource):
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
-    @api.response(400, 'Invalide UUID format')
+    @api.response(400, 'Invalid UUID format')
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all reviews for a specific place"""

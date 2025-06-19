@@ -189,22 +189,31 @@ def test_update_review_invalid_uuid(mock_facade, client):
 
 
 @patch('app.api.v1.reviews.facade')
-def test_delete_review(mock_facade, client):
+def test_delete_review(mock_facade, client, user_token):
+    access_token, user_id = user_token
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
     review_id = uuid.uuid4()
     mock_review = MagicMock()
     mock_review.id = review_id
+    mock_review.user = user_id
 
     mock_facade.get_review.return_value = mock_review
 
-    response = client.delete(f'/api/v1/reviews/{review_id}')
+    response = client.delete(f'/api/v1/reviews/{review_id}', headers=headers)
     assert response.status_code == 200
     data = response.get_json()
     assert data['message'] == "Review deleted successfully"
 
 
 @patch('app.api.v1.reviews.facade')
-def test_delete_review_invalid_uuid(mock_facade, client):
-    response = client.delete('/api/v1/reviews/invalid-uuid')
+def test_delete_review_invalid_uuid(mock_facade, client, user_token):
+    access_token, user_id = user_token
+    headers ={
+        'Authorization': f'Bearer {access_token}'
+    } 
+    response = client.delete('/api/v1/reviews/invalid-uuid', headers=headers)
     assert response.status_code == 400
     assert "Invalid UUID format" in response.get_json()['error']
 
