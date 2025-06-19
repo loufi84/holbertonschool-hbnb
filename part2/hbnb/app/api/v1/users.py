@@ -6,6 +6,7 @@ from uuid import UUID
 from app.models.user import UserCreate, LoginRequest
 from flask_jwt_extended import create_access_token
 import hashlib
+import json
 
 api = Namespace('users', description='User operations')
 api = Namespace('auth', description='Authentication operations')
@@ -46,7 +47,7 @@ class UserList(Resource):
         try:
             user_data = UserCreate(**request.json)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         if facade.get_user_by_email(user_data.email):
             return {'error': 'Email already registered'}, 400
@@ -125,7 +126,7 @@ class UserResource(Resource):
         try:
             updated_user = facade.update_user(user_uuid, update_data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         return {
             'id': str(updated_user.id),
@@ -148,7 +149,7 @@ class Login(Resource):
         try:
             login_data = LoginRequest(**data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         user = facade.get_user_by_email(login_data.email)
         if not user:

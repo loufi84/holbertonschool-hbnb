@@ -7,6 +7,7 @@ from app.models.review import ReviewCreate
 from app.models.booking import Booking
 from app.models.place import Place
 from flask_jwt_extended import jwt_required, get_jwt_identity
+import json
 
 api = Namespace('reviews', description='Review operations')
 
@@ -46,7 +47,7 @@ class ReviewList(Resource):
         try:
             review_data = ReviewCreate(**request.json)
         except ValidationError as e:
-            return {"error": e.errors()}, 400
+            return {"error": json.loads(e.json())}, 400
         try:
             new_review = facade.create_review(review_data, user_id, place_id)
         except PermissionError as e:
@@ -115,7 +116,7 @@ class ReviewResource(Resource):
         try:
             updated_review = facade.update_review(review_uuid, update_data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         return {
             'id': str(updated_review.id),  # UUID -> str pour le JSON

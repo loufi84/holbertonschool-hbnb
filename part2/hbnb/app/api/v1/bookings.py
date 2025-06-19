@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
 from datetime import datetime, timezone
 from dateutil.parser import isoparse
+import json
 
 api = Namespace('bookings', description='Booking operations')
 
@@ -43,7 +44,7 @@ class BookingList(Resource):
             place_id = uuid.UUID(data.get("place_id"))
             booking_data = CreateBooking(**data)
         except ValidationError as e:
-            return {'errors': str(e.errors()[0]['msg'])}, 400
+            return {'errors': json.loads(e.json())}, 400
         except ValueError as e:
             return {'error': str(e)}, 400
 
@@ -148,7 +149,7 @@ class BookingResource(Resource):
         try:
             updated_booking = facade.update_booking(booking_uuid, update_data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
         except PermissionError as e:
             return {'error': str(e)}, 403
 

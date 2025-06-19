@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from app.models.place import PlaceCreate, Place
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
+import json
 
 api = Namespace('places', description='Places operations')
 
@@ -57,7 +57,7 @@ class PlaceList(Resource):
         try:
             new_place = facade.create_place(data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
         except Exception as e:
             return {'error': str(e)}, 500
         amenities = []
@@ -170,7 +170,7 @@ class PlaceResource(Resource):
         try:
             updated_place = facade.update_place(place_uuid, update_data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         return {
             'id': updated_place.id,
@@ -194,7 +194,7 @@ class PlaceResource(Resource):
         try:
             place_uuid = UUID(place_id)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         existing_place = facade.get_place(place_uuid)
         if not existing_place:
