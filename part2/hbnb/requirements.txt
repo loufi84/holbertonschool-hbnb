@@ -4,3 +4,5 @@ flask_httpauth
 flask_jwt_extended
 pydantic
 email-validator
+pytest
+pytest-mock

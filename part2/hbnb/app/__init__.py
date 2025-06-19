@@ -10,8 +10,6 @@ from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.bookings import api as bookings_ns
 from flask_jwt_extended import JWTManager
-import jwt
-import datetime
 
 
 def create_app():
