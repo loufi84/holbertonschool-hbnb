@@ -162,7 +162,11 @@ class HBnBFacade:
     def create_review(self, review_data, booking_id, place_id, user_id):
         booking = self.get_booking(booking_id)
 
-        if booking is None:
+        if not self.user_repo.get(user_id):
+            raise ValueError("User not found")
+        if not self.place_repo.get(place_id):
+            raise ValueError("Place not found")
+        if not booking:
             raise ValueError("Booking not found")
         if (
             booking.status != BookingStatus.DONE or
