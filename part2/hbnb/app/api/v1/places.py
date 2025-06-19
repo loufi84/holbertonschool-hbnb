@@ -165,17 +165,18 @@ class PlaceResource(Resource):
             return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
+        try:
+            updated_place = facade.update_place(place_uuid, update_data)
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
+
         amenities = []
-        for amenity in existing_place.amenities:
+        for amenity in updated_place.amenities:
             amenities.append({
                 'id': str(amenity.id),
                 'name': amenity.name,
                 'description': amenity.description
             })
-        try:
-            updated_place = facade.update_place(place_uuid, update_data)
-        except ValidationError as e:
-            return {'error': json.loads(e.json())}, 400
 
         return {
             'id': updated_place.id,
