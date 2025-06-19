@@ -3,9 +3,28 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from unittest.mock import patch
 
+"""
+Unit tests for the Bookings API endpoints.
 
-# MockBooking qui imite ton modèle Booking avec
-# model_dump et attributs nécessaires
+These tests mock the facade layer to simulate database
+operations without real persistence.
+
+The tests cover:
+- Creating a booking (including conflict detection)
+- Retrieving bookings by ID
+- Handling booking not found cases
+- Updating bookings
+- Listing all bookings (including empty list case)
+
+A `MockBooking` class mimics the Booking model with the necessary attributes
+and a `model_dump` method.
+
+Test fixtures `client` and `user_token` are assumed to be provided by
+the test environment.
+"""
+
+
+# MockBooking simulates the Booking model for tests
 class MockBooking:
     def __init__(self, user=None, place=None, status="PENDING",
                  start_date=None, end_date=None, id=None):
@@ -18,6 +37,7 @@ class MockBooking:
         self.end_date = end_date or (now + timedelta(days=1))
 
     def model_dump(self, mode="json"):
+        # Serialize the booking instance to dict (JSON-like)
         return {
             "id": str(self.id),
             "user_id": str(self.user),
@@ -33,13 +53,12 @@ class MockBooking:
 
 @patch('app.api.v1.bookings.facade')
 def test_create_booking(mock_facade, client, user_token):
+    # Arrange: user token and place, no existing bookings for place
     token, user_id = user_token
     place_id = uuid.uuid4()
-
-    # Aucun booking existant pour la place
     mock_facade.get_booking_list_by_place.return_value = []
 
-    # Booking créé renvoyé par facade
+    # Booking to be created
     mock_booking = MockBooking(user=user_id, place=place_id)
     mock_facade.create_booking.return_value = mock_booking
 
@@ -49,12 +68,14 @@ def test_create_booking(mock_facade, client, user_token):
         "end_date": mock_booking.end_date.isoformat()
     }
 
+    # Act: create booking via POST
     response = client.post(
         '/api/v1/bookings/',
         json=payload,
         headers={'Authorization': f'Bearer {token}'}
     )
 
+    # Assert: booking created successfully with status PENDING
     assert response.status_code == 201
     data = response.get_json()
     assert data['status'] == "PENDING"
@@ -64,10 +85,10 @@ def test_create_booking(mock_facade, client, user_token):
 
 @patch('app.api.v1.bookings.facade')
 def test_create_booking_conflict(mock_facade, client, user_token):
+    # Arrange: existing booking that conflicts with requested dates
     token, user_id = user_token
     place_id = uuid.uuid4()
 
-    # Booking existant qui entre en conflit avec les dates
     existing_booking = MockBooking(
         user=user_id,
         place=place_id,
@@ -82,11 +103,14 @@ def test_create_booking_conflict(mock_facade, client, user_token):
         "end_date": "2025-01-15T00:00:00+00:00"
     }
 
+    # Act: try to create conflicting booking
     response = client.post(
         '/api/v1/bookings/',
         json=payload,
         headers={'Authorization': f'Bearer {token}'}
     )
+
+    # Assert: error returned due to booking conflict
     assert response.status_code == 400
     data = response.get_json()
     assert "Already booked" in data['error']
@@ -94,12 +118,15 @@ def test_create_booking_conflict(mock_facade, client, user_token):
 
 @patch('app.api.v1.bookings.facade')
 def test_get_booking_by_id(mock_facade, client):
+    # Arrange: mock a booking returned by facade
     booking_id = uuid.uuid4()
     mock_booking = MockBooking(id=booking_id)
-
     mock_facade.get_booking.return_value = mock_booking
 
+    # Act: get booking by ID
     response = client.get(f'/api/v1/bookings/{booking_id}')
+
+    # Assert: booking returned successfully
     assert response.status_code == 200
     data = response.get_json()
     assert data['id'] == str(booking_id)
@@ -107,10 +134,14 @@ def test_get_booking_by_id(mock_facade, client):
 
 @patch('app.api.v1.bookings.facade')
 def test_get_booking_not_found(mock_facade, client):
+    # Arrange: no booking found by facade
     mock_facade.get_booking.return_value = None
-
     booking_id = uuid.uuid4()
+
+    # Act: attempt to get nonexistent booking
     response = client.get(f'/api/v1/bookings/{booking_id}')
+
+    # Assert: 404 error returned
     assert response.status_code == 404
     data = response.get_json()
     assert "Booking not found" in data['error']
@@ -118,20 +149,18 @@ def test_get_booking_not_found(mock_facade, client):
 
 @patch('app.api.v1.bookings.facade')
 def test_update_booking(mock_facade, client, user_token):
+    # Arrange: existing booking owned by user, place owned by user
     token, user_id = user_token
     booking_id = uuid.uuid4()
 
-    # Booking existant
     existing_booking = MockBooking(id=booking_id, user=user_id)
     mock_facade.get_booking.return_value = existing_booking
 
-    # Place mockée, avec owner_id égal à l'utilisateur courant
     class MockPlace:
         owner_id = user_id
 
     mock_facade.get_place.return_value = MockPlace()
 
-    # Booking mis à jour renvoyé
     updated_booking = MockBooking(
         id=booking_id,
         user=user_id,
@@ -141,16 +170,16 @@ def test_update_booking(mock_facade, client, user_token):
     )
     mock_facade.update_booking.return_value = updated_booking
 
-    payload = {
-        "status": "DONE"
-    }
+    payload = {"status": "DONE"}
 
+    # Act: update booking status
     response = client.put(
         f'/api/v1/bookings/{booking_id}',
         json=payload,
         headers={'Authorization': f'Bearer {token}'}
     )
 
+    # Assert: status updated and returned as list with one item
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -159,21 +188,21 @@ def test_update_booking(mock_facade, client, user_token):
 
 @patch('app.api.v1.bookings.facade')
 def test_update_booking_not_found(mock_facade, client, user_token):
+    # Arrange: booking not found for update
     token, user_id = user_token
     booking_id = uuid.uuid4()
-
     mock_facade.get_booking.return_value = None
 
-    payload = {
-        "status": "DONE"
-    }
+    payload = {"status": "DONE"}
 
+    # Act: attempt update on nonexistent booking
     response = client.put(
         f'/api/v1/bookings/{booking_id}',
         json=payload,
         headers={'Authorization': f'Bearer {token}'}
     )
 
+    # Assert: 404 error returned
     assert response.status_code == 404
     data = response.get_json()
     assert "Booking not found" in data['error']
@@ -181,10 +210,14 @@ def test_update_booking_not_found(mock_facade, client, user_token):
 
 @patch('app.api.v1.bookings.facade')
 def test_get_all_bookings(mock_facade, client):
+    # Arrange: facade returns a list with one booking
     mock_booking = MockBooking()
     mock_facade.get_all_bookings.return_value = [mock_booking]
 
+    # Act: get all bookings
     response = client.get('/api/v1/bookings/')
+
+    # Assert: list contains the mocked booking
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -193,9 +226,13 @@ def test_get_all_bookings(mock_facade, client):
 
 @patch('app.api.v1.bookings.facade')
 def test_get_all_bookings_empty(mock_facade, client):
+    # Arrange: facade returns an empty list
     mock_facade.get_all_bookings.return_value = []
 
+    # Act: get all bookings
     response = client.get('/api/v1/bookings/')
+
+    # Assert: empty message returned
     assert response.status_code == 200
     data = response.get_json()
     assert "No booking yet" in data['message']

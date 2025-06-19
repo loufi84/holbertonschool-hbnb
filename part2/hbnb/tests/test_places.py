@@ -1,9 +1,29 @@
 import uuid
 from unittest.mock import patch, MagicMock
 
+"""
+Unit tests for the Places API endpoints.
+
+These tests mock the facade layer to simulate database
+interactions without real persistence.
+
+Covered tests include:
+- Creating a place
+- Retrieving all places
+- Getting a place by ID
+- Updating a place
+- Deleting a place
+
+The `MagicMock` class is used to simulate Place model instances.
+
+Test fixtures `client` and `user_token` are assumed
+available from the test setup.
+"""
+
 
 @patch('app.api.v1.places.facade')
 def test_create_place(mock_facade, client, user_token):
+    # Arrange: mock token, user ID, and the created place object
     token, user_id = user_token
     mock_place = MagicMock()
     mock_place.id = str(uuid.uuid4())
@@ -25,6 +45,7 @@ def test_create_place(mock_facade, client, user_token):
         "amenity_ids": []
     }
 
+    # Act: send POST request to create place
     response = client.post(
         '/api/v1/places/',
         json=payload,
@@ -35,6 +56,7 @@ def test_create_place(mock_facade, client, user_token):
         }
     )
 
+    # Assert: place created successfully, title matches
     assert response.status_code == 201
     data = response.get_json()
     assert data['title'] == "Maison"
@@ -42,6 +64,7 @@ def test_create_place(mock_facade, client, user_token):
 
 @patch('app.api.v1.places.facade')
 def test_get_places(mock_facade, client):
+    # Arrange: mock a list with one place
     mock_place = MagicMock()
     mock_place.id = str(uuid.uuid4())
     mock_place.title = "Château"
@@ -53,7 +76,10 @@ def test_get_places(mock_facade, client):
 
     mock_facade.place_repo.get_all.return_value = [mock_place]
 
+    # Act: send GET request to list places
     response = client.get('/api/v1/places/')
+
+    # Assert: returns list containing our mocked place
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 1
@@ -62,6 +88,7 @@ def test_get_places(mock_facade, client):
 
 @patch('app.api.v1.places.facade')
 def test_get_place_by_id(mock_facade, client):
+    # Arrange: mock a specific place with known ID
     place_id = uuid.uuid4()
 
     mock_place = MagicMock()
@@ -75,7 +102,10 @@ def test_get_place_by_id(mock_facade, client):
 
     mock_facade.get_place.return_value = mock_place
 
+    # Act: get place by ID
     response = client.get(f'/api/v1/places/{place_id}')
+
+    # Assert: place details returned correctly
     assert response.status_code == 200
     data = response.get_json()
     assert data['title'] == "Manoir"
@@ -84,12 +114,13 @@ def test_get_place_by_id(mock_facade, client):
 
 @patch('app.api.v1.places.facade')
 def test_update_place(mock_facade, client, user_token):
+    # Arrange: existing place owned by user, and updated place
     token, user_id = user_token
     place_id = str(uuid.uuid4())
 
     mock_existing_place = MagicMock()
     mock_existing_place.id = place_id
-    mock_existing_place.owner_id = user_id  # ICI très important
+    mock_existing_place.owner_id = user_id  # Important for ownership check
     mock_existing_place.amenities = []
 
     mock_updated_place = MagicMock()
@@ -110,12 +141,14 @@ def test_update_place(mock_facade, client, user_token):
         "price": 200.0
     }
 
+    # Act: update place via PUT
     response = client.put(
         f'/api/v1/places/{place_id}',
         json=payload,
         headers={'Authorization': f'Bearer {token}'}
     )
 
+    # Assert: update successful, title updated
     assert response.status_code == 200
     data = response.get_json()
     assert data['title'] == "Grotte"
@@ -123,21 +156,24 @@ def test_update_place(mock_facade, client, user_token):
 
 @patch('app.api.v1.places.facade')
 def test_delete_place(mock_facade, client, user_token):
+    # Arrange: existing place owned by user for deletion
     token, user_id = user_token
     place_id = str(uuid.uuid4())
 
     mock_existing_place = MagicMock()
     mock_existing_place.id = place_id
-    mock_existing_place.owner_id = user_id  # ICI aussi !
+    mock_existing_place.owner_id = user_id  # Ownership important
     mock_existing_place.amenities = []
 
     mock_facade.get_place.return_value = mock_existing_place
 
+    # Act: delete place via DELETE
     response = client.delete(
         f'/api/v1/places/{place_id}',
         headers={'Authorization': f'Bearer {token}'}
     )
 
+    # Assert: deletion successful with confirmation message
     assert response.status_code == 200
     data = response.get_json()
     assert data['message'] == "Place deleted successfully"

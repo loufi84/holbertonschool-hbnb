@@ -1,19 +1,37 @@
 import uuid
 from unittest.mock import patch, MagicMock
 
+"""
+Unit tests for the Reviews API endpoints.
+
+These tests mock the facade layer to simulate data operations
+without hitting the database.
+
+Test cases cover:
+- Creating a review (valid, booking not done, invalid UUID)
+- Retrieving all reviews
+- Getting a review by ID (valid and invalid UUID)
+- Updating a review (valid and invalid UUID)
+- Deleting a review (valid and invalid UUID)
+- Getting reviews by place (valid and invalid UUID)
+
+Fixtures `client` and `user_token` are assumed to be
+provided by the test framework.
+"""
+
 
 @patch('app.api.v1.reviews.facade')
 def test_create_review(mock_facade, client, user_token):
     token, user_id = user_token
 
-    # Mock booking
+    # Mock booking with DONE status
     booking_id = uuid.uuid4()
     mock_booking = MagicMock()
     mock_booking.id = booking_id
     mock_booking.status = "DONE"
     mock_booking.place = uuid.uuid4()
 
-    # Mock review creation
+    # Mock created review
     mock_review = MagicMock()
     mock_review.id = uuid.uuid4()
     mock_review.comment = "C'était vraiment naze, lol"
@@ -44,6 +62,7 @@ def test_create_review(mock_facade, client, user_token):
 def test_create_review_booking_not_done(mock_facade, client, user_token):
     token, user_id = user_token
 
+    # Booking with status not DONE
     booking_id = uuid.uuid4()
     mock_booking = MagicMock()
     mock_booking.id = booking_id

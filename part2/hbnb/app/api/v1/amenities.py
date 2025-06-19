@@ -1,3 +1,8 @@
+"""
+This module contains all the API endpoints for the amenities.
+It calls the basic business logic from the facade (/app/services/facade).
+It defines the CRUD methods for the amenities.
+"""
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
