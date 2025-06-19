@@ -214,6 +214,10 @@ class HBnBFacade:
         return ''
 
     def create_booking(self, user_id, place_id, booking_data):
+        if not self.user_repo.get(user_id):
+            raise ValueError("User not found")
+        if not self.place_repo.get(place_id):
+            raise ValueError("Place not found")
         new_booking = Booking(
             place=place_id,
             user=user_id,
