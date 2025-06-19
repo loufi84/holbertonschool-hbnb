@@ -2,6 +2,7 @@ import uuid
 import json
 from unittest.mock import patch, MagicMock
 
+
 @patch('app.api.v1.amenities.facade')
 def test_create_amenity_as_admin(mock_facade, client, admin_token):
     token, admin_id = admin_token

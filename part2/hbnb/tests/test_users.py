@@ -1,6 +1,7 @@
 import uuid
 import hashlib
 
+
 def test_create_user_success(client, mocker):
     user_data = {
         "first_name": "Jeanne",
@@ -10,7 +11,8 @@ def test_create_user_success(client, mocker):
     }
 
     # Mock facade
-    mocker.patch("app.api.v1.users.facade.get_user_by_email", return_value=None)
+    mocker.patch("app.api.v1.users.facade.get_user_by_email",
+                 return_value=None)
     mock_user = mocker.Mock()
     mock_user.id = uuid.uuid4()
     mock_user.first_name = user_data["first_name"]
@@ -23,6 +25,7 @@ def test_create_user_success(client, mocker):
     data = response.get_json()
     assert data["email"] == user_data["email"]
 
+
 def test_create_user_email_exists(client, mocker):
     user_data = {
         "first_name": "Jean",
@@ -32,17 +35,21 @@ def test_create_user_email_exists(client, mocker):
     }
     # Simule qu'un user existe déjà
     existing_user = mocker.Mock()
-    mocker.patch("app.api.v1.users.facade.get_user_by_email", return_value=existing_user)
+    mocker.patch("app.api.v1.users.facade.get_user_by_email",
+                 return_value=existing_user)
 
     response = client.post('/api/v1/users/', json=user_data)
     assert response.status_code == 400
     data = response.get_json()
     assert 'Email already registered' in data['error']
 
+
 def test_get_all_users(client, mocker):
     # Simule plusieurs users retournés par facade
-    user1 = mocker.Mock(id=uuid.uuid4(), first_name="Sylvain", last_name="Téhain", email="sylvain@example.com")
-    user2 = mocker.Mock(id=uuid.uuid4(), first_name="Le", last_name="Caillou", email="RoCk@example.com")
+    user1 = mocker.Mock(id=uuid.uuid4(), first_name="Sylvain",
+                        last_name="Téhain", email="sylvain@example.com")
+    user2 = mocker.Mock(id=uuid.uuid4(), first_name="Le",
+                        last_name="Caillou", email="RoCk@example.com")
 
     user1.model_dump.return_value = {
         "id": str(user1.id),
@@ -57,22 +64,26 @@ def test_get_all_users(client, mocker):
         "email": user2.email
     }
 
-    mocker.patch("app.api.v1.users.facade.get_all_users", return_value=[user1, user2])
+    mocker.patch("app.api.v1.users.facade.get_all_users",
+                 return_value=[user1, user2])
 
     response = client.get('/api/v1/users/')
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 2
 
+
 def test_get_user_by_id_success(client, mocker):
     user_id = uuid.uuid4()
-    user = mocker.Mock(id=user_id, first_name="Lily", last_name="Putien", email="lily@example.com")
+    user = mocker.Mock(id=user_id, first_name="Lily",
+                       last_name="Putien", email="lily@example.com")
     mocker.patch("app.api.v1.users.facade.get_user", return_value=user)
 
     response = client.get(f'/api/v1/users/{user_id}')
     assert response.status_code == 200
     data = response.get_json()
     assert data["id"] == str(user_id)
+
 
 def test_get_user_by_id_not_found(client, mocker):
     user_id = uuid.uuid4()
@@ -81,13 +92,18 @@ def test_get_user_by_id_not_found(client, mocker):
     response = client.get(f'/api/v1/users/{user_id}')
     assert response.status_code == 404
 
+
 def test_update_user_success(client, mocker):
     user_id = uuid.uuid4()
-    existing_user = mocker.Mock(id=user_id, first_name="Jean-Philipe", last_name="Smedt", email="jean@example.com")
-    updated_user = mocker.Mock(id=user_id, first_name="Johnny", last_name="Halliday", email="ahquecoucou@example.com")
+    existing_user = mocker.Mock(id=user_id, first_name="Jean-Philipe",
+                                last_name="Smedt", email="jean@example.com")
+    updated_user = mocker.Mock(id=user_id, first_name="Johnny",
+                               last_name="Halliday", email="ahque@mail.com")
 
-    mocker.patch("app.api.v1.users.facade.get_user", return_value=existing_user)
-    mocker.patch("app.api.v1.users.facade.update_user", return_value=updated_user)
+    mocker.patch("app.api.v1.users.facade.get_user",
+                 return_value=existing_user)
+    mocker.patch("app.api.v1.users.facade.update_user",
+                 return_value=updated_user)
 
     payload = {"first_name": "Johnny"}
     response = client.put(f'/api/v1/users/{user_id}', json=payload)
@@ -95,11 +111,13 @@ def test_update_user_success(client, mocker):
     data = response.get_json()
     assert data["first_name"] == "Johnny"
 
+
 def test_login_success(client, mocker):
     password = "my_password"
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     user = mocker.Mock(id=uuid.uuid4(), hashed_password=hashed_password)
-    mocker.patch("app.api.v1.users.facade.get_user_by_email", return_value=user)
+    mocker.patch("app.api.v1.users.facade.get_user_by_email",
+                 return_value=user)
 
     payload = {
         "email": "jeann@example.com",

@@ -46,7 +46,7 @@ class ReviewList(Resource):
         if booking.status != "DONE":
             return {"error": "Booking not completed"}, 403
         place_id = booking.place
-        
+
         try:
             new_review = facade.create_review(
                 review_data, booking_id, place_id, user_id

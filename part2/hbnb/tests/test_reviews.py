@@ -1,6 +1,7 @@
 import uuid
 from unittest.mock import patch, MagicMock
 
+
 @patch('app.api.v1.reviews.facade')
 def test_create_review(mock_facade, client, user_token):
     token, user_id = user_token
@@ -38,6 +39,7 @@ def test_create_review(mock_facade, client, user_token):
     assert data['comment'] == "C'était vraiment naze, lol"
     assert data['rating'] == 0.2
 
+
 @patch('app.api.v1.reviews.facade')
 def test_create_review_booking_not_done(mock_facade, client, user_token):
     token, user_id = user_token
@@ -65,6 +67,7 @@ def test_create_review_booking_not_done(mock_facade, client, user_token):
     assert response.status_code == 403
     assert "Booking not completed" in response.get_json()['error']
 
+
 @patch('app.api.v1.reviews.facade')
 def test_create_review_invalid_booking_uuid(mock_facade, client, user_token):
     token, user_id = user_token
@@ -84,6 +87,7 @@ def test_create_review_invalid_booking_uuid(mock_facade, client, user_token):
     assert response.status_code == 400
     assert "Invalid booking UUID format" in response.get_json()['error']
 
+
 @patch('app.api.v1.reviews.facade')
 def test_get_reviews(mock_facade, client):
     mock_review = MagicMock()
@@ -99,12 +103,13 @@ def test_get_reviews(mock_facade, client):
     assert len(data) == 1
     assert data[0]['comment'] == "C'était presque pas chiant comme la mort!"
 
+
 @patch('app.api.v1.reviews.facade')
 def test_get_review_by_id(mock_facade, client):
     review_id = uuid.uuid4()
     mock_review = MagicMock()
     mock_review.id = review_id
-    mock_review.comment = "Au secours, il y a un gobelin dans les toilettes"
+    mock_review.comment = "Au secours il y a un gobelin dans les toilettes"
     mock_review.rating = 2.1
 
     mock_facade.get_review.return_value = mock_review
@@ -112,14 +117,16 @@ def test_get_review_by_id(mock_facade, client):
     response = client.get(f'/api/v1/reviews/{review_id}')
     assert response.status_code == 200
     data = response.get_json()
-    assert data['comment'] == "Au secours, il y a un gobelin dans les toilettes"
+    assert data['comment'] == "Au secours il y a un gobelin dans les toilettes"
     assert data['rating'] == 2.1
+
 
 @patch('app.api.v1.reviews.facade')
 def test_get_review_by_id_invalid_uuid(mock_facade, client):
     response = client.get('/api/v1/reviews/invalid-uuid')
     assert response.status_code == 400
     assert "Invalid UUID format" in response.get_json()['error']
+
 
 @patch('app.api.v1.reviews.facade')
 def test_update_review(mock_facade, client):
@@ -154,11 +161,13 @@ def test_update_review(mock_facade, client):
     assert data['comment'] == "En fait c'était cool"
     assert data['rating'] == 5.0
 
+
 @patch('app.api.v1.reviews.facade')
 def test_update_review_invalid_uuid(mock_facade, client):
     response = client.put('/api/v1/reviews/invalid-uuid', json={})
     assert response.status_code == 400
     assert "Invalid UUID format" in response.get_json()['error']
+
 
 @patch('app.api.v1.reviews.facade')
 def test_delete_review(mock_facade, client):
@@ -173,11 +182,13 @@ def test_delete_review(mock_facade, client):
     data = response.get_json()
     assert data['message'] == "Review deleted successfully"
 
+
 @patch('app.api.v1.reviews.facade')
 def test_delete_review_invalid_uuid(mock_facade, client):
     response = client.delete('/api/v1/reviews/invalid-uuid')
     assert response.status_code == 400
     assert "Invalid UUID format" in response.get_json()['error']
+
 
 @patch('app.api.v1.reviews.facade')
 def test_get_reviews_by_place(mock_facade, client):
@@ -195,6 +206,7 @@ def test_get_reviews_by_place(mock_facade, client):
     data = response.get_json()
     assert len(data) == 1
     assert data[0]['comment'] == "C'était vraiment un hôtel ça???"
+
 
 @patch('app.api.v1.reviews.facade')
 def test_get_reviews_by_place_invalid_uuid(mock_facade, client):

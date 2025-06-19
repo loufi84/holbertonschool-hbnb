@@ -3,9 +3,12 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from unittest.mock import patch
 
-# MockBooking qui imite ton modèle Booking avec model_dump et attributs nécessaires
+
+# MockBooking qui imite ton modèle Booking avec
+# model_dump et attributs nécessaires
 class MockBooking:
-    def __init__(self, user=None, place=None, status="PENDING", start_date=None, end_date=None, id=None):
+    def __init__(self, user=None, place=None, status="PENDING",
+                 start_date=None, end_date=None, id=None):
         self.id = id or uuid.uuid4()
         self.user = user or uuid.uuid4()
         self.place = place or uuid.uuid4()

@@ -1,6 +1,7 @@
 import uuid
 from unittest.mock import patch, MagicMock
 
+
 @patch('app.api.v1.places.facade')
 def test_create_place(mock_facade, client, user_token):
     token, user_id = user_token
@@ -38,6 +39,7 @@ def test_create_place(mock_facade, client, user_token):
     data = response.get_json()
     assert data['title'] == "Maison"
 
+
 @patch('app.api.v1.places.facade')
 def test_get_places(mock_facade, client):
     mock_place = MagicMock()
@@ -56,6 +58,7 @@ def test_get_places(mock_facade, client):
     data = response.get_json()
     assert len(data) == 1
     assert data[0]['title'] == "Château"
+
 
 @patch('app.api.v1.places.facade')
 def test_get_place_by_id(mock_facade, client):
@@ -77,6 +80,7 @@ def test_get_place_by_id(mock_facade, client):
     data = response.get_json()
     assert data['title'] == "Manoir"
     assert data['place_id'] == str(place_id)
+
 
 @patch('app.api.v1.places.facade')
 def test_update_place(mock_facade, client, user_token):
@@ -115,6 +119,7 @@ def test_update_place(mock_facade, client, user_token):
     assert response.status_code == 200
     data = response.get_json()
     assert data['title'] == "Grotte"
+
 
 @patch('app.api.v1.places.facade')
 def test_delete_place(mock_facade, client, user_token):
