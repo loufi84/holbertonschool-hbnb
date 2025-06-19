@@ -116,6 +116,8 @@ Run the tests using:
 You can also manually test the endpoints using Postman, cURL, or any REST client.  
 (Tested functional with SwaggerUI on web browser)  
 
+You can also type ‘‘‘pytest‘‘‘ in the terminal in hbnb folder.
+
 ⸻
 
 🚧 Roadmap  
