@@ -132,6 +132,11 @@ class UserResource(Resource):
                 TypeAdapter(EmailStr).validate_python(update_data["email"])
             except ValidationError:
                 return {"error": "Invalid email format"}, 400
+
+        if ("email" in update_data and
+           facade.get_user_by_email(update_data["email"])):
+            return {'error': 'Email already registered'}, 400
+
         try:
             updated_user = facade.update_user(user_uuid, update_data)
         except ValidationError as e:
