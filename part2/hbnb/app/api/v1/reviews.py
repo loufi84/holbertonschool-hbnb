@@ -42,12 +42,14 @@ class ReviewList(Resource):
             return {"error": "Invalid booking UUID format"}, 400
         booking = facade.get_booking(booking_id)
         if booking is None:
-            return {"error": "Booking not found"}, 404  # ou raise ValueError / PermissionError selon contexte
+            return {"error": "Booking not found"}, 404
         if booking.status != "DONE":
             return {"error": "Booking not completed"}, 403
         place_id = booking.place
         try:
-            new_review = facade.create_review(review_data, booking_id, place_id, user_id)
+            new_review = facade.create_review(
+                review_data, booking_id, place_id, user_id
+                )
         except PermissionError as e:
             return {"error": str(e)}, 403
 

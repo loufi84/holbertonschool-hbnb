@@ -164,7 +164,10 @@ class HBnBFacade:
 
         if booking is None:
             raise ValueError("Booking not found")
-        if booking.status != BookingStatus.DONE or booking.end_date >= datetime.now(timezone.utc):
+        if (
+            booking.status != BookingStatus.DONE or
+            booking.end_date >= datetime.now(timezone.utc)
+           ):
             raise PermissionError("User must visit the place to post review.")
 
         new_review = Review(
@@ -249,7 +252,6 @@ class HBnBFacade:
                                       "owner of a place can update the status")
             if booking_data['status'] not in ("DONE", "PENDING", "CANCELED"):
                 raise ValueError("Status must be DONE, PENDING, or CANCELED")
-
 
         try:
             updated_booking = booking.copy(update=booking_data)
