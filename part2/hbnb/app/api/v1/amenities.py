@@ -1,3 +1,8 @@
+"""
+This module contains all the API endpoints for the amenities.
+It calls the basic business logic from the facade (/app/services/facade).
+It defines the CRUD methods for the amenities.
+"""
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
@@ -5,7 +10,7 @@ from pydantic import ValidationError
 from uuid import UUID
 from app.models.amenity import AmenityCreate
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
+import json
 
 api = Namespace('amenities', description='Amenity operations')
 
@@ -34,7 +39,7 @@ class AmenityList(Resource):
         try:
             amenity_data = AmenityCreate(**request.json)
         except ValidationError as e:
-            return {"error": e.errors()}, 400
+            return {"error": json.loads(e.json())}, 400
 
         if facade.get_amenity(amenity_data.name):
             return {"error": "This amenity already exists"}, 400
@@ -100,7 +105,7 @@ class AmenityResource(Resource):
         try:
             updated_amenity = facade.update_amenity(amenity_uuid, update_data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         return {
             'id': str(updated_amenity.id),  # UUID -> str pour le JSON

@@ -1,3 +1,8 @@
+"""
+This module contains all the API endpoints for the places.
+It calls the basic business logic from the facade (/app/services/facade).
+It defines the CRUD methods for the places.
+"""
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
@@ -5,7 +10,7 @@ from pydantic import ValidationError
 from app.models.place import PlaceCreate, Place
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
+import json
 
 api = Namespace('places', description='Places operations')
 
@@ -30,7 +35,8 @@ place_model_update = api.model('PlaceUpdate', {
                            description='The title of the place'),
     'description': fields.String(required=False,
                                  description='The description of the place'),
-    'price': fields.Float(required=False, description='The price of the place'),
+    'price': fields.Float(required=False,
+                          description='The price of the place'),
     'latitude': fields.Float(required=False,
                              description='The latitude of the place'),
     'longitude': fields.Float(required=False,
@@ -39,10 +45,11 @@ place_model_update = api.model('PlaceUpdate', {
                                description='List of amenity IDs')
 })
 
+
 @api.route('/')
 class PlaceList(Resource):
     @jwt_required()
-    @api.expect(place_model, validate=True)
+    @api.expect(place_model)
     @api.response(201, 'Place successfully created')
     @api.response(403, 'User must be connected to create a place')
     @api.response(400, 'Invalid input')
@@ -55,7 +62,7 @@ class PlaceList(Resource):
         try:
             new_place = facade.create_place(data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
         except Exception as e:
             return {'error': str(e)}, 500
         amenities = []
@@ -137,7 +144,7 @@ class PlaceResource(Resource):
             }, 200
 
     @jwt_required()
-    @api.expect(place_model_update, validate=True)
+    @api.expect(place_model_update)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
     @api.response(403, 'Forbidden')
@@ -158,17 +165,18 @@ class PlaceResource(Resource):
             return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
+        try:
+            updated_place = facade.update_place(place_uuid, update_data)
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
+
         amenities = []
-        for amenity in existing_place.amenities:
+        for amenity in updated_place.amenities:
             amenities.append({
                 'id': str(amenity.id),
                 'name': amenity.name,
                 'description': amenity.description
             })
-        try:
-            updated_place = facade.update_place(place_uuid, update_data)
-        except ValidationError as e:
-            return {'error': e.errors()}, 400
 
         return {
             'id': updated_place.id,
@@ -192,7 +200,7 @@ class PlaceResource(Resource):
         try:
             place_uuid = UUID(place_id)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         existing_place = facade.get_place(place_uuid)
         if not existing_place:

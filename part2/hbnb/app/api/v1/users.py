@@ -1,11 +1,17 @@
+"""
+This module contains all the API endpoints for the users.
+It calls the basic business logic from the facade (/app/services/facade).
+It defines the CRUD methods for the users.
+"""
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from pydantic import ValidationError
+from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
-from app.models.user import UserCreate, LoginRequest
+from app.models.user import User, UserCreate, LoginRequest
 from flask_jwt_extended import create_access_token
 import hashlib
+import json
 
 api = Namespace('users', description='User operations')
 api = Namespace('auth', description='Authentication operations')
@@ -24,7 +30,7 @@ user_update_model = api.model('UserUpdate', {
     'first_name': fields.String(required=False,
                                 description='First name of user'),
     'last_name': fields.String(required=False,
-                                description='Last name of user'),
+                               description='Last name of user'),
     'email': fields.String(required=False, description='Email of user'),
     'password': fields.String(required=False, description='Password of user')
 })
@@ -38,15 +44,15 @@ login_model = api.model('Login', {
 
 @api.route('/')
 class UserList(Resource):
-    @api.expect(user_model, validate=True)
-    @api.response(201, 'User succesfully created')
+    @api.expect(user_model)
+    @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered or invalid input')
     def post(self):
         """Register new user"""
         try:
             user_data = UserCreate(**request.json)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         if facade.get_user_by_email(user_data.email):
             return {'error': 'Email already registered'}, 400
@@ -121,11 +127,15 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
 
         update_data = request.json
-
+        if "email" in update_data:
+            try:
+                TypeAdapter(EmailStr).validate_python(update_data["email"])
+            except ValidationError:
+                return {"error": "Invalid email format"}, 400
         try:
             updated_user = facade.update_user(user_uuid, update_data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         return {
             'id': str(updated_user.id),
@@ -148,7 +158,7 @@ class Login(Resource):
         try:
             login_data = LoginRequest(**data)
         except ValidationError as e:
-            return {'error': e.errors()}, 400
+            return {'error': json.loads(e.json())}, 400
 
         user = facade.get_user_by_email(login_data.email)
         if not user:

@@ -1,11 +1,15 @@
-'''
+"""
+HBnBFacade Module
 
-'''
+This module defines the HBnBFacade class, which acts as a facade layer
+for the application. It centralizes operations on users, places, amenities,
+reviews, and bookings, using repositories to handle data persistence.
+"""
+
 from app.persistence.repository import InMemoryRepository
 from app.models.amenity import Amenity, AmenityCreate
-from app.models.place import Place
-from app.models.review import Review, ReviewCreate
 from app.models.place import Place, PlaceCreate
+from app.models.review import Review, ReviewCreate
 from app.models.user import User, UserCreate
 from app.models.booking import Booking, BookingStatus
 from pydantic import ValidationError
@@ -15,18 +19,31 @@ import hashlib
 
 
 class HBnBFacade:
-    '''
-    This is the class defining the facade of the application.
-    It contains all the base operations used by services.
-    '''
+    """
+    HBnBFacade centralizes all business logic for managing:
+    - Users
+    - Places
+    - Amenities
+    - Reviews
+    - Bookings
+
+    It uses in-memory repositories to store data and provides
+    methods for creating, retrieving, updating, and deleting records.
+    """
     def __init__(self):
+        """Initialize repositories for each entity."""
         self.user_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
         self.booking_repo = InMemoryRepository()
 
+    # ------------------ User management ------------------
+
     def create_user(self, user_data):
+        """
+        Create a new user with hashed password.
+        """
         user_in = UserCreate(**user_data)
         hashed_pw = hashlib.sha256(user_in.password.encode()).hexdigest()
 
@@ -40,12 +57,17 @@ class HBnBFacade:
         return user
 
     def get_user(self, user_id):
+        """Retrieve user by ID."""
         return self.user_repo.get(user_id)
 
     def get_user_by_email(self, email):
+        """Retrieve user by email address."""
         return self.user_repo.get_by_attribute('email', email)
 
     def update_user(self, user_id: UUID, update_data: dict):
+        """
+        Update user data. If password is provided, hash it.
+        """
         user = self.user_repo.get(user_id)
         if not user:
             return None
@@ -58,9 +80,15 @@ class HBnBFacade:
         return self.user_repo.get(user_id)
 
     def get_all_users(self):
+        """Retrieve all users."""
         return self.user_repo.get_all()
 
+    # ------------------ Place management ------------------
+
     def create_place(self, place_data):
+        """
+        Create a new place and validate amenities existence.
+        """
         place_in = PlaceCreate(**place_data)
 
         amenities = []
@@ -84,9 +112,13 @@ class HBnBFacade:
         return place
 
     def get_place(self, place_id):
+        """Retrieve place by ID."""
         return self.place_repo.get(place_id)
 
     def update_place(self, place_id: str, update_data: dict) -> Place:
+        """
+        Update place data, handle amenity association update.
+        """
         place = self.place_repo.get(place_id)
         if not place:
             raise Exception("Place not found")
@@ -95,14 +127,13 @@ class HBnBFacade:
             current_amenity_ids = {str(a.id) for a in place.amenities}
             new_amenity_ids = set(update_data["amenity_ids"])
 
+            # Determine amenities to add and remove
             to_add = new_amenity_ids - current_amenity_ids
             to_remove = current_amenity_ids - new_amenity_ids
 
-            # Delete unused amenities
-            updated_amenities = [a for a in place.amenities if str(
-                a.id) not in to_remove]
+            updated_amenities = [a for a in place.amenities if
+                                 str(a.id) not in to_remove]
 
-            # Ajouter les nouvelles amenities
             for amenity_id in to_add:
                 amenity = self.get_amenity(amenity_id)
                 if not amenity:
@@ -120,17 +151,24 @@ class HBnBFacade:
         update_fields["updated_at"] = datetime.now(timezone.utc)
 
         updated_place = self.place_repo.update(place_id, update_fields)
-
         return updated_place
 
     def delete_place(self, place_id):
+        """
+        Delete a place by ID.
+        """
         place = self.place_repo.get(place_id)
         if not place:
             return None
         self.place_repo.delete(place_id)
         return ''
 
+    # ------------------ Amenity management ------------------
+
     def create_amenity(self, amenity_data):
+        """
+        Create a new amenity.
+        """
         amenity_in = AmenityCreate(**amenity_data)
 
         amenity = Amenity(
@@ -142,12 +180,17 @@ class HBnBFacade:
         return amenity
 
     def get_amenity(self, amenity_id):
+        """Retrieve amenity by ID."""
         return self.amenity_repo.get(amenity_id)
 
     def get_all_amenities(self):
+        """Retrieve all amenities."""
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
+        """
+        Update an existing amenity.
+        """
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
@@ -159,39 +202,52 @@ class HBnBFacade:
         self.amenity_repo._storage[str(amenity_id)] = updated_amenity
         return updated_amenity
 
-    def create_review(self, review_data, user_id, place_id):
-        bookings = self.booking_repo.get_all()
+    # ------------------ Review management ------------------
 
-        has_valid_booking = any(
-            str(booking.place) == str(place_id)
-            and str(booking.user) == str(user_id)
-            and booking.status == BookingStatus.DONE
-            and booking.end_date < datetime.now(timezone.utc)
-            for booking in bookings
-            )
-        if not has_valid_booking:
+    def create_review(self, review_data, booking_id, place_id, user_id):
+        """
+        Create a review only if booking is done and user visited the place.
+        """
+        booking = self.get_booking(booking_id)
+
+        if not self.user_repo.get(user_id):
+            raise ValueError("User not found")
+        if not self.place_repo.get(place_id):
+            raise ValueError("Place not found")
+        if not booking:
+            raise ValueError("Booking not found")
+
+        if (booking.status != BookingStatus.DONE or
+                booking.end_date >= datetime.now(timezone.utc)):
             raise PermissionError("User must visit the place to post review.")
 
         new_review = Review(
             comment=review_data.comment,
             rating=review_data.rating,
-            place=place_id,
-            user=user_id,
+            booking=str(booking_id),
+            place=str(place_id),
+            user=str(user_id)
         )
         self.review_repo.add(new_review)
         return new_review
 
     def get_review(self, review_id):
+        """Retrieve review by ID."""
         return self.review_repo.get(review_id)
 
     def get_all_reviews(self):
+        """Retrieve all reviews."""
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
+        """Retrieve all reviews for a specific place."""
         reviews = self.review_repo.get_all()
         return [review for review in reviews if review.place == place_id]
 
     def update_review(self, review_id, review_data):
+        """
+        Update an existing review.
+        """
         review = self.review_repo.get(review_id)
         if not review:
             return None
@@ -204,13 +260,23 @@ class HBnBFacade:
         return updated_review
 
     def delete_review(self, review_id):
+        """Delete a review by ID."""
         review = self.review_repo.get(review_id)
         if not review:
             return None
         self.review_repo.delete(review_id)
         return ''
 
+    # ------------------ Booking management ------------------
+
     def create_booking(self, user_id, place_id, booking_data):
+        """
+        Create a new booking for a place by a user.
+        """
+        if not self.user_repo.get(user_id):
+            raise ValueError("User not found")
+        if not self.place_repo.get(place_id):
+            raise ValueError("Place not found")
         new_booking = Booking(
             place=place_id,
             user=user_id,
@@ -222,35 +288,32 @@ class HBnBFacade:
         return new_booking
 
     def get_booking(self, booking_id):
+        """Retrieve booking by ID."""
         return self.booking_repo.get(booking_id)
 
     def get_all_bookings(self):
+        """Retrieve all bookings."""
         return self.booking_repo.get_all()
 
     def get_booking_list_by_place(self, place_id):
+        """Retrieve all bookings for a specific place."""
         return [
             booking for booking in self.booking_repo._storage.values()
             if str(booking.place) == str(place_id)
-            ]
+        ]
 
     def get_booking_list_by_user(self, user_id):
+        """Retrieve all bookings for a specific user."""
         return [
             booking for booking in self.booking_repo._storage.values()
             if str(booking.user) == str(user_id)
-            ]
-
-    def get_last_completed_booking(self, user_id):
-        bookings = self.get_booking_list_by_user(user_id)
-        completed = [
-            booking for booking in bookings
-            if booking.status == "DONE"
         ]
-        if not completed:
-            raise PermissionError("No completed booking found")
-
-        return max(completed, key=lambda booking: booking.end_date)
 
     def update_booking(self, booking_id, booking_data):
+        """
+        Update a booking.
+        Only the owner of the place can update booking status.
+        """
         booking = self.booking_repo.get(booking_id)
         if not booking:
             return None
@@ -260,13 +323,15 @@ class HBnBFacade:
 
         if 'status' in booking_data:
             if str(place.owner_id) != str(user_id):
-                raise PermissionError("Only the"
-                                      "owner of a place can update the status")
+                raise PermissionError("Only the owner of a place"
+                                      "can update the status")
+            if booking_data['status'] not in ("DONE", "PENDING", "CANCELED"):
+                raise ValueError("Status must be DONE, PENDING, or CANCELED")
 
-            try:
-                updated_booking = booking.copy(update=booking_data)
-            except ValidationError as e:
-                raise e
+        try:
+            updated_booking = booking.copy(update=booking_data)
+        except ValidationError as e:
+            raise e
 
         self.booking_repo._storage[str(booking_id)] = updated_booking
         return updated_booking
