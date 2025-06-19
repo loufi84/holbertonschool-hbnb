@@ -4,3 +4,7 @@ flask_httpauth
 flask_jwt_extended
 pydantic
 email-validator
+python-dateutil
+json
+uuid
+hashlib

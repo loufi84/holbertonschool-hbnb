@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from uuid import UUID
+import uuid
 from app.models.review import ReviewCreate
 from app.models.booking import Booking
 from app.models.place import Place
@@ -13,6 +13,7 @@ api = Namespace('reviews', description='Review operations')
 
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
+    'booking': fields.String(required=True, description='ID of the booking'),
     'comment': fields.String(required=True, description='Text of the review'),
     'rating': fields.Float(required=True,
                            description='Rating of the place (1-5)'),
@@ -32,24 +33,21 @@ class ReviewList(Resource):
         user_id = get_jwt_identity()
 
         try:
-            last_booking = facade.get_last_completed_booking(user_id)
-        except PermissionError as e:
-            return {'error': str(e)}, 403
-        if not last_booking:
-            return {'error': 'No completed booking found'}, 403
-        place_id = last_booking.place
-        if not place_id:
-            return {'error': 'You must complete a '
-                    'booking to review a place'}, 403
-        place = facade.get_place(place_id)
-        if not place:
-            return {"error": "Place not found"}, 404
-        try:
             review_data = ReviewCreate(**request.json)
         except ValidationError as e:
             return {"error": json.loads(e.json())}, 400
         try:
-            new_review = facade.create_review(review_data, user_id, place_id)
+            booking_id = uuid.UUID(review_data.booking)
+        except ValueError:
+            return {"error": "Invalid booking UUID format"}, 400
+        booking = facade.get_booking(booking_id)
+        if booking is None:
+            return {"error": "Booking not found"}, 404  # ou raise ValueError / PermissionError selon contexte
+        if booking.status != "DONE":
+            return {"error": "Booking not completed"}, 403
+        place_id = booking.place
+        try:
+            new_review = facade.create_review(review_data, booking_id, place_id, user_id)
         except PermissionError as e:
             return {"error": str(e)}, 403
 
@@ -82,7 +80,7 @@ class ReviewResource(Resource):
     def get(self, review_id):
         """Get review details by ID"""
         try:
-            review_uuid = UUID(review_id)
+            review_uuid = uuid.UUID(review_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
@@ -103,7 +101,7 @@ class ReviewResource(Resource):
     def put(self, review_id):
         """Update a review's information"""
         try:
-            review_uuid = UUID(review_id)
+            review_uuid = uuid.UUID(review_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
@@ -130,7 +128,7 @@ class ReviewResource(Resource):
     def delete(self, review_id):
         """Delete a review"""
         try:
-            review_uuid = UUID(review_id)
+            review_uuid = uuid.UUID(review_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
@@ -150,7 +148,7 @@ class PlaceReviewList(Resource):
     def get(self, place_id):
         """Get all reviews for a specific place"""
         try:
-            place_uuid = UUID(place_id)
+            place_uuid = uuid.UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
         review_list = facade.get_reviews_by_place(place_uuid)

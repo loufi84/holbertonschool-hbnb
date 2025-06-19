@@ -159,24 +159,20 @@ class HBnBFacade:
         self.amenity_repo._storage[str(amenity_id)] = updated_amenity
         return updated_amenity
 
-    def create_review(self, review_data, user_id, place_id):
-        bookings = self.booking_repo.get_all()
+    def create_review(self, review_data, booking_id, place_id, user_id):
+        booking = self.get_booking(booking_id)
 
-        has_valid_booking = any(
-            str(booking.place) == str(place_id)
-            and str(booking.user) == str(user_id)
-            and booking.status == BookingStatus.DONE
-            and booking.end_date < datetime.now(timezone.utc)
-            for booking in bookings
-            )
-        if not has_valid_booking:
+        if booking is None:
+            raise ValueError("Booking not found")
+        if booking.status != BookingStatus.DONE or booking.end_date >= datetime.now(timezone.utc):
             raise PermissionError("User must visit the place to post review.")
 
         new_review = Review(
             comment=review_data.comment,
             rating=review_data.rating,
-            place=place_id,
-            user=user_id,
+            booking=str(booking_id),
+            place=str(place_id),
+            user=str(user_id)
         )
         self.review_repo.add(new_review)
         return new_review
@@ -238,17 +234,6 @@ class HBnBFacade:
             booking for booking in self.booking_repo._storage.values()
             if str(booking.user) == str(user_id)
             ]
-
-    def get_last_completed_booking(self, user_id):
-        bookings = self.get_booking_list_by_user(user_id)
-        completed = [
-            booking for booking in bookings
-            if booking.status == "DONE"
-        ]
-        if not completed:
-            raise PermissionError("No completed booking found")
-
-        return max(completed, key=lambda booking: booking.end_date)
 
     def update_booking(self, booking_id, booking_data):
         booking = self.booking_repo.get(booking_id)

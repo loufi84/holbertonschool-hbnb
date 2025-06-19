@@ -8,8 +8,9 @@ class Review(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
-    place: uuid.UUID
-    user: uuid.UUID
+    place: str
+    user: str
+    booking: str
     created_at: datetime = Field(default_factory=lambda:
                                  datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
@@ -26,6 +27,7 @@ class Review(BaseModel):
 class ReviewCreate(BaseModel):
     comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
+    booking: str
 
     @field_validator('comment')
     @classmethod
