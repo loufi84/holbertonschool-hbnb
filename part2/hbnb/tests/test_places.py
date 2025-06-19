@@ -6,9 +6,9 @@ def test_create_place(mock_facade, client, user_token):
     token, user_id = user_token
     mock_place = MagicMock()
     mock_place.id = str(uuid.uuid4())
-    mock_place.title = "Test Place"
-    mock_place.description = "Description"
-    mock_place.price = 100.0
+    mock_place.title = "Maison"
+    mock_place.description = "En pain d'épices"
+    mock_place.price = 42.0
     mock_place.latitude = 45.0
     mock_place.longitude = 5.0
     mock_place.amenities = []
@@ -16,8 +16,8 @@ def test_create_place(mock_facade, client, user_token):
     mock_facade.create_place.return_value = mock_place
 
     payload = {
-        "title": "Test Place",
-        "description": "Description",
+        "title": "Maison",
+        "description": "En pain d'épices",
         "price": 100.0,
         "latitude": 45.0,
         "longitude": 5.0,
@@ -36,17 +36,17 @@ def test_create_place(mock_facade, client, user_token):
 
     assert response.status_code == 201
     data = response.get_json()
-    assert data['title'] == "Test Place"
+    assert data['title'] == "Maison"
 
 @patch('app.api.v1.places.facade')
 def test_get_places(mock_facade, client):
     mock_place = MagicMock()
     mock_place.id = str(uuid.uuid4())
-    mock_place.title = "Test Place"
-    mock_place.description = "Description"
-    mock_place.price = 100.0
-    mock_place.latitude = 45.0
-    mock_place.longitude = 5.0
+    mock_place.title = "Château"
+    mock_place.description = "Ambulant (ou dans le Ciel)"
+    mock_place.price = 26473.0
+    mock_place.latitude = 27.0
+    mock_place.longitude = -121.0
     mock_place.amenities = []
 
     mock_facade.place_repo.get_all.return_value = [mock_place]
@@ -55,7 +55,7 @@ def test_get_places(mock_facade, client):
     assert response.status_code == 200
     data = response.get_json()
     assert len(data) == 1
-    assert data[0]['title'] == "Test Place"
+    assert data[0]['title'] == "Château"
 
 @patch('app.api.v1.places.facade')
 def test_get_place_by_id(mock_facade, client):
@@ -63,8 +63,8 @@ def test_get_place_by_id(mock_facade, client):
 
     mock_place = MagicMock()
     mock_place.id = place_id
-    mock_place.title = "Test Place"
-    mock_place.description = "Description"
+    mock_place.title = "Manoir"
+    mock_place.description = "Luigi non inclus"
     mock_place.price = 100.0
     mock_place.latitude = 45.0
     mock_place.longitude = 5.0
@@ -75,7 +75,7 @@ def test_get_place_by_id(mock_facade, client):
     response = client.get(f'/api/v1/places/{place_id}')
     assert response.status_code == 200
     data = response.get_json()
-    assert data['title'] == "Test Place"
+    assert data['title'] == "Manoir"
     assert data['place_id'] == str(place_id)
 
 @patch('app.api.v1.places.facade')
@@ -90,8 +90,8 @@ def test_update_place(mock_facade, client, user_token):
 
     mock_updated_place = MagicMock()
     mock_updated_place.id = place_id
-    mock_updated_place.title = "Updated Place"
-    mock_updated_place.description = "Updated Description"
+    mock_updated_place.title = "Grotte"
+    mock_updated_place.description = "Amenez votre gourdin"
     mock_updated_place.price = 200.0
     mock_updated_place.latitude = 50.0
     mock_updated_place.longitude = 10.0
@@ -102,7 +102,7 @@ def test_update_place(mock_facade, client, user_token):
     mock_facade.update_place.return_value = mock_updated_place
 
     payload = {
-        "title": "Updated Place",
+        "title": "Grotte",
         "price": 200.0
     }
 
@@ -114,7 +114,7 @@ def test_update_place(mock_facade, client, user_token):
 
     assert response.status_code == 200
     data = response.get_json()
-    assert data['title'] == "Updated Place"
+    assert data['title'] == "Grotte"
 
 @patch('app.api.v1.places.facade')
 def test_delete_place(mock_facade, client, user_token):
