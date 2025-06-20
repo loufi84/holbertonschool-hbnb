@@ -210,9 +210,9 @@ def test_delete_review(mock_facade, client, user_token):
 @patch('app.api.v1.reviews.facade')
 def test_delete_review_invalid_uuid(mock_facade, client, user_token):
     access_token, user_id = user_token
-    headers ={
+    headers = {
         'Authorization': f'Bearer {access_token}'
-    } 
+    }
     response = client.delete('/api/v1/reviews/invalid-uuid', headers=headers)
     assert response.status_code == 400
     assert "Invalid UUID format" in response.get_json()['error']

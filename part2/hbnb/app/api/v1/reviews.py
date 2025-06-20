@@ -147,7 +147,7 @@ class ReviewResource(Resource):
         review_to_delete = facade.get_review(review_uuid)
         if not review_to_delete:
             return {'error': 'Review not found'}, 404
-        
+
         if user_id != str(review_to_delete.user):
             return {'error': "You must be the review's"
                     " creator to delete it"}, 403

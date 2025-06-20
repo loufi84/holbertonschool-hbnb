@@ -185,7 +185,6 @@ class PlaceCreate(BaseModel):
     amenity_ids: Optional[List[uuid.UUID]] = []
 
     @field_validator('price')
-    @classmethod
     def round_price(cls, v: float) -> float:
         """
         Round the price to 2 decimal places for consistency.
@@ -199,7 +198,6 @@ class PlaceCreate(BaseModel):
         return round(v, 2)
 
     @field_validator('title', 'description')
-    @classmethod
     def no_blank_strings(cls, value: str) -> str:
         """
         Ensure that title and description fields are
