@@ -41,7 +41,7 @@ class AmenityList(Resource):
         except ValidationError as e:
             return {"error": json.loads(e.json())}, 400
 
-        if facade.get_amenity(amenity_data.name):
+        if facade.get_amenity_by_name(amenity_data.name):
             return {"error": "This amenity already exists"}, 400
 
         new_amenity = facade.create_amenity(amenity_data.model_dump())

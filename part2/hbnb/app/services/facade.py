@@ -187,6 +187,10 @@ class HBnBFacade:
         """Retrieve all amenities."""
         return self.amenity_repo.get_all()
 
+    def get_amenity_by_name(self, amenity_name):
+        """Retrieve an amenity by its name"""
+        return self.amenity_repo.get_by_attribute("name", amenity_name)
+
     def update_amenity(self, amenity_id, amenity_data):
         """
         Update an existing amenity.
