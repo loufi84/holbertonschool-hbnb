@@ -132,6 +132,17 @@ class UserCreate(BaseModel):
         return value
 
 
+class UserPublic(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
 class LoginRequest(BaseModel):
     """
     Model representing a login request payload.
