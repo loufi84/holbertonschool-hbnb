@@ -6,7 +6,7 @@ for the application. It centralizes operations on users, places, amenities,
 reviews, and bookings, using repositories to handle data persistence.
 """
 
-from app.persistence.repository import InMemoryRepository
+from app.persistence.repository import SQLAlchemyRepository
 from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place, PlaceCreate
 from app.models.review import Review, ReviewCreate
@@ -16,6 +16,7 @@ from pydantic import ValidationError
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from argon2 import PasswordHasher
+import uuid
 
 
 class HBnBFacade:
@@ -32,11 +33,11 @@ class HBnBFacade:
     """
     def __init__(self):
         """Initialize repositories for each entity."""
-        self.user_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
-        self.booking_repo = InMemoryRepository()
+        self.user_repo = SQLAlchemyRepository(User)
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
+        self.booking_repo = SQLAlchemyRepository(Booking)
         self.ph = PasswordHasher(
             time_cost=2,  # Base recommended (number of hash iterations)
             memory_cost=62500,  # Memory allowed (64Mb)
@@ -59,6 +60,7 @@ class HBnBFacade:
         hashed_pw = self.ph.hash(user_in.password)
 
         user = User(
+            id=str(uuid.uuid4()),
             first_name=user_in.first_name,
             last_name=user_in.last_name,
             email=user_in.email,

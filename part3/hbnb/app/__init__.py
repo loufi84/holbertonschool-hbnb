@@ -27,6 +27,9 @@ def create_app(config_name='default'):
     db.init_app(app)
     jwt.init_app(app)
 
+    with app.app_context():
+        db.create_all()
+
     @app.route('/')
     def redirect_to_docs():
         print("Redirect / to /docs")

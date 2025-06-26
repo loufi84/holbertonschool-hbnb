@@ -24,6 +24,7 @@ user_model = api.model('User', {
     'last_name': fields.String(required=True, description='Last name of user'),
     'email': fields.String(required=True, description='Email of user'),
     'password': fields.String(required=True, description='Password of user'),
+    'photo_url': fields.String(required=False, description='Avatar of user')
 })
 
 # User update
@@ -33,7 +34,8 @@ user_update_model = api.model('UserUpdate', {
     'last_name': fields.String(required=False,
                                description='Last name of user'),
     'email': fields.String(required=False, description='Email of user'),
-    'password': fields.String(required=False, description='Password of user')
+    'password': fields.String(required=False, description='Password of user'),
+    'photo_url': fields.String(required=False, description='Avatar of user')
 })
 
 # User login
@@ -60,12 +62,7 @@ class UserList(Resource):
 
         new_user = facade.create_user(user_data.model_dump())
 
-        return {
-            'id': str(new_user.id),  # UUID -> str pour le JSON
-            'first_name': new_user.first_name,
-            'last_name': new_user.last_name,
-            'email': new_user.email
-        }, 201
+        return UserPublic.model_validate(new_user).model_dump(), 201
 
     @api.doc(params={'email': 'Filter user by email (optional)'})
     @api.response(200, 'User(s) found')

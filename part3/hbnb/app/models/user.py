@@ -9,6 +9,7 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from pydantic import field_validator
 from datetime import datetime, timezone
 from typing import Optional, List
+from app import db
 
 
 # Default profile picture URL used when no photo_url is provided by the user
@@ -18,7 +19,8 @@ DEFAULT_USER_PHOTO_URL = (
 )
 
 
-class User(BaseModel):
+
+class User(db.Model):
     """
     Represents a user with detailed information stored in the system.
 
@@ -37,6 +39,37 @@ class User(BaseModel):
         places: List of UUIDs referencing places associated with user.
         reviews: List of UUIDs referencing reviews made by user.
     """
+    __tablename__ = 'users'
+
+    id = db.Column(db.String, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    hashed_password = db.Column(db.String(255), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)  # Allows disabling user
+    is_admin = db.Column(db.Boolean, default=False)
+    created_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc), nullable=False
+        )
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+    photo_url = db.Column(db.String(2048), nullable=True)
+    places = db.Column(db.JSON, default=list)
+    reviews = db.Column(db.JSON, default=list)
+
+    def set_first_name(self, first_name):
+        self.first_name = first_name
+        self.updated_at = datetime.now(timezone.utc)
+
+    def set_last_name(self, last_name):
+        self.last_name = last_name
+        self.updated_at = datetime.now(timezone.utc)
+
+
+"""
+class User(BaseModel):
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     first_name: str = Field(..., min_length=1, max_length=50)
@@ -56,44 +89,7 @@ class User(BaseModel):
     model_config = ConfigDict(
         json_encoders={datetime: lambda v: v.isoformat()}
     )
-
-    @field_validator("photo_url")
-    @classmethod
-    def set_default_photo(cls, photo_url):
-        """
-        Ensures that the photo_url field defaults to a
-        generic image if not provided.
-
-        Args:
-            photo_url (str | None): URL of the user's profile photo.
-
-        Returns:
-            str: The original URL or a default URL if none was given.
-        """
-        if not photo_url:
-            return DEFAULT_USER_PHOTO_URL
-        return photo_url
-
-    def set_first_name(self, first_name: str) -> None:
-        """
-        Updates the user's first name and refreshes the updated_at timestamp.
-
-        Args:
-            first_name (str): New first name to set.
-        """
-        self.first_name = first_name
-        self.updated_at = datetime.now(timezone.utc)
-
-    def set_last_name(self, last_name: str) -> None:
-        """
-        Updates the user's last name and refreshes the updated_at timestamp.
-
-        Args:
-            last_name (str): New last name to set.
-        """
-        self.last_name = last_name
-        self.updated_at = datetime.now(timezone.utc)
-
+"""
 
 class UserCreate(BaseModel):
     """
@@ -110,6 +106,14 @@ class UserCreate(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=50)
     email: EmailStr
     password: str = Field(..., min_length=1, max_length=50)
+    photo_url: Optional[str] = None
+
+    @field_validator("photo_url")
+    @classmethod
+    def set_default_photo(cls, photo_url):
+        if not photo_url:
+            return DEFAULT_USER_PHOTO_URL
+        return photo_url
 
     @field_validator('first_name', 'last_name', 'password')
     @classmethod
@@ -138,9 +142,11 @@ class UserPublic(BaseModel):
     last_name: str
     email: EmailStr
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+    # Pydantic config to serialize datetime as ISO format strings
+    model_config = ConfigDict(
+    json_encoders={datetime: lambda v: v.isoformat()},
+    from_attributes=True
+    )
 
 
 class LoginRequest(BaseModel):
