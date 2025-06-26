@@ -11,13 +11,17 @@ from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.bookings import api as bookings_ns
 from flask_jwt_extended import JWTManager
 from config import config
+from flask_sqlalchemy import SQLAlchemy
 
+
+db = SQLAlchemy()
 
 def create_app(config_name='default'):
     print("create_app() called")
     app = Flask(__name__)
     app.config.from_object(config(config_name))
     jwt = JWTManager(app)
+    db = init_app(app)
 
     @app.route('/')
     def redirect_to_docs():
