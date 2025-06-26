@@ -9,8 +9,8 @@ from app.services import facade
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
 from app.models.user import User, UserCreate, LoginRequest
+from app.services.facade import HBnBFacade
 from flask_jwt_extended import create_access_token
-from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import json
 
@@ -169,10 +169,10 @@ class Login(Resource):
         user = facade.get_user_by_email(login_data.email)
         if not user:
             return {'error': 'User not found'}, 404
-        hashed_input_pw = hashlib.sha256(
-            login_data.password.encode()).hexdigest()
-        if user.hashed_password != hashed_input_pw:
-            return {'error': 'Invalide password or email'}, 401
+        try:
+            facade.passwd_hasher.verify(user.hashed_password, login_data.password)
+        except VerifyMismatchError:
+            return {'error': 'Invalid password or email'}, 401
 
         access_token = create_access_token(identity=str(user.id))
         return {'access token': access_token}, 201
