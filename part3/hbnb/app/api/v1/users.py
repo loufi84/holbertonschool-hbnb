@@ -10,7 +10,8 @@ from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
 from app.models.user import User, UserCreate, LoginRequest
 from flask_jwt_extended import create_access_token
-import hashlib
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 import json
 
 api = Namespace('users', description='User operations')
