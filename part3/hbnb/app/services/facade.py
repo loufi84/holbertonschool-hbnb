@@ -15,7 +15,7 @@ from app.models.booking import Booking, BookingStatus
 from pydantic import ValidationError
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
-import hashlib
+from argon2 import PasswordHasher
 
 
 class HBnBFacade:
@@ -37,6 +37,17 @@ class HBnBFacade:
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
         self.booking_repo = InMemoryRepository()
+        self.ph = PasswordHasher(
+            time_cost=3,
+            memory_cost=65536,
+            parallelism=2,
+            hash_len=32,
+            salt_len=16
+        )
+
+    @property
+    def passwd_hasher(self):
+        return self.ph
 
     # ------------------ User management ------------------
 
@@ -45,7 +56,7 @@ class HBnBFacade:
         Create a new user with hashed password.
         """
         user_in = UserCreate(**user_data)
-        hashed_pw = hashlib.sha256(user_in.password.encode()).hexdigest()
+        hashed_pw = self.ph.hash(user_in.password)
 
         user = User(
             first_name=user_in.first_name,
@@ -73,8 +84,9 @@ class HBnBFacade:
             return None
 
         if "password" in update_data:
-            update_data["hashed_password"] = hashlib.sha256(
-                update_data.pop("password").encode()).hexdigest()
+            update_data["hashed_password"] = self.ph.hash(
+                update_data.pop("password")
+            )
 
         self.user_repo.update(user_id, update_data)
         return self.user_repo.get(user_id)
