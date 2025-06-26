@@ -10,11 +10,14 @@ from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.bookings import api as bookings_ns
 from flask_jwt_extended import JWTManager
+from config import config
 
 
-def create_app():
+def create_app(config_name='default'):
     print("create_app() called")
     app = Flask(__name__)
+    app.config.from_object(config(config_name))
+    jwt = JWTManager(app)
 
     @app.route('/')
     def redirect_to_docs():
@@ -37,9 +40,6 @@ def create_app():
               doc='/docs',
               authorizations=authorizations,
               security='Bearer Auth')
-
-    app.config['JWT_SECRET_KEY'] = 'a-string-secret-at-least-256-bits-long'
-    jwt = JWTManager(app)
 
     api.add_namespace(users_ns, path='/api/v1/users')
     api.add_namespace(amenities_ns, path='/api/v1/amenities')
