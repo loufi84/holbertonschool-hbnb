@@ -38,10 +38,10 @@ class HBnBFacade:
         self.amenity_repo = InMemoryRepository()
         self.booking_repo = InMemoryRepository()
         self.ph = PasswordHasher(
-            time_cost=3,
-            memory_cost=65536,
-            parallelism=2,
-            hash_len=32,
+            time_cost=2,  # Base recommended (number of hash iterations)
+            memory_cost=62500,  # Memory allowed (64Mb)
+            parallelism=2,  # Number of threads used
+            hash_len=24,
             salt_len=16
         )
 
