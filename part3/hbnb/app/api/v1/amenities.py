@@ -71,11 +71,11 @@ class AmenityResource(Resource):
     def get(self, amenity_id):
         """Get amenity details by ID"""
         try:
-            amenity_uuid = UUID(amenity_id)
+            UUID(amenity_id)
         except TypeError:
             return {'error': 'Invalid UUID format'}, 400
 
-        amenity = facade.get_amenity(amenity_uuid)
+        amenity = facade.get_amenity(amenity_id)
         if not amenity:
             return {'error': 'Amenity not found'}, 404
 
@@ -98,18 +98,18 @@ class AmenityResource(Resource):
         if not user or not user.is_admin:
             return {'error': 'Admin privileges required'}, 403
         try:
-            amenity_uuid = UUID(amenity_id)
+            UUID(amenity_id)
         except TypeError:
             return {'error': 'Invalid UUID format'}, 400
 
-        existing_amenity = facade.get_amenity(amenity_uuid)
+        existing_amenity = facade.get_amenity(amenity_id)
         if not existing_amenity:
             return {'error': 'Amenity not found'}, 404
 
         update_data = request.json
 
         try:
-            updated_amenity = facade.update_amenity(amenity_uuid, update_data)
+            updated_amenity = facade.update_amenity(amenity_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 

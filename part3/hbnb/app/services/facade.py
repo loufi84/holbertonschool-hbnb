@@ -16,7 +16,9 @@ from pydantic import ValidationError
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from argon2 import PasswordHasher
+import app.persistence.repository
 import uuid
+from app import db
 
 
 class HBnBFacade:
@@ -90,8 +92,8 @@ class HBnBFacade:
                 update_data.pop("password")
             )
 
-        self.user_repo.update(user_id, update_data)
-        return self.user_repo.get(user_id)
+        self.user_repo.update(str(user_id), update_data)
+        return self.user_repo.get(str(user_id))
 
     def get_all_users(self):
         """Retrieve all users."""
@@ -213,13 +215,8 @@ class HBnBFacade:
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
-        try:
-            updated_amenity = amenity.copy(update=amenity_data)
-        except ValidationError as e:
-            raise e
-
-        self.amenity_repo._storage[str(amenity_id)] = updated_amenity
-        return updated_amenity
+        self.amenity_repo.update(amenity_id, amenity_data)
+        return self.amenity_repo.get(amenity_id)
 
     # ------------------ Review management ------------------
 
@@ -271,13 +268,8 @@ class HBnBFacade:
         review = self.review_repo.get(review_id)
         if not review:
             return None
-        try:
-            updated_review = review.copy(update=review_data)
-        except ValidationError as e:
-            raise e
-
-        self.review_repo._storage[str(review_id)] = updated_review
-        return updated_review
+        self.review_repo.update(review_id, review_data)
+        return self.review_repo.get(review_id)
 
     def delete_review(self, review_id):
         """Delete a review by ID."""
@@ -349,10 +341,5 @@ class HBnBFacade:
             if booking_data['status'] not in ("DONE", "PENDING", "CANCELED"):
                 raise ValueError("Status must be DONE, PENDING, or CANCELED")
 
-        try:
-            updated_booking = booking.copy(update=booking_data)
-        except ValidationError as e:
-            raise e
-
-        self.booking_repo._storage[str(booking_id)] = updated_booking
-        return updated_booking
+        self.booking_repo.update(booking_id, booking_data)
+        return self.booking_repo.get(booking_id)

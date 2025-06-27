@@ -77,9 +77,9 @@ class BookingList(Resource):
             if booking.status == "PENDING" and now > booking.end_date:
                 booking.set_status("DONE")
             booking_list.append({
-                'id': str(booking.id),
-                'place_id': str(booking.place),
-                'user_id': str(booking.user),
+                'id': booking.id,
+                'place_id': booking.place,
+                'user_id': booking.user,
                 'start_date': booking.start_date.isoformat(),
                 'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
@@ -95,11 +95,11 @@ class BookingResource(Resource):
     def get(self, booking_id):
         """Get booking details by ID"""
         try:
-            booking_uuid = uuid.UUID(booking_id)
+            uuid.UUID(booking_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        booking = facade.get_booking(booking_uuid)
+        booking = facade.get_booking(booking_id)
         if not booking:
             return {'error': 'Booking not found'}, 404
 
@@ -109,9 +109,9 @@ class BookingResource(Resource):
         ):
             booking.set_status("DONE")
         return {
-                'id': str(booking.id),  # UUID -> str pour le JSON
-                'user_id': str(booking.user),
-                'place_id': str(booking.place),
+                'id': booking.id,
+                'user_id': booking.user,
+                'place_id': booking.place,
                 'start_date': booking.start_date.isoformat(),
                 'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
@@ -125,11 +125,11 @@ class BookingResource(Resource):
     def put(self, booking_id):
         """Update a booking's information"""
         try:
-            booking_uuid = uuid.UUID(booking_id)
+            uuid.UUID(booking_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        booking = facade.get_booking(booking_uuid)
+        booking = facade.get_booking(booking_id)
         if not booking:
             return {'error': 'Booking not found'}, 404
 
@@ -146,7 +146,7 @@ class BookingResource(Resource):
 
         if "status" in update_data:
             place = facade.get_place(booking.place)
-            if not place or str(place.owner_id) != str(current_user):
+            if not place or place.owner_id != str(current_user):
                 return {
                     'error': 'Only the owner of a place can update the status'
                     }, 403
@@ -156,7 +156,7 @@ class BookingResource(Resource):
                     }, 400
 
         try:
-            updated_booking = facade.update_booking(booking_uuid, update_data)
+            updated_booking = facade.update_booking(booking_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
         except PermissionError as e:
@@ -164,7 +164,7 @@ class BookingResource(Resource):
 
         return [
             {
-                'id': str(updated_booking.id),  # UUID -> str pour le JSON
+                'id': updated_booking.id,
                 'start_date': updated_booking.start_date.isoformat(),
                 'end_date': updated_booking.end_date.isoformat(),
                 'status': updated_booking.status,
@@ -180,10 +180,10 @@ class PlaceBookingList(Resource):
     def get(self, place_id):
         """Get all bookings for a specific place"""
         try:
-            place_uuid = uuid.UUID(place_id)
+            uuid.UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
-        bookings = facade.get_booking_list_by_place(place_uuid)
+        bookings = facade.get_booking_list_by_place(place_id)
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
@@ -193,9 +193,9 @@ class PlaceBookingList(Resource):
             if booking.status == "PENDING" and now > booking.end_date:
                 booking.set_status("DONE")
             booking_list.append({
-                'id': str(booking.id),
-                'place_id': str(booking.place),
-                'user_id': str(booking.user),
+                'id': booking.id,
+                'place_id': booking.place,
+                'user_id': booking.user,
                 'start_date': booking.start_date.isoformat(),
                 'end_date': booking.end_date.isoformat(),
                 'status': booking.status,
@@ -210,10 +210,10 @@ class UserBookingList(Resource):
     def get(self, user_id):
         """Get all bookings of a user"""
         try:
-            user_uuid = uuid.UUID(user_id)
+            uuid.UUID(user_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
-        bookings = facade.get_booking_list_by_user(user_uuid)
+        bookings = facade.get_booking_list_by_user(user_id)
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
@@ -223,9 +223,9 @@ class UserBookingList(Resource):
             if booking.status == "PENDING" and now > booking.end_date:
                 booking.set_status("DONE")
             booking_list.append({
-                'id': str(booking.id),
-                'place_id': str(booking.place),
-                'user_id': str(booking.user),
+                'id': booking.id,
+                'place_id': booking.place,
+                'user_id': booking.user,
                 'start_date': booking.start_date.isoformat(),
                 'end_date': booking.end_date.isoformat(),
                 'status': booking.status,

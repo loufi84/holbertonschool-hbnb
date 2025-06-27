@@ -117,11 +117,11 @@ class PlaceResource(Resource):
         """Get a place by ID"""
         if place_id:
             try:
-                place_uuid = UUID(place_id)
+                UUID(place_id)
             except ValueError:
                 return {'error': 'invalid UUID format'}
 
-            place = facade.get_place(place_uuid)
+            place = facade.get_place(place_id)
             if not place:
                 return {'error': 'Place not found'}, 404
 
@@ -134,7 +134,7 @@ class PlaceResource(Resource):
                 })
 
             return {
-                'place_id': str(place.id),
+                'place_id': place.id,
                 'title': place.title,
                 'description': place.description,
                 'price': place.price,
@@ -153,11 +153,11 @@ class PlaceResource(Resource):
         """Method to update a place"""
         user_id = get_jwt_identity()
         try:
-            place_uuid = UUID(place_id)
+            UUID(place_id)
         except ValueError:
             return {'error': 'Invalid input or UUID'}, 400
 
-        existing_place = facade.get_place(place_uuid)
+        existing_place = facade.get_place(place_id)
         if not existing_place:
             return {'error': 'Place not found'}, 404
 
@@ -166,7 +166,7 @@ class PlaceResource(Resource):
 
         update_data = request.json
         try:
-            updated_place = facade.update_place(place_uuid, update_data)
+            updated_place = facade.update_place(place_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
@@ -198,16 +198,16 @@ class PlaceResource(Resource):
         """Method to delete a place"""
         user_id = get_jwt_identity()
         try:
-            place_uuid = UUID(place_id)
+            UUID(place_id)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
-        existing_place = facade.get_place(place_uuid)
+        existing_place = facade.get_place(place_id)
         if not existing_place:
             return {'error': 'Place not found'}, 404
 
         if existing_place.owner_id != user_id:
             return {'error': 'You must own the place to delete it'}, 403
 
-        facade.delete_place(place_uuid)
+        facade.delete_place(place_id)
         return {'message': 'Place deleted successfully'}, 200
