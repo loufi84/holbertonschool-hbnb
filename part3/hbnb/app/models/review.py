@@ -28,9 +28,9 @@ class Review(db.Model):
     id = db.Column(db.String, primary_key=True)
     comment = db.Column(db.String(2000), nullable=False)
     rating = db.Column(db.Float, nullable=False)
-    place = db.Column(db.String, nullable=False)
+    place = db.Column(db.String, db.ForeignKey('places_id'), nullable=False,)
     user = db.Column(db.String, nullable=False)
-    booking = db.Column(db.String, nullable=False)
+    booking = db.Column(db.String, db.ForeignKey('booking'), nullable=False)
     created_at = db.Column(
         db.DateTime, default=datetime.now(timezone.utc), nullable=False
         )
