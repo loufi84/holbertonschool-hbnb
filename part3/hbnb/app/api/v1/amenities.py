@@ -45,9 +45,7 @@ class AmenityList(Resource):
             return {"error": "This amenity already exists"}, 400
 
         new_amenity = facade.create_amenity(amenity_data.model_dump())
-        return [
-            AmenityPublic.model_validate(new_amenity).model_dump()
-        ], 200
+        return AmenityPublic.model_validate(new_amenity).model_dump(), 200
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
@@ -74,7 +72,7 @@ class AmenityResource(Resource):
         if not amenity:
             return {'error': 'Amenity not found'}, 404
 
-        return [AmenityPublic.model_validate(amenity).model_dump()], 200
+        return AmenityPublic.model_validate(amenity).model_dump(), 200
 
     # Now secured with admin privileges
     @jwt_required()
@@ -104,6 +102,4 @@ class AmenityResource(Resource):
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
-        return [
-            AmenityPublic.model_validate(updated_amenity).model_dump()
-            ], 200
+        return AmenityPublic.model_validate(updated_amenity).model_dump(), 200
