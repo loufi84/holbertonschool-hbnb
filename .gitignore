@@ -3,3 +3,4 @@ __pycache__
 .env
 saves.py
 test_root.py
+.pytest_cache
