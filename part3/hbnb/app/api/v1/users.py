@@ -91,11 +91,11 @@ class UserResource(Resource):
     def get(self, user_id):
         """Get user details by ID"""
         try:
-            user_uuid = UUID(user_id)
+            UUID(user_id)
         except TypeError:
             return {'error': 'Invalid UUID format'}, 400
 
-        user = facade.get_user(user_uuid)
+        user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
 
@@ -108,11 +108,11 @@ class UserResource(Resource):
     def put(self, user_id):
         """Update an existing user"""
         try:
-            user_uuid = UUID(user_id)
+            UUID(user_id)
         except TypeError:
             return {'error': 'Invalid UUID format'}, 400
 
-        existing_user = facade.get_user(user_uuid)
+        existing_user = facade.get_user(user_id)
         if not existing_user:
             return {'error': 'User not found'}, 404
 
@@ -128,7 +128,7 @@ class UserResource(Resource):
             return {'error': 'Email already registered'}, 400
 
         try:
-            updated_user = facade.update_user(user_uuid, update_data)
+            updated_user = facade.update_user(user_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
@@ -158,5 +158,8 @@ class Login(Resource):
         except VerifyMismatchError:
             return {'error': 'Invalid password or email'}, 401
 
-        access_token = create_access_token(identity=str(user.id))
+        access_token = create_access_token(
+            identity=user.id,
+            additional_claims={"is_admin": user.is_admin}
+        )
         return {'access token': access_token}, 200

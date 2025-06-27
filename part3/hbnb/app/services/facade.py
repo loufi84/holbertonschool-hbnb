@@ -11,7 +11,7 @@ from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place, PlaceCreate
 from app.models.review import Review, ReviewCreate
 from app.models.user import User, UserCreate
-from app.models.booking import Booking, BookingStatus
+from app.models.booking import Booking, BookingStatus, BookingPublic
 from pydantic import ValidationError
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
@@ -225,7 +225,7 @@ class HBnBFacade:
         if not booking:
             raise ValueError("Booking not found")
 
-        if (booking.status != BookingStatus.DONE or
+        if (booking.status != BookingStatus.DONE.value or
                 booking.end_date >= datetime.now(timezone.utc)):
             raise PermissionError("User must visit the place to post review.")
 
@@ -250,8 +250,7 @@ class HBnBFacade:
 
     def get_reviews_by_place(self, place_id):
         """Retrieve all reviews for a specific place."""
-        reviews = self.review_repo.get_all()
-        return [review for review in reviews if review.place == place_id]
+        return Review.query.filter(Review.place == str(place_id)).all()
 
     def update_review(self, review_id, review_data):
         """
@@ -287,10 +286,10 @@ class HBnBFacade:
             user=user_id,
             start_date=booking_data.start_date,
             end_date=booking_data.end_date,
-            status=BookingStatus.PENDING
+            status=BookingStatus.PENDING.value
         )
         self.booking_repo.add(new_booking)
-        return new_booking
+        return BookingPublic.model_validate(new_booking).model_dump(), 201
 
     def get_booking(self, booking_id):
         """Retrieve booking by ID."""
@@ -302,10 +301,11 @@ class HBnBFacade:
 
     def get_booking_list_by_place(self, place_id):
         """Retrieve all bookings for a specific place."""
-        return [
-            booking for booking in self.booking_repo._storage.values()
-            if str(booking.place) == str(place_id)
-        ]
+        return (
+            db.session.query(Booking)
+            .filter(Booking.place == str(place_id))
+            .all()
+        )
 
     def get_booking_list_by_user(self, user_id):
         """Retrieve all bookings for a specific user."""

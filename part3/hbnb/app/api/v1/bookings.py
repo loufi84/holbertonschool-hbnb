@@ -33,6 +33,10 @@ booking_update_model = api.model('BookingUpdate', {
         ),
 })
 
+def ensure_aware(dt):
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
 
 @api.route('/')
 class BookingList(Resource):
@@ -44,9 +48,10 @@ class BookingList(Resource):
         """Create a new booking"""
         user_id = get_jwt_identity()
         data = request.json
+        place_id = data.get("place_id")
 
         try:
-            place_id = uuid.UUID(data.get("place_id"))
+            uuid.UUID(data.get("place_id"))
             booking_data = CreateBooking(**data)
         except ValidationError as e:
             return {'errors': json.loads(e.json())}, 400
@@ -55,11 +60,14 @@ class BookingList(Resource):
 
         booking_list = facade.get_booking_list_by_place(place_id)
         for booking in booking_list:
-            if (
-                booking.start_date < booking_data.end_date
-                and booking_data.start_date < booking.end_date
-               ):
-                return {"error": "Already booked"}, 400
+            booking_start = ensure_aware(booking.start_date)
+            booking_end = ensure_aware(booking.end_date)
+            new_start = ensure_aware(booking_data.start_date)
+            new_end = ensure_aware(booking_data.end_date)
+
+            if booking_start < new_end and new_start < booking_end:
+                return {'error': 'Already booked'}, 400
+
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
         return BookingPublic.model_validate(new_booking).model_dump(), 201

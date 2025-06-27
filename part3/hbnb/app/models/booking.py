@@ -6,7 +6,7 @@ enforcing constraints such as valid date ranges and status values.
 
 from app import db  # db = SQLAlchemy()
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from enum import Enum
 
 
@@ -133,3 +133,8 @@ class BookingPublic(BaseModel):
     user: str 
     place: str
     status: str
+
+    model_config = ConfigDict(
+    json_encoders={datetime: lambda v: v.isoformat()},
+    from_attributes=True
+    )

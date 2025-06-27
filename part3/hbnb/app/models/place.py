@@ -5,7 +5,7 @@ including associated amenities, reviews, and photo handling.
 """
 
 import uuid
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
 from typing import Optional, List
 from datetime import datetime, timezone
 from sqlalchemy import CheckConstraint
@@ -24,14 +24,6 @@ place_amenities = db.Table(
     db.Column('place_id', db.String, db.ForeignKey('places.id'),
               primary_key=True),
     db.Column('amenity.id', db.String, db.ForeignKey('amenities.id'),
-              primary_key=True)
-)
-
-place_reviews = db.Table(
-    'place_reviews',
-    db.Column('place_id', db.String, db.ForeignKey('places.id'),
-              primary_key=True),
-    db.Column('review_id', db.String, db.ForeignKey('reviews.id'),
               primary_key=True)
 )
 
@@ -63,7 +55,7 @@ class Place(db.Model):
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     owner_id = db.Column(db.String, nullable=False)
-    rating = db.Column(db.Float, nullable=False)
+    rating = db.Column(db.Float, nullable=True)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False)
@@ -74,18 +66,22 @@ class Place(db.Model):
     amenities = db.relationship('Amenity', secondary=place_amenities,
                                 back_populates='places')
     photos_url = db.Column(db.JSON, default=list)
-    reviews = db.relationship('Review', back_populates='place',
+    reviews = db.relationship('Review', back_populates='place_rel',
                               cascade='all, delete-orphan')
 
 
     __table_args__ = (
-        CheckConstraint('price > 0', name='check_price_positive'),
+        CheckConstraint('price >= 0', name='check_price_positive'),
         CheckConstraint('rating >= 0 AND rating <= 5', name='check_rating'),
         CheckConstraint('latitude >= -90 AND latitude <= 90'
                         , name='check_latitude'),
         CheckConstraint('longitude >= -180 AND longitude <= 180'
                         ,name='check_longitude')
     )
+
+    @property
+    def amenity_ids(self):
+        return [a.id for a in self.amenities]
 
     @field_validator("photos")
     @classmethod
@@ -294,6 +290,12 @@ class PlacePublic(BaseModel):
     price: float = Field(..., ge=0)
     latitude: float = Field(..., ge=-90, le=90)
     longitude: float = Field(..., ge=-180, le=180)
-    rating: float = 0.0
+    rating: Optional[float]
     owner_id: str
-    amenity_ids: Optional[List[uuid.UUID]] = []
+    amenity_ids: Optional[List[str]] = []
+
+    model_config = ConfigDict(
+    json_encoders={datetime: lambda v: v.isoformat(),
+                   uuid.UUID: lambda v: str(v)},
+    from_attributes=True
+    )
