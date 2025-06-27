@@ -107,7 +107,6 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=1, max_length=50)
     photo_url: Optional[str] = None
-    is_admin: Optional[bool] = False
 
     @field_validator("photo_url")
     @classmethod

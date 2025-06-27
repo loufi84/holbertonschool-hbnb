@@ -64,7 +64,7 @@ class HBnBFacade:
             first_name=user_in.first_name,
             last_name=user_in.last_name,
             email=user_in.email,
-            hashed_password=hashed_pw
+            hashed_password=hashed_pw,
         )
         self.user_repo.add(user)
         return user
