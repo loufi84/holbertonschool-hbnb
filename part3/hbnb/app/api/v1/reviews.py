@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-import uuid
+from uuid import UUID
 from app.models.review import ReviewCreate
 from app.models.booking import Booking
 from app.models.place import Place
@@ -42,10 +42,10 @@ class ReviewList(Resource):
         except ValidationError as e:
             return {"error": json.loads(e.json())}, 400
         try:
-            booking_id = uuid.UUID(review_data.booking)
+            UUID(review_data.booking)
         except ValueError:
             return {"error": "Invalid booking UUID format"}, 400
-        booking = facade.get_booking(booking_id)
+        booking = facade.get_booking(review_data.booking)
         if booking is None:
             return {"error": "Booking not found"}, 404
         if booking.status != "DONE":
@@ -54,7 +54,7 @@ class ReviewList(Resource):
 
         try:
             new_review = facade.create_review(
-                review_data, booking_id, place_id, user_id
+                review_data, review_data.booking, place_id, user_id
                 )
         except PermissionError as e:
             return {"error": str(e)}, 403
@@ -90,11 +90,11 @@ class ReviewResource(Resource):
     def get(self, review_id):
         """Get review details by ID"""
         try:
-            review_uuid = uuid.UUID(review_id)
+            UUID(review_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        review = facade.get_review(review_uuid)
+        review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
 
@@ -111,18 +111,18 @@ class ReviewResource(Resource):
     def put(self, review_id):
         """Update a review's information"""
         try:
-            review_uuid = uuid.UUID(review_id)
+            UUID(review_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        review = facade.get_review(review_uuid)
+        review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
 
         update_data = request.json
 
         try:
-            updated_review = facade.update_review(review_uuid, update_data)
+            updated_review = facade.update_review(review_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
@@ -140,11 +140,11 @@ class ReviewResource(Resource):
         user_id = get_jwt_identity()
         """Delete a review"""
         try:
-            review_uuid = uuid.UUID(review_id)
+            UUID(review_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        review_to_delete = facade.get_review(review_uuid)
+        review_to_delete = facade.get_review(review_id)
         if not review_to_delete:
             return {'error': 'Review not found'}, 404
 
@@ -152,7 +152,7 @@ class ReviewResource(Resource):
             return {'error': "You must be the review's"
                     " creator to delete it"}, 403
 
-        facade.delete_review(review_uuid)
+        facade.delete_review(review_id)
         return {'message': 'Review deleted successfully'}, 200
 
 
@@ -164,10 +164,10 @@ class PlaceReviewList(Resource):
     def get(self, place_id):
         """Get all reviews for a specific place"""
         try:
-            place_uuid = uuid.UUID(place_id)
+            UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
-        review_list = facade.get_reviews_by_place(place_uuid)
+        review_list = facade.get_reviews_by_place(place_id)
         if not review_list:
             return {'message': 'No review for this place yet'}, 200
 
