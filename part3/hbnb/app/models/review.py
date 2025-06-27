@@ -28,7 +28,7 @@ class Review(db.Model):
     id = db.Column(db.String, primary_key=True)
     comment = db.Column(db.String(2000), nullable=False)
     rating = db.Column(db.Float, nullable=False)
-    place = db.Column(db.String, db.ForeignKey('places_id'), nullable=False,)
+    place_id = db.Column(db.String, db.ForeignKey('places.id'), nullable=False)
     user = db.Column(db.String, nullable=False)
     booking = db.Column(db.String, db.ForeignKey('booking'), nullable=False)
     created_at = db.Column(
@@ -38,6 +38,7 @@ class Review(db.Model):
         db.DateTime, default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc)
         )
+    place = db.relationship('Place', back_populates='reviews')
 
     __table_args__ = ( 
         db.CheckConstraint('rating >= 0 AND rating <= 5', name='check_rating_range'),

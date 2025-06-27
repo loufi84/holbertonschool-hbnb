@@ -5,12 +5,12 @@ enforcing constraints on fields like name and description.
 """
 
 from pydantic import BaseModel, Field, model_validator
-import uuid
 from datetime import datetime, timezone
-from typing import Optional
+from app.models.place import place_amenities
+from app import db
 
 
-class Amenity(BaseModel):
+class Amenity(db.Model):
     """
     Represents an amenity with unique ID, name, description, and timestamps.
 
@@ -21,13 +21,20 @@ class Amenity(BaseModel):
         created_at: Timestamp of creation in UTC.
         updated_at: Optional timestamp for last update in UTC.
     """
+    __tablename__ = 'amenities'
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1, max_length=500)
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
+    id = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        nullable=False)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+    places = db.relationship('Place', secondary=place_amenities,
+                             back_populates='amenities')
 
     def set_name(self, name: str):
         """
@@ -86,3 +93,23 @@ class AmenityCreate(BaseModel):
                     f"{field_name} cannot be empty or just whitespace")
             values[field_name] = value.strip()
         return values
+'''
+class Amenity(BaseModel):
+    """
+    Represents an amenity with unique ID, name, description, and timestamps.
+
+    Attributes:
+        id: Unique identifier for the amenity (UUID as a string).
+        name: Name of the amenity, must be between 1 and 100 characters.
+        description: Description of the amenity, between 1 and 500 characters.
+        created_at: Timestamp of creation in UTC.
+        updated_at: Optional timestamp for last update in UTC.
+    """
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=500)
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+'''
