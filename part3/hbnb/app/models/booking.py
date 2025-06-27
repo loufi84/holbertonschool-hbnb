@@ -125,3 +125,11 @@ class CreateBooking(BaseModel):
         if start and end and start >= end:
             raise ValueError("Start date must be before end date")
         return values
+
+class BookingPublic(BaseModel):
+    id: str
+    start_date: datetime = Field(...)
+    end_date: datetime = Field(...)
+    user: str 
+    place: str
+    status: str

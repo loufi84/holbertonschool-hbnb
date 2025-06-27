@@ -6,7 +6,7 @@ It defines the CRUD methods for the bookings.
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from app.models.booking import CreateBooking
+from app.models.booking import CreateBooking, BookingPublic
 from pydantic import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
@@ -62,7 +62,7 @@ class BookingList(Resource):
                 return {"error": "Already booked"}, 400
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
-        return new_booking.model_dump(mode="json"), 201
+        return BookingPublic.model_validate(new_booking).model_dump(), 201
 
     @api.response(200, 'List of bookings retrieved successfully')
     def get(self):
@@ -71,19 +71,15 @@ class BookingList(Resource):
         if not bookings:
             return {"message": "No booking yet"}, 200
 
-        booking_list = []
         now = datetime.now(timezone.utc)
+
+        booking_list = []
         for booking in bookings:
             if booking.status == "PENDING" and now > booking.end_date:
                 booking.set_status("DONE")
-            booking_list.append({
-                'id': booking.id,
-                'place_id': booking.place,
-                'user_id': booking.user,
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-            })
+
+            booking_list.append(BookingPublic.model_validate(booking).model_dump())
+
         return booking_list, 200
 
 
@@ -108,14 +104,7 @@ class BookingResource(Resource):
             and datetime.now(timezone.utc) > booking.end_date
         ):
             booking.set_status("DONE")
-        return {
-                'id': booking.id,
-                'user_id': booking.user,
-                'place_id': booking.place,
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-        }, 200
+        return BookingPublic.model_validate(booking).model_dump(), 200
 
     @api.expect(booking_update_model)
     @api.response(200, 'Booking updated successfully')
@@ -162,14 +151,7 @@ class BookingResource(Resource):
         except PermissionError as e:
             return {'error': str(e)}, 403
 
-        return [
-            {
-                'id': updated_booking.id,
-                'start_date': updated_booking.start_date.isoformat(),
-                'end_date': updated_booking.end_date.isoformat(),
-                'status': updated_booking.status,
-            }
-        ], 200
+        return BookingPublic.model_validate(updated_booking).model_dump(), 200
 
 
 @api.route('/places/<place_id>/booking')
@@ -187,19 +169,15 @@ class PlaceBookingList(Resource):
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
-        booking_list = []
         now = datetime.now(timezone.utc)
+
+        booking_list = []
         for booking in bookings:
             if booking.status == "PENDING" and now > booking.end_date:
                 booking.set_status("DONE")
-            booking_list.append({
-                'id': booking.id,
-                'place_id': booking.place,
-                'user_id': booking.user,
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-            })
+
+            booking_list.append(BookingPublic.model_validate(booking).model_dump())
+
         return booking_list, 200
 
 
@@ -217,17 +195,13 @@ class UserBookingList(Resource):
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
-        booking_list = []
         now = datetime.now(timezone.utc)
+
+        booking_list = []
         for booking in bookings:
             if booking.status == "PENDING" and now > booking.end_date:
                 booking.set_status("DONE")
-            booking_list.append({
-                'id': booking.id,
-                'place_id': booking.place,
-                'user_id': booking.user,
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-            })
+
+            booking_list.append(BookingPublic.model_validate(booking).model_dump())
+
         return booking_list, 200
