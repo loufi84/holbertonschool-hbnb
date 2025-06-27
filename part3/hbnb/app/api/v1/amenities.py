@@ -85,6 +85,7 @@ class AmenityResource(Resource):
                 'description': amenity.description,
         }, 200
 
+    # Now secured with admin privileges
     @jwt_required()
     @api.expect(amenity_model)
     @api.response(200, 'Amenity updated successfully')
