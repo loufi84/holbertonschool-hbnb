@@ -75,15 +75,13 @@ class UserList(Resource):
             if not user:
                 return {'error': 'User not found'}, 404
 
-            return {
-                'id': str(user.id),
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email
-            }, 200
+            return UserPublic.model_validate(user).model_dump(), 200
 
         users = facade.get_all_users()
-        return [UserPublic.from_orm(user).dict() for user in users], 200
+        return [
+            UserPublic.model_validate(user).model_dump()
+            for user in users
+            ], 200
 
 
 @api.route('/<user_id>')
@@ -102,12 +100,7 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
 
-        return {
-            'id': str(user.id),
-            'firs_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email
-        }, 200
+        return UserPublic.model_validate(user).model_dump(), 200
 
     @api.expect(user_update_model)
     @api.response(200, 'User successfully updated')
@@ -140,12 +133,7 @@ class UserResource(Resource):
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
-        return {
-            'id': str(updated_user.id),
-            'first_name': updated_user.first_name,
-            'last_name': updated_user.last_name,
-            'email': updated_user.email
-        }, 200
+        return UserPublic.model_validate(updated_user).model_dump(), 200
 
 
 @api.route('/login')

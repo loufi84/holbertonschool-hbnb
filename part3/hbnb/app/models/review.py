@@ -4,13 +4,12 @@ It manages the creation, validation, and updating of Review objects,
 enforcing constraints like rating boundaries and non-empty comments.
 """
 
-import uuid
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from app import db  # db = SQLAlchemy()
 
 
-class Review(BaseModel):
+class Review(db.Model):
     """
     Represents a user review for a place, linked to a booking.
 
@@ -22,18 +21,27 @@ class Review(BaseModel):
         user: UUID of the user who wrote the review.
         booking: Identifier of the related booking.
         created_at: Timestamp when review was created (UTC).
-        updated_at: Optional timestamp of last update (UTC).
+        updated_at: Timestamp of last update (UTC).
     """
+    __tablename__ = 'reviews'
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    comment: str = Field(..., min_length=1, max_length=1000)
-    rating: float = Field(..., ge=0, le=5)  # Rating must be between 0 and 5
-    place: uuid.UUID
-    user: uuid.UUID
-    booking: str
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
+    id = db.Column(db.String, primary_key=True)
+    comment = db.Column(db.String(2000), nullable=False)
+    rating = db.Column(db.Float, nullable=False)
+    place = db.Column(db.String, nullable=False)
+    user = db.Column(db.String, nullable=False)
+    booking = db.Column(db.String, nullable=False)
+    created_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc), nullable=False
+        )
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+
+    __table_args__ = ( 
+        db.CheckConstraint('rating >= 0 AND rating <= 5', name='check_rating_range'),
+    )
 
     def set_comment(self, comment: str) -> None:
         """
@@ -54,6 +62,18 @@ class Review(BaseModel):
         """
         self.rating = rating
         self.updated_at = datetime.now(timezone.utc)
+
+"""class Review(BaseModel):
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    comment: str = Field(..., min_length=1, max_length=1000)
+    rating: float = Field(..., ge=0, le=5)  # Rating must be between 0 and 5
+    place: uuid.UUID
+    user: uuid.UUID
+    booking: str
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None"""
 
 
 class ReviewCreate(BaseModel):

@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from pydantic import field_validator
 from datetime import datetime, timezone
 from typing import Optional, List
-from app import db
+from app import db  # db = SQLAlchemy()
 
 
 # Default profile picture URL used when no photo_url is provided by the user
@@ -17,7 +17,6 @@ DEFAULT_USER_PHOTO_URL = (
     "https://cdn0.iconfinder.com/data/icons"
     "/mobile-basic-vol-1/32/Profile-256.png"
 )
-
 
 
 class User(db.Model):
