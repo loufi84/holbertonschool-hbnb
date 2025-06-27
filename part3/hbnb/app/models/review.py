@@ -5,7 +5,7 @@ enforcing constraints like rating boundaries and non-empty comments.
 """
 
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from app import db  # db = SQLAlchemy()
 
 
@@ -122,3 +122,15 @@ class ReviewCreate(BaseModel):
             float: Rounded rating value.
         """
         return round(value, 1)
+
+class ReviewPublic(BaseModel):
+    id: str
+    comment: str = Field(..., min_length=1, max_length=1000)
+    rating: float = Field(..., ge=0, le=5)
+    booking: str
+
+    # Pydantic config to serialize datetime as ISO format strings
+    model_config = ConfigDict(
+    json_encoders={datetime: lambda v: v.isoformat()},
+    from_attributes=True
+    )

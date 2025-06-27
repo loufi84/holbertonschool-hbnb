@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models.place import PlaceCreate, Place
+from app.models.place import PlaceCreate, PlacePublic
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
@@ -72,41 +72,21 @@ class PlaceList(Resource):
                 'name': amenity.name,
                 'description': amenity.description
             })
-        return {
-            'id': new_place.id,
-            'title': new_place.title,
-            'description': new_place.description,
-            'price': new_place.price,
-            'latitude': new_place.latitude,
-            'longitude': new_place.longitude,
-            'owner_id': new_place.owner_id,
-            'amenities': amenities
-        }, 201
+        return PlacePublic.model_validate(new_place).model_dump(), 201
 
     @api.response(200, 'Places found')
     @api.response(404, 'No places found')
     def get(self):
         """Get a list of all places"""
         places = facade.place_repo.get_all()
-        places_list = []
-        for place in places:
-            amenities = []
-            for amenity in place.amenities:
-                amenities.append({
-                    'id': str(amenity.id),
-                    'name': amenity.name,
-                    'description': amenity.description
-                })
-            places_list.append({
-                'id': str(place.id),
-                'title': place.title,
-                'description': place.description,
-                'price': place.price,
-                'latitude': place.latitude,
-                'longitude': place.longitude,
-                'amenities': amenities
-            })
-        return places_list, 200
+
+        if not places:
+            return {'message': 'No places found'}, 404
+
+        return [
+            PlacePublic.model_validate(place).model_dump()
+            for place in places
+        ], 200
 
 
 @api.route('/<place_id>')
@@ -133,15 +113,7 @@ class PlaceResource(Resource):
                     'description': amenity.description
                 })
 
-            return {
-                'place_id': place.id,
-                'title': place.title,
-                'description': place.description,
-                'price': place.price,
-                'latitude': place.latitude,
-                'longitude': place.longitude,
-                'amenities': amenities
-            }, 200
+            return PlacePublic.model_validate(place).model_dump(), 200
 
     @jwt_required()
     @api.expect(place_model_update)
@@ -178,16 +150,7 @@ class PlaceResource(Resource):
                 'description': amenity.description
             })
 
-        return {
-            'id': updated_place.id,
-            'title': updated_place.title,
-            'description': updated_place.description,
-            'price': updated_place.price,
-            'latitude': updated_place.latitude,
-            'longitude': updated_place.longitude,
-            'owner_id': updated_place.owner_id,
-            'amenities': amenities
-        }
+        return PlacePublic.model_validate(updated_place).model_dump(), 200
 
     @jwt_required()
     @api.response(200, 'Place successfully deleted')

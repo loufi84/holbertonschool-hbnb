@@ -8,8 +8,7 @@ from flask import request
 from app.services import facade
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
-from app.models.user import User, UserCreate, LoginRequest, UserPublic
-from app.services.facade import HBnBFacade
+from app.models.user import UserCreate, LoginRequest, UserPublic
 from flask_jwt_extended import create_access_token
 from argon2.exceptions import VerifyMismatchError
 import json

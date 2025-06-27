@@ -286,3 +286,14 @@ class Place(BaseModel):
     reviews: List[Review] = Field(default_factory=list)
     rating: float = 0.0
 '''
+
+class PlacePublic(BaseModel):
+    id: str
+    title: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=1000)
+    price: float = Field(..., ge=0)
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    rating: float = 0.0
+    owner_id: str
+    amenity_ids: Optional[List[uuid.UUID]] = []

@@ -8,9 +8,7 @@ from flask import request
 from app.services import facade
 from pydantic import ValidationError
 from uuid import UUID
-from app.models.review import ReviewCreate
-from app.models.booking import Booking
-from app.models.place import Place
+from app.models.review import ReviewCreate, ReviewPublic
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
 
@@ -61,11 +59,7 @@ class ReviewList(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
 
-        return {
-            'id': str(new_review.id),  # UUID -> str pour le JSON
-            'comment': new_review.comment,
-            'rating': new_review.rating,
-        }, 201
+        return ReviewPublic.model_validate(new_review).model_dump(), 201
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
@@ -74,12 +68,9 @@ class ReviewList(Resource):
         if not reviews_list:
             return {"message": "No review yet"}, 200
         return [
-            {
-                'id': str(review.id),  # UUID -> str pour le JSON
-                'comment': review.comment,
-                'rating': review.rating,
-            } for review in reviews_list
-        ], 200
+            ReviewPublic.model_validate(review).model_dump()
+            for review in reviews_list
+            ], 200
 
 
 @api.route('/<review_id>')
@@ -98,11 +89,7 @@ class ReviewResource(Resource):
         if not review:
             return {'error': 'Review not found'}, 404
 
-        return {
-                'id': str(review.id),  # UUID -> str pour le JSON
-                'comment': review.comment,
-                'rating': review.rating,
-        }, 200
+        return ReviewPublic.model_validate(review).model_dump(), 200
 
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
@@ -126,11 +113,7 @@ class ReviewResource(Resource):
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
-        return {
-            'id': str(updated_review.id),  # UUID -> str pour le JSON
-            'comment': updated_review.comment,
-            'rating': updated_review.rating,
-        }, 200
+        return ReviewPublic.model_validate(updated_review).model_dump(), 200
 
     @jwt_required()
     @api.response(200, 'Review deleted successfully')
@@ -172,9 +155,6 @@ class PlaceReviewList(Resource):
             return {'message': 'No review for this place yet'}, 200
 
         return [
-            {
-                'id': str(review.id),  # UUID -> str pour le JSON
-                'comment': review.comment,
-                'rating': review.rating,
-            } for review in review_list
+            ReviewPublic.model_validate(review).model_dump()
+            for review in review_list
         ], 200
