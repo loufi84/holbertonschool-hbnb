@@ -309,10 +309,11 @@ class HBnBFacade:
 
     def get_booking_list_by_user(self, user_id):
         """Retrieve all bookings for a specific user."""
-        return [
-            booking for booking in self.booking_repo._storage.values()
-            if str(booking.user) == str(user_id)
-        ]
+        return (
+            db.session.query(Booking)
+            .filter_by(user=user_id)
+            .all()
+        )
 
     def update_booking(self, booking_id, booking_data):
         """

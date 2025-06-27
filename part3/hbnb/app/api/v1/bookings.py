@@ -83,10 +83,11 @@ class BookingList(Resource):
 
         booking_list = []
         for booking in bookings:
-            if booking.status == "PENDING" and now > booking.end_date:
+            booking_end_aware = ensure_aware(booking.end_date)
+            if booking.status == "PENDING" and now > booking_end_aware:
                 booking.set_status("DONE")
 
-            booking_list.append(BookingPublic.model_validate(booking).model_dump())
+            booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
 
         return booking_list, 200
 
@@ -107,12 +108,13 @@ class BookingResource(Resource):
         if not booking:
             return {'error': 'Booking not found'}, 404
 
-        if (
-            booking.status == "PENDING"
-            and datetime.now(timezone.utc) > booking.end_date
-        ):
+        now_utc = datetime.now(timezone.utc)
+        booking_end_aware = ensure_aware(booking.end_date)
+
+        if booking.status == "PENDING" and now_utc > booking_end_aware:
             booking.set_status("DONE")
-        return BookingPublic.model_validate(booking).model_dump(), 200
+
+        return BookingPublic.model_validate(booking).model_dump(mode='json'), 200
 
     @api.expect(booking_update_model)
     @api.response(200, 'Booking updated successfully')
@@ -159,7 +161,7 @@ class BookingResource(Resource):
         except PermissionError as e:
             return {'error': str(e)}, 403
 
-        return BookingPublic.model_validate(updated_booking).model_dump(), 200
+        return BookingPublic.model_validate(updated_booking).model_dump(mode='json'), 200
 
 
 @api.route('/places/<place_id>/booking')
@@ -181,10 +183,11 @@ class PlaceBookingList(Resource):
 
         booking_list = []
         for booking in bookings:
-            if booking.status == "PENDING" and now > booking.end_date:
+            booking_end_aware = ensure_aware(booking.end_date)
+            if booking.status == "PENDING" and now > booking_end_aware:
                 booking.set_status("DONE")
 
-            booking_list.append(BookingPublic.model_validate(booking).model_dump())
+            booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
 
         return booking_list, 200
 
@@ -207,9 +210,10 @@ class UserBookingList(Resource):
 
         booking_list = []
         for booking in bookings:
-            if booking.status == "PENDING" and now > booking.end_date:
+            booking_end_aware = ensure_aware(booking.end_date)
+            if booking.status == "PENDING" and now > booking_end_aware:
                 booking.set_status("DONE")
 
-            booking_list.append(BookingPublic.model_validate(booking).model_dump())
+            booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
 
         return booking_list, 200
