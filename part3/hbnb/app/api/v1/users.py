@@ -172,4 +172,4 @@ class Login(Resource):
             return {'error': 'Invalid password or email'}, 401
 
         access_token = create_access_token(identity=str(user.id))
-        return {'access token': access_token}, 201
+        return {'access token': access_token}, 200

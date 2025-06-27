@@ -85,12 +85,17 @@ class AmenityResource(Resource):
                 'description': amenity.description,
         }, 200
 
+    @jwt_required()
     @api.expect(amenity_model)
     @api.response(200, 'Amenity updated successfully')
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')
     def put(self, amenity_id):
         """Update an amenity's information"""
+        user_id = get_jwt_identity()
+        user = facade.get_user(user_id)
+        if not user or not user.is_admin:
+            return {'error': 'Admin privileges required'}, 403
         try:
             amenity_uuid = UUID(amenity_id)
         except TypeError:
