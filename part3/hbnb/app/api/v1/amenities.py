@@ -8,7 +8,7 @@ from flask import request
 from app.services import facade
 from pydantic import ValidationError
 from uuid import UUID
-from app.models.amenity import AmenityCreate
+from app.models.amenity import AmenityCreate, AmenityPublic
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
 
@@ -45,22 +45,17 @@ class AmenityList(Resource):
             return {"error": "This amenity already exists"}, 400
 
         new_amenity = facade.create_amenity(amenity_data.model_dump())
-        return {
-            'id': str(new_amenity.id),  # UUID -> str pour le JSON
-            'name': new_amenity.name,
-            'description': new_amenity.description,
-        }, 201
+        return [
+            AmenityPublic.model_validate(new_amenity).model_dump()
+        ], 200
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
         """Get a list of amenities"""
         amenity_list = facade.get_all_amenities()
         return [
-            {
-                'id': str(amenity.id),  # UUID -> str pour le JSON
-                'name': amenity.name,
-                'description': amenity.description,
-            } for amenity in amenity_list
+            AmenityPublic.model_validate(amenity).model_dump()
+            for amenity in amenity_list
         ], 200
 
 
@@ -79,11 +74,7 @@ class AmenityResource(Resource):
         if not amenity:
             return {'error': 'Amenity not found'}, 404
 
-        return {
-                'id': str(amenity.id),  # UUID -> str pour le JSON
-                'name': amenity.name,
-                'description': amenity.description,
-        }, 200
+        return [AmenityPublic.model_validate(amenity).model_dump()], 200
 
     # Now secured with admin privileges
     @jwt_required()
@@ -113,8 +104,6 @@ class AmenityResource(Resource):
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
-        return {
-            'id': str(updated_amenity.id),  # UUID -> str pour le JSON
-            'name': updated_amenity.name,
-            'description': updated_amenity.description
-        }, 200
+        return [
+            AmenityPublic.model_validate(updated_amenity).model_dump()
+            ], 200

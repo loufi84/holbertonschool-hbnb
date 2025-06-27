@@ -4,7 +4,7 @@ It handles creation, validation, and management of Amenity objects,
 enforcing constraints on fields like name and description.
 """
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from datetime import datetime, timezone
 from app.models.place import place_amenities
 from app import db
@@ -113,3 +113,14 @@ class Amenity(BaseModel):
                                  datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
 '''
+
+class AmenityPublic(BaseModel):
+
+    id: str
+    name: str
+    description: str
+
+    model_config = ConfigDict(
+    json_encoders={datetime: lambda v: v.isoformat()},
+    from_attributes=True
+    )
