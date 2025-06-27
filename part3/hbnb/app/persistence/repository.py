@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from abc import ABC, abstractmethod
 from app import db
+from datetime import datetime, timezone
 '''
 
 '''
@@ -76,7 +77,7 @@ class SQLAlchemyRepository(Repository):
         db.session.commit()
 
     def get(self, obj_id):
-        return self.model.query.get(obj_id)
+        return self.model.query.get(str(obj_id))
 
     def get_all(self):
         return self.model.query.all()
@@ -86,7 +87,12 @@ class SQLAlchemyRepository(Repository):
         if obj:
             for key, value in data.items():
                 setattr(obj, key, value)
+
+            if hasattr(obj, "updated_at"):
+                setattr(obj, "updated_at", datetime.now(timezone.utc))
+
             db.session.commit()
+            return obj
 
     def delete(self, obj_id):
         obj = self.get(obj_id)

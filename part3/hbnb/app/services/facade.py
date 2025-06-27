@@ -157,17 +157,9 @@ class HBnBFacade:
                 updated_amenities.append(amenity)
 
             update_data.pop('amenity_ids')
-            update_data['amenities'] = updated_amenities
 
-        update_fields = {}
-        for key, value in update_data.items():
-            if hasattr(place, key):
-                update_fields[key] = value
-
-        update_fields["updated_at"] = datetime.now(timezone.utc)
-
-        updated_place = self.place_repo.update(place_id, update_fields)
-        return updated_place
+        self.place_repo.update(place_id, update_data)
+        return self.place_repo.get(place_id)
 
     def delete_place(self, place_id):
         """
