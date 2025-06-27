@@ -186,6 +186,7 @@ class HBnBFacade:
         amenity_in = AmenityCreate(**amenity_data)
 
         amenity = Amenity(
+            id = str(uuid.uuid4()),
             name=amenity_in.name,
             description=amenity_in.description
         )

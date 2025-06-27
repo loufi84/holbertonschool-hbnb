@@ -8,8 +8,8 @@ import uuid
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime, timezone
-from app.models.amenity import Amenity
-from app.models.review import Review
+from sqlalchemy import CheckConstraint
+from app import db
 
 # Default image URL to use when no photos are provided for a place
 DEFAULT_PLACE_PHOTO_URL = (
@@ -19,7 +19,23 @@ DEFAULT_PLACE_PHOTO_URL = (
 )
 
 
-class Place(BaseModel):
+place_amenities = db.Table(
+    'place_amenities',
+    db.Column('place_id', db.String, db.ForeignKey('places.id'),
+              primary_key=True),
+    db.Column('amenity.id', db.String, db.ForeignKey('amenities.id'),
+              primary_key=True)
+)
+
+place_reviews = db.Table(
+    'place_reviews',
+    db.Column('place_id', db.String, db.ForeignKey('places.id'),
+              primary_key=True),
+    db.Column('review_id', db.String, db.ForeignKey('reviews.id'),
+              primary_key=True)
+)
+
+class Place(db.Model):
     """
     Represents a physical place listing with detailed information.
 
@@ -38,21 +54,38 @@ class Place(BaseModel):
         reviews: List of Review objects linked to this place.
         rating: Average rating calculated from reviews, default 0.0.
     """
+    __tablename__ = 'places'
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str = Field(..., min_length=1, max_length=50)
-    description: str = Field(..., min_length=1, max_length=1000)
-    price: float = Field(..., ge=0)  # price must be zero or positive
-    latitude: float = Field(..., ge=-90, le=90)
-    longitude: float = Field(..., ge=-180, le=180)
-    owner_id: str
-    amenities: List[Amenity] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
-    photos: List[str] = Field(default_factory=list)
-    reviews: List[Review] = Field(default_factory=list)
-    rating: float = 0.0
+    id = db.Column(db.String, primary_key=True)
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String, nullable=False)
+    rating = db.Column(db.Float, nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        nullable=False)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+    amenities = db.relationship('Amenity', secondary=place_amenities,
+                                back_populates='places')
+    photos_url = db.Column(db.JSON, default=list)
+    reviews = db.relationship('Review', back_populates='place',
+                              cascade='all, delete-orphan')
+
+
+    __table_args__ = (
+        CheckConstraint('price > 0', name='check_price_positive'),
+        CheckConstraint('rating >= 0 AND rating <= 5', name='check_rating'),
+        CheckConstraint('latitude >= -90 AND latitude <= 90'
+                        , name='check_latitude'),
+        CheckConstraint('longitude >= -180 AND longitude <= 180'
+                        ,name='check_longitude')
+    )
 
     @field_validator("photos")
     @classmethod
@@ -216,3 +249,40 @@ class PlaceCreate(BaseModel):
         if not value:
             raise ValueError("Field cannot be empty or just whitespace")
         return value
+
+'''
+class Place(BaseModel):
+    """
+    Represents a physical place listing with detailed information.
+
+    Attributes:
+        id: Unique identifier for the place (UUID as string).
+        title: Short descriptive title (1 to 50 characters).
+        description: Detailed text description (1 to 1000 characters).
+        price: Price per unit (e.g., per night), must be non-negative.
+        latitude: Geographic latitude, valid range [-90, 90].
+        longitude: Geographic longitude, valid range [-180, 180].
+        owner_id: Identifier of the user who owns the place.
+        amenities: List of Amenity objects associated with the place.
+        created_at: Timestamp when the place was created (UTC).
+        updated_at: Optional timestamp for last modification (UTC).
+        photos: List of photo URLs representing the place.
+        reviews: List of Review objects linked to this place.
+        rating: Average rating calculated from reviews, default 0.0.
+    """
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str = Field(..., min_length=1, max_length=50)
+    description: str = Field(..., min_length=1, max_length=1000)
+    price: float = Field(..., ge=0)  # price must be zero or positive
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    owner_id: str
+    amenities: List[Amenity] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda:
+                                 datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+    photos: List[str] = Field(default_factory=list)
+    reviews: List[Review] = Field(default_factory=list)
+    rating: float = 0.0
+'''
