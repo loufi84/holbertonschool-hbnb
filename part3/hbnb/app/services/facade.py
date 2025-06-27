@@ -240,6 +240,7 @@ class HBnBFacade:
             raise PermissionError("User must visit the place to post review.")
 
         new_review = Review(
+            id=str(uuid.uuid4()),
             comment=review_data.comment,
             rating=review_data.rating,
             booking=str(booking_id),
@@ -296,6 +297,7 @@ class HBnBFacade:
         if not self.place_repo.get(place_id):
             raise ValueError("Place not found")
         new_booking = Booking(
+            id=str(uuid.uuid4()),
             place=place_id,
             user=user_id,
             start_date=booking_data.start_date,
