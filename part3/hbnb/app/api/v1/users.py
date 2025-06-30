@@ -6,10 +6,12 @@ It defines the CRUD methods for the users.
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
+from blacklist import blacklist
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
 from app.models.user import UserCreate, LoginRequest, UserPublic
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from argon2.exceptions import VerifyMismatchError
 import json
 
@@ -162,4 +164,32 @@ class Login(Resource):
             identity=user.id,
             additional_claims={"is_admin": user.is_admin}
         )
-        return {'access token': access_token}, 200
+        refresh_token = create_refresh_token(identity=user.id)
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }, 200
+
+@api.route('/refresh')
+class TokenRefresh(Resource):
+    @jwt_required()
+    def post(self):
+        identity = get_jwt_identity()
+        new_token = create_access_token(identity=identity)
+        return {"access_token": new_token}, 200
+    
+@api.route('/logout')
+class Logout(Resource):
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]
+        blacklist.add(jti)
+        return {"message": "Access token revoked"}, 200
+    
+@api.route('/logout_refresh')
+class LogoutRefresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        jti = get_jwt()["jti"]
+        blacklist.add(jti)
+        return {"message": "Refresh token revoked"}, 200

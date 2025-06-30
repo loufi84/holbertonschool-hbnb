@@ -7,6 +7,7 @@ from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from config import config
 from flask_sqlalchemy import SQLAlchemy
+from blacklist import blacklist
 
 
 db = SQLAlchemy()
@@ -26,6 +27,11 @@ def create_app(config_name='default'):
 
     db.init_app(app)
     jwt.init_app(app)
+
+    @jwt.token_in_blocklist_loader
+    def check_if_blacklist(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        return jti in blacklist
 
     with app.app_context():
         db.create_all()
