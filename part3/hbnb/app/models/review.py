@@ -30,7 +30,7 @@ class Review(db.Model):
     rating = db.Column(db.Float, nullable=False)
     place = db.Column(db.String, db.ForeignKey('places.id'), nullable=False)
     user = db.Column(db.String, nullable=False)
-    booking = db.Column(db.String, db.ForeignKey('booking'), nullable=False)
+    booking = db.Column(db.String, db.ForeignKey('bookings.id'), nullable=False)
     created_at = db.Column(
         db.DateTime, default=datetime.now(timezone.utc), nullable=False
         )

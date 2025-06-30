@@ -21,6 +21,11 @@ import uuid
 from app import db
 
 
+def ensure_aware(dt):
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
 class HBnBFacade:
     """
     HBnBFacade centralizes all business logic for managing:
@@ -225,8 +230,9 @@ class HBnBFacade:
         if not booking:
             raise ValueError("Booking not found")
 
+        end_date_aware = ensure_aware(booking.end_date)
         if (booking.status != BookingStatus.DONE.value or
-                booking.end_date >= datetime.now(timezone.utc)):
+                end_date_aware >= datetime.now(timezone.utc)):
             raise PermissionError("User must visit the place to post review.")
 
         new_review = Review(
