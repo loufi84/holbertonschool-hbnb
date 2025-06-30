@@ -160,8 +160,19 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 class AdminCreate(UserCreate):
     """
 
     """
     is_admin: bool = True
+
+
+class RevokedToken(db.Model):
+    __tablename__ = 'revoked_tokens'
+
+    jti = db.Column(db.String(36), primary_key=True)
+    expires_at = db.Column(db.Datetim, nullable=False)
+
+    def __repr__(self):
+        return f"<RevokedToken {self.jti}>"
