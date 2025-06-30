@@ -138,6 +138,29 @@ class UserResource(Resource):
 
         return UserPublic.model_validate(updated_user).model_dump(), 200
 
+    @jwt_required()
+    @api.response(200, 'User deleted successfully')
+    @api.response(400, 'Invalide UUID format')
+    @api.response(404, 'User not found')
+    def delete(self, user_id):
+        user_id = get_jwt_identity()
+        """Delete a user"""
+        try:
+            UUID(user_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+
+        user_to_delete = facade.get_user(user_id)
+        if not user_to_delete:
+            return {'error': 'User not found'}, 404
+
+        if user_id != str(user_to_delete.id):
+            return {'error': "Only an admin or the account owner can delete"
+            "this account"}, 403
+
+        facade.delete_user(user_id)
+        return {'message': 'User deleted successfully'}, 200
+
 
 @api.route('/login')
 class Login(Resource):

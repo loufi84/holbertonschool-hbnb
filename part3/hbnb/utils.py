@@ -1,12 +1,13 @@
-from app import db, create_app
 from app.models.amenity import Amenity
 from sqlalchemy import delete
 from app.models.user import RevokedToken
-from datetime import datetime
+from datetime import datetime, timezone
+from extensions import db
 
-app = create_app()
 
-with app.app_context():
+def delete_invalid_amenities():
+    """
+    """
     result = db.session.execute(
         delete(Amenity).where(Amenity.id.like('<function uuid4%'))
     )
@@ -15,7 +16,9 @@ with app.app_context():
 
 
 def purge_expired_tokens():
-    now = datetime.utcnow()
+    """
+    """
+    now = datetime.now(timezone.utc)
     expired = RevokedToken.query.filter(RevokedToken.expires_at < now).all()
 
     for token in expired:

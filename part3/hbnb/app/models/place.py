@@ -9,7 +9,8 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serial
 from typing import Optional, List
 from datetime import datetime, timezone
 from sqlalchemy import CheckConstraint
-from app import db
+from extensions import db  # db = SQLAlchemy()
+from .review import Review
 
 # Default image URL to use when no photos are provided for a place
 DEFAULT_PLACE_PHOTO_URL = (
@@ -66,7 +67,7 @@ class Place(db.Model):
     amenities = db.relationship('Amenity', secondary=place_amenities,
                                 back_populates='places')
     photos_url = db.Column(db.JSON, default=list)
-    reviews = db.relationship('Review', back_populates='place_rel',
+    reviews = db.relationship(Review, back_populates='place_rel',
                               cascade='all, delete-orphan')
 
 

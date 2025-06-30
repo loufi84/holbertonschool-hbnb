@@ -6,7 +6,7 @@ enforcing constraints like rating boundaries and non-empty comments.
 
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, field_validator, ConfigDict
-from app import db  # db = SQLAlchemy()
+from extensions import db  # db = SQLAlchemy()
 
 
 class Review(db.Model):

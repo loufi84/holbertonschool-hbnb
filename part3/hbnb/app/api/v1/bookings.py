@@ -58,15 +58,15 @@ class BookingList(Resource):
         except ValueError as e:
             return {'error': str(e)}, 400
 
-        booking_list = facade.get_booking_list_by_place(place_id)
+        booking_list = facade.get_pending_booking_list_by_place(place_id)
         for booking in booking_list:
-            booking_start = ensure_aware(booking.start_date)
-            booking_end = ensure_aware(booking.end_date)
-            new_start = ensure_aware(booking_data.start_date)
-            new_end = ensure_aware(booking_data.end_date)
+                booking_start = ensure_aware(booking.start_date)
+                booking_end = ensure_aware(booking.end_date)
+                new_start = ensure_aware(booking_data.start_date)
+                new_end = ensure_aware(booking_data.end_date)
 
-            if booking_start < new_end and new_start < booking_end:
-                return {'error': 'Already booked'}, 400
+                if booking_start < new_end and new_start < booking_end:
+                    return {'error': 'Already booked'}, 400
         now = datetime.now(timezone.utc)
         if booking_data.start_date < now:
             return {'error': 'Cannot create a booking in the past'}, 400
@@ -154,9 +154,9 @@ class BookingResource(Resource):
                 return {
                     'error': 'Only the owner of a place can update the status'
                     }, 403
-            if update_data['status'] not in ("DONE", "PENDING", "CANCELED"):
+            if update_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
                 return {
-                    'error': "Status must be DONE, PENDING, or CANCELED"
+                    'error': "Status must be DONE, PENDING, or CANCELLED"
                     }, 400
 
         try:
@@ -197,6 +197,34 @@ class PlaceBookingList(Resource):
 
         return booking_list, 200
 
+@api.route('/places/<place_id>/pending_booking')
+class PlaceBookingList(Resource):
+    @api.response(200, 'List of booking for the place retrieved successfully')
+    @api.response(400, 'Invalide UUID format')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """Get all pending bookings for a specific place"""
+        print(f"GET /places/{place_id}/pending_booking called")
+        try:
+            uuid.UUID(place_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+        bookings = facade.get_pending_booking_list_by_place(place_id)
+        if not bookings:
+            return {'message': 'No pending booking for this place yet'}, 200
+
+        now = datetime.now(timezone.utc)
+        booking_list = []
+        for booking in bookings:
+            booking_end_aware = ensure_aware(booking.end_date)
+            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
+            else:
+                booking_list.append(BookingPublic.model_validate(booking)
+                                    .model_dump(mode='json'))
+
+        return booking_list, 200
 
 @api.route('/users/<user_id>/booking')
 class UserBookingList(Resource):

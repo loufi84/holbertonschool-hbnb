@@ -119,6 +119,27 @@ class HBnBFacade:
     def get_all_users(self):
         """Retrieve all users."""
         return self.user_repo.get_all()
+    
+    def delete_user(self, user_id):
+        """Delete an user by ID."""
+        print("delete_user called with user_id:", user_id)
+        user = self.user_repo.get(user_id)
+        if not user:
+            print(f"User not found for id={user_id}")
+            return None
+
+        user_bookings = self.get_booking_list_by_user(user_id)
+        for booking in user_bookings:
+            self.cancel_booking(booking.id)
+
+        user_places = self.place_repo.get_by_attribute(owner_id=user_id)
+        for place in user_places:
+            for review in place.reviews:
+                self.review_repo.delete(review.id)
+            self.place_repo.delete(place.id)
+
+        self.user_repo.delete(user_id)
+        return ''
 
     # ------------------ Place management ------------------
 
@@ -337,6 +358,15 @@ class HBnBFacade:
             .all()
         )
 
+    def get_pending_booking_list_by_place(self, place_id):
+        """Retrieve all pending bookings for a specific place."""
+        return (
+            db.session.query(Booking)
+            .filter(Booking.place == str(place_id),
+                    Booking.status == BookingStatus.PENDING.value)
+            .all()
+        )
+
     def get_booking_list_by_user(self, user_id):
         """Retrieve all bookings for a specific user."""
         return (
@@ -344,6 +374,16 @@ class HBnBFacade:
             .filter_by(user=user_id)
             .all()
         )
+
+    def cancel_booking(self, booking_id):
+        """
+        Cancel a booking.
+        Only the owner of the place or an admin can update booking status.
+        """
+        booking = self.get_booking(booking_id)
+        if booking.status == BookingStatus.PENDING.value:
+                booking.set_status(BookingStatus.CANCELLED.value)
+        return booking
 
     def update_booking(self, booking_id, booking_data):
         """
@@ -361,8 +401,8 @@ class HBnBFacade:
             if str(place.owner_id) != str(user_id):
                 raise PermissionError("Only the owner of a place"
                                       "can update the status")
-            if booking_data['status'] not in ("DONE", "PENDING", "CANCELED"):
-                raise ValueError("Status must be DONE, PENDING, or CANCELED")
+            if booking_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
+                raise ValueError("Status must be DONE, PENDING, or CANCELLED")
 
         self.booking_repo.update(booking_id, booking_data)
         return self.booking_repo.get(booking_id)

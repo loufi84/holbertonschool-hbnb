@@ -153,6 +153,9 @@ class PlaceReviewList(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all reviews for a specific place"""
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
         try:
             UUID(place_id)
         except ValueError:

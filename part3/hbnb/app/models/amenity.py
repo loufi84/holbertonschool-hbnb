@@ -7,7 +7,7 @@ enforcing constraints on fields like name and description.
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from datetime import datetime, timezone
 from app.models.place import place_amenities
-from app import db
+from extensions import db  # db = SQLAlchemy()
 
 
 class Amenity(db.Model):

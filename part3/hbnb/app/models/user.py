@@ -4,12 +4,11 @@ It includes models for User data, user creation requests, and login requests,
 with validation rules and sensible defaults applied.
 """
 
-import uuid
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from pydantic import field_validator
 from datetime import datetime, timezone
-from typing import Optional, List
-from app import db  # db = SQLAlchemy()
+from typing import Optional
+from extensions import db  # db = SQLAlchemy()
 
 
 # Default profile picture URL used when no photo_url is provided by the user
@@ -172,7 +171,7 @@ class RevokedToken(db.Model):
     __tablename__ = 'revoked_tokens'
 
     jti = db.Column(db.String(36), primary_key=True)
-    expires_at = db.Column(db.Datetim, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return f"<RevokedToken {self.jti}>"

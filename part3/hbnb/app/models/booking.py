@@ -4,7 +4,7 @@ It supports creation, validation, and management of Booking objects,
 enforcing constraints such as valid date ranges and status values.
 """
 
-from app import db  # db = SQLAlchemy()
+from extensions import db  # db = SQLAlchemy()
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from enum import Enum

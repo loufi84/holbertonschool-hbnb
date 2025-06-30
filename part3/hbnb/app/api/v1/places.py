@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models.place import PlaceCreate, PlacePublic
+from app.models.place import PlacePublic
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
@@ -124,6 +124,7 @@ class PlaceResource(Resource):
     def put(self, place_id):
         """Method to update a place"""
         user_id = get_jwt_identity()
+        user = facade.get_user(user_id)
         try:
             UUID(place_id)
         except ValueError:
@@ -133,7 +134,8 @@ class PlaceResource(Resource):
         if not existing_place:
             return {'error': 'Place not found'}, 404
 
-        if existing_place.owner_id != user_id:
+        if (existing_place.owner_id != user_id
+        and user.is_admin == False ):
             return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
@@ -160,6 +162,7 @@ class PlaceResource(Resource):
     def delete(self, place_id):
         """Method to delete a place"""
         user_id = get_jwt_identity()
+        user = facade.get_user(user_id)
         try:
             UUID(place_id)
         except ValidationError as e:
@@ -169,7 +172,8 @@ class PlaceResource(Resource):
         if not existing_place:
             return {'error': 'Place not found'}, 404
 
-        if existing_place.owner_id != user_id:
+        if (existing_place.owner_id != user_id
+        and user.is_admin == False ):
             return {'error': 'You must own the place to delete it'}, 403
 
         facade.delete_place(place_id)
