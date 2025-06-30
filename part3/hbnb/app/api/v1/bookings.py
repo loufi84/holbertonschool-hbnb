@@ -67,6 +67,9 @@ class BookingList(Resource):
 
             if booking_start < new_end and new_start < booking_end:
                 return {'error': 'Already booked'}, 400
+        now = datetime.now(timezone.utc)
+        if new_start < now:
+            return {'error': 'Cannot create a booking in the past'}, 400
 
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
