@@ -8,6 +8,7 @@ from flask import request
 from app.services import facade
 from pydantic import ValidationError
 from uuid import UUID
+from app.models.booking import BookingStatus
 from app.models.review import ReviewCreate, ReviewPublic
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
@@ -46,8 +47,7 @@ class ReviewList(Resource):
         booking = facade.get_booking(review_data.booking)
         if booking is None:
             return {"error": "Booking not found"}, 404
-        if booking.status != "DONE":
-            return {"error": "Booking not completed"}, 403
+
         place_id = booking.place
 
         try:

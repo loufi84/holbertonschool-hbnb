@@ -6,7 +6,7 @@ It defines the CRUD methods for the bookings.
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from app.models.booking import CreateBooking, BookingPublic
+from app.models.booking import CreateBooking, BookingPublic, BookingStatus
 from pydantic import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
@@ -84,8 +84,9 @@ class BookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == "PENDING" and now > booking_end_aware:
-                booking.set_status("DONE")
+            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
 
             booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
 
@@ -108,11 +109,12 @@ class BookingResource(Resource):
         if not booking:
             return {'error': 'Booking not found'}, 404
 
-        now_utc = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc)
         booking_end_aware = ensure_aware(booking.end_date)
 
-        if booking.status == "PENDING" and now_utc > booking_end_aware:
-            booking.set_status("DONE")
+        if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+            booking.set_status(BookingStatus.DONE.value)
+            facade.booking_repo.update(booking_id, booking.__dict__)
 
         return BookingPublic.model_validate(booking).model_dump(mode='json'), 200
 
@@ -184,8 +186,9 @@ class PlaceBookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == "PENDING" and now > booking_end_aware:
-                booking.set_status("DONE")
+            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
 
             booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
 
@@ -211,8 +214,9 @@ class UserBookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == "PENDING" and now > booking_end_aware:
-                booking.set_status("DONE")
+            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
 
             booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
 
