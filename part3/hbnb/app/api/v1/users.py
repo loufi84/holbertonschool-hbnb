@@ -6,13 +6,15 @@ It defines the CRUD methods for the users.
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
+from datetime import datetime
 from blacklist import blacklist
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
-from app.models.user import UserCreate, LoginRequest, UserPublic
+from app.models.user import UserCreate, LoginRequest, UserPublic, RevokedToken
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from argon2.exceptions import VerifyMismatchError
+from app import db
 import json
 
 api = Namespace('users', description='User operations')
@@ -182,14 +184,26 @@ class TokenRefresh(Resource):
 class Logout(Resource):
     @jwt_required()
     def post(self):
-        jti = get_jwt()["jti"]
-        blacklist.add(jti)
+        jwt_data = get_jwt()
+        jti = jwt_data["jti"]
+        exp = jwt_data["exp"]
+        expires_at = datetime.utcfromtimestamp(exp)
+
+        db.session.add(RevokedToken(jti=jti, expires_at=expires_at))
+        db.session.commit()
+
         return {"message": "Access token revoked"}, 200
     
 @api.route('/logout_refresh')
 class LogoutRefresh(Resource):
     @jwt_required(refresh=True)
     def post(self):
-        jti = get_jwt()["jti"]
-        blacklist.add(jti)
+        jwt_data = get_jwt()
+        jti = jwt_data["jti"]
+        exp = jwt_data["exp"]
+        expires_at = datetime.utcfromtimestamp(exp)
+
+        db.session.add(RevokedToken(jti=jti, expires_at=expires_at))
+        db.session.commit()
+
         return {"message": "Refresh token revoked"}, 200

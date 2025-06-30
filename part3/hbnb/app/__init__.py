@@ -8,6 +8,8 @@ from flask_jwt_extended import JWTManager
 from config import config
 from flask_sqlalchemy import SQLAlchemy
 from blacklist import blacklist
+from app.models.user import RevokedToken
+from utils import purge_expired_tokens
 
 
 db = SQLAlchemy()
@@ -31,10 +33,14 @@ def create_app(config_name='default'):
     @jwt.token_in_blocklist_loader
     def check_if_blacklist(jwt_header, jwt_payload):
         jti = jwt_payload["jti"]
-        return jti in blacklist
+        token = db.session.get(RevokedToken, jti)
+        return token is not None
 
     with app.app_context():
         db.create_all()
+
+    with app.app_context():
+        purge_expired_tokens()
 
     @app.route('/')
     def redirect_to_docs():
