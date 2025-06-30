@@ -215,8 +215,15 @@ class HBnBFacade:
     def create_review(self, review_data, booking_id, place_id, user_id):
         """
         Create a review only if booking is done and user visited the place.
+        One review per booking.
         """
         booking = self.get_booking(booking_id)
+        reviews = self.review_repo.get_all()
+        for review in reviews:
+            if review.booking == booking_id:
+                raise PermissionError(
+                    "User can review a place once per booking."
+                    )
 
         if not self.user_repo.get(user_id):
             raise ValueError("User not found")
