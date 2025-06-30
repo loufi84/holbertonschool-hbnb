@@ -238,13 +238,6 @@ class HBnBFacade:
             raise ValueError("Booking not found")
 
         end_date_aware = ensure_aware(booking.end_date)
-        print("DEBUG booking.status:", booking.status)
-        print("DEBUG expected:", BookingStatus.DONE.value)
-        print("booking.status == DONE ?", booking.status == BookingStatus.DONE.value)
-
-        print("DEBUG booking.end_date:", end_date_aware)
-        print("DEBUG now:", datetime.now(timezone.utc))
-        print("end_date in past ?", end_date_aware < datetime.now(timezone.utc))
 
         if (booking.status != BookingStatus.DONE.value or
                 end_date_aware >= datetime.now(timezone.utc)):
