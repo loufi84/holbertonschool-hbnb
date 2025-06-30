@@ -9,7 +9,7 @@ from app.services import facade
 from blacklist import blacklist
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
-from app.models.user import UserCreate, LoginRequest, UserPublic
+from app.models.user import UserCreate, LoginRequest, UserPublic, AdminCreate
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from argon2.exceptions import VerifyMismatchError
@@ -193,3 +193,27 @@ class LogoutRefresh(Resource):
         jti = get_jwt()["jti"]
         blacklist.add(jti)
         return {"message": "Refresh token revoked"}, 200
+
+@api.route('/admin_creation')
+class AdminCreation(Resource):
+    @api.expect(user_model)
+    @api.response(201, 'Admin successfully created')
+    @api.response(400, 'Email already registered or invalid input')
+    @api.response(401, 'You are not allowed to create an admin')
+    @jwt_required()
+    def post(self):
+        identity = get_jwt_identity()
+        user = facade.get_user(identity)
+        if not user.is_admin:
+            return {'error': 'You are not allowed'}, 401
+        try:
+            admin_data = AdminCreate(**request.json)
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
+
+        if facade.get_user_by_email(admin_data.email):
+            return {'error': 'Email already registered'}, 400
+
+        new_admin = facade.create_user_admin(admin_data.model_dump())
+
+        return UserPublic.model_validate(new_admin).model_dump(), 201

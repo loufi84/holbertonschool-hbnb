@@ -9,14 +9,12 @@ reviews, and bookings, using repositories to handle data persistence.
 from app.persistence.repository import SQLAlchemyRepository
 from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place, PlaceCreate
-from app.models.review import Review, ReviewCreate
-from app.models.user import User, UserCreate
-from app.models.booking import Booking, BookingStatus, BookingPublic
-from pydantic import ValidationError
+from app.models.review import Review
+from app.models.user import User, UserCreate, AdminCreate
+from app.models.booking import Booking, BookingStatus
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from argon2 import PasswordHasher
-import app.persistence.repository
 import uuid
 from app import db
 
@@ -72,6 +70,24 @@ class HBnBFacade:
             last_name=user_in.last_name,
             email=user_in.email,
             hashed_password=hashed_pw,
+        )
+        self.user_repo.add(user)
+        return user
+    
+    def create_user_admin(self, user_data):
+        """
+        Create a new user with hashed password.
+        """
+        user_in = AdminCreate(**user_data)
+        hashed_pw = self.ph.hash(user_in.password)
+
+        user = User(
+            id=str(uuid.uuid4()),
+            first_name=user_in.first_name,
+            last_name=user_in.last_name,
+            email=user_in.email,
+            hashed_password=hashed_pw,
+            is_admin= user_in.is_admin
         )
         self.user_repo.add(user)
         return user

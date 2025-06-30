@@ -159,3 +159,9 @@ class LoginRequest(BaseModel):
 
     email: EmailStr
     password: str
+
+class AdminCreate(UserCreate):
+    """
+
+    """
+    is_admin: bool = True

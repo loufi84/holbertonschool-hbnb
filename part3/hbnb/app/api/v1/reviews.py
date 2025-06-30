@@ -59,6 +59,9 @@ class ReviewList(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
 
+        place = facade.place_repo.get(place_id)
+        place.update_average_rating()
+        facade.place_repo.update(place.id, {"rating": place.rating})
         return ReviewPublic.model_validate(new_review).model_dump(), 201
 
     @api.response(200, 'List of reviews retrieved successfully')
@@ -107,12 +110,16 @@ class ReviewResource(Resource):
             return {'error': 'Review not found'}, 404
 
         update_data = request.json
+        place_id = review.place
 
         try:
             updated_review = facade.update_review(review_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
+        place = facade.place_repo.get(place_id)
+        place.update_average_rating()
+        facade.place_repo.update(place.id, {"rating": place.rating})
         return ReviewPublic.model_validate(updated_review).model_dump(), 200
 
     @jwt_required()
