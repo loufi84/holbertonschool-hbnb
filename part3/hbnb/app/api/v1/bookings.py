@@ -70,7 +70,7 @@ class BookingList(Resource):
 
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
-        return BookingPublic.model_validate(new_booking).model_dump(), 201
+        return BookingPublic.model_validate(new_booking).model_dump(mode='json'), 201
 
     @api.response(200, 'List of bookings retrieved successfully')
     def get(self):

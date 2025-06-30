@@ -289,7 +289,7 @@ class HBnBFacade:
             status=BookingStatus.PENDING.value
         )
         self.booking_repo.add(new_booking)
-        return BookingPublic.model_validate(new_booking).model_dump(), 201
+        return new_booking
 
     def get_booking(self, booking_id):
         """Retrieve booking by ID."""
