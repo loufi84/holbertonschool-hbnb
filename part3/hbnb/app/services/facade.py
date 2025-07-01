@@ -252,6 +252,14 @@ class HBnBFacade:
         self.amenity_repo.update(amenity_id, amenity_data)
         return self.amenity_repo.get(amenity_id)
 
+    def delete_amenity(self, amenity_id):
+        """Delete an amenity by ID."""
+        amenity = self.amenity_repo.get(amenity_id)
+        if not amenity:
+            return None
+        self.amenity_repo.delete(amenity_id)
+        return ''
+
     # ------------------ Review management ------------------
 
     def create_review(self, review_data, booking_id, place_id, user_id):
