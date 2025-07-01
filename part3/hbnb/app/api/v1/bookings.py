@@ -33,10 +33,12 @@ booking_update_model = api.model('BookingUpdate', {
         ),
 })
 
+
 def ensure_aware(dt):
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt
+
 
 @api.route('/')
 class BookingList(Resource):
@@ -60,20 +62,21 @@ class BookingList(Resource):
 
         booking_list = facade.get_pending_booking_list_by_place(place_id)
         for booking in booking_list:
-                booking_start = ensure_aware(booking.start_date)
-                booking_end = ensure_aware(booking.end_date)
-                new_start = ensure_aware(booking_data.start_date)
-                new_end = ensure_aware(booking_data.end_date)
+            booking_start = ensure_aware(booking.start_date)
+            booking_end = ensure_aware(booking.end_date)
+            new_start = ensure_aware(booking_data.start_date)
+            new_end = ensure_aware(booking_data.end_date)
 
-                if booking_start < new_end and new_start < booking_end:
-                    return {'error': 'Already booked'}, 400
+            if booking_start < new_end and new_start < booking_end:
+                return {'error': 'Already booked'}, 400
         now = datetime.now(timezone.utc)
         if booking_data.start_date < now:
             return {'error': 'Cannot create a booking in the past'}, 400
 
         new_booking = facade.create_booking(user_id, place_id, booking_data)
 
-        return BookingPublic.model_validate(new_booking).model_dump(mode='json'), 201
+        return (BookingPublic.model_validate(
+            new_booking).model_dump(mode='json')), 201
 
     @api.response(200, 'List of bookings retrieved successfully')
     def get(self):
@@ -87,11 +90,13 @@ class BookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+            if booking.status == (BookingStatus.PENDING.value
+                                  and now > booking_end_aware):
                 booking.set_status(BookingStatus.DONE.value)
                 facade.booking_repo.update(booking.id, booking.__dict__)
 
-            booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
 
         return booking_list, 200
 
@@ -115,11 +120,13 @@ class BookingResource(Resource):
         now = datetime.now(timezone.utc)
         booking_end_aware = ensure_aware(booking.end_date)
 
-        if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+        if (booking.status == BookingStatus.PENDING.value
+           and now > booking_end_aware):
             booking.set_status(BookingStatus.DONE.value)
             facade.booking_repo.update(booking_id, booking.__dict__)
 
-        return BookingPublic.model_validate(booking).model_dump(mode='json'), 200
+        return (BookingPublic.model_validate(
+            booking).model_dump(mode='json')), 200
 
     @api.expect(booking_update_model)
     @api.response(200, 'Booking updated successfully')
@@ -166,7 +173,8 @@ class BookingResource(Resource):
         except PermissionError as e:
             return {'error': str(e)}, 403
 
-        return BookingPublic.model_validate(updated_booking).model_dump(mode='json'), 200
+        return (BookingPublic.model_validate(
+            updated_booking).model_dump(mode='json')), 200
 
 
 @api.route('/places/<place_id>/booking')
@@ -189,13 +197,16 @@ class PlaceBookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+            if (booking.status == BookingStatus.PENDING.value
+               and now > booking_end_aware):
                 booking.set_status(BookingStatus.DONE.value)
                 facade.booking_repo.update(booking.id, booking.__dict__)
 
-            booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
 
         return booking_list, 200
+
 
 @api.route('/places/<place_id>/pending_booking')
 class PlaceBookingList(Resource):
@@ -217,7 +228,8 @@ class PlaceBookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+            if (booking.status == BookingStatus.PENDING.value
+               and now > booking_end_aware):
                 booking.set_status(BookingStatus.DONE.value)
                 facade.booking_repo.update(booking.id, booking.__dict__)
             else:
@@ -225,6 +237,7 @@ class PlaceBookingList(Resource):
                                     .model_dump(mode='json'))
 
         return booking_list, 200
+
 
 @api.route('/users/<user_id>/booking')
 class UserBookingList(Resource):
@@ -245,10 +258,12 @@ class UserBookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == BookingStatus.PENDING.value and now > booking_end_aware:
+            if (booking.status == BookingStatus.PENDING.value
+               and now > booking_end_aware):
                 booking.set_status(BookingStatus.DONE.value)
                 facade.booking_repo.update(booking.id, booking.__dict__)
 
-            booking_list.append(BookingPublic.model_validate(booking).model_dump(mode='json'))
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
 
         return booking_list, 200

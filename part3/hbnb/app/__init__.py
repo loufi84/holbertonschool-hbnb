@@ -1,19 +1,22 @@
 #!/usr/bin/python3
 '''
-
+This module provides the initialization file for
+the Flask server and JWT management.
 '''
 from flask import Flask, redirect
 from flask_restx import Api
-from flask_jwt_extended import JWTManager
 from config import config
-from flask_sqlalchemy import SQLAlchemy
-from blacklist import blacklist
 from utils import purge_expired_tokens
 from extensions import db, jwt
 from app.models.user import RevokedToken
 from utils import purge_expired_tokens, delete_invalid_amenities
 
+
 def create_app(config_name='default'):
+    """
+    Initialize the Flask server, the database and all used
+    JWT functions.
+    """
     print("create_app() called")
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -23,6 +26,9 @@ def create_app(config_name='default'):
 
     @jwt.token_in_blocklist_loader
     def check_if_blacklist(jwt_header, jwt_payload):
+        """
+        This methods will iterate the revoked tokens when a user logout.
+        """
         jti = jwt_payload["jti"]
         token = db.session.get(RevokedToken, jti)
         return token is not None
@@ -40,6 +46,9 @@ def create_app(config_name='default'):
 
     @app.route('/')
     def redirect_to_docs():
+        """
+        This method redirect the API to /docs to default
+        """
         print("Redirect / to /docs")
         return redirect('/docs')
 

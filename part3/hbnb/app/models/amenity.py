@@ -93,34 +93,18 @@ class AmenityCreate(BaseModel):
                     f"{field_name} cannot be empty or just whitespace")
             values[field_name] = value.strip()
         return values
-'''
-class Amenity(BaseModel):
-    """
-    Represents an amenity with unique ID, name, description, and timestamps.
 
-    Attributes:
-        id: Unique identifier for the amenity (UUID as a string).
-        name: Name of the amenity, must be between 1 and 100 characters.
-        description: Description of the amenity, between 1 and 500 characters.
-        created_at: Timestamp of creation in UTC.
-        updated_at: Optional timestamp for last update in UTC.
-    """
-
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1, max_length=500)
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
-'''
 
 class AmenityPublic(BaseModel):
-
+    """
+    This class is used to display public informations when an amenity is
+    returned to the client.
+    """
     id: str
     name: str
     description: str
 
     model_config = ConfigDict(
-    json_encoders={datetime: lambda v: v.isoformat()},
-    from_attributes=True
+                json_encoders={datetime: lambda v: v.isoformat()},
+                from_attributes=True
     )

@@ -103,15 +103,14 @@ class AmenityResource(Resource):
 
         return AmenityPublic.model_validate(updated_amenity).model_dump(), 200
 
-
     @jwt_required()
     @api.response(200, 'Amenity deleted successfully')
     @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Amenity not found')
     def delete(self, amenity_id):
+        """Delete an amenity"""
         user_id = get_jwt_identity()
         user = facade.get_user(user_id)
-        """Delete an amenity"""
         try:
             UUID(amenity_id)
         except ValueError:
@@ -121,7 +120,7 @@ class AmenityResource(Resource):
         if not amenity_to_delete:
             return {'error': 'Amenity not found'}, 404
 
-        if user.is_admin == False:
+        if user.is_admin is False:
             return {'error': "You must be an admin to delete an amenity"}, 403
 
         facade.delete_amenity(amenity_id)

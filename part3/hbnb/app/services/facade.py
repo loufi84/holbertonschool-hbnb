@@ -24,6 +24,7 @@ def ensure_aware(dt):
         return dt.replace(tzinfo=timezone.utc)
     return dt
 
+
 class HBnBFacade:
     """
     HBnBFacade centralizes all business logic for managing:
@@ -73,7 +74,7 @@ class HBnBFacade:
         )
         self.user_repo.add(user)
         return user
-    
+
     def create_user_admin(self, user_data):
         """
         Create a new user with hashed password.
@@ -87,7 +88,7 @@ class HBnBFacade:
             last_name=user_in.last_name,
             email=user_in.email,
             hashed_password=hashed_pw,
-            is_admin= user_in.is_admin
+            is_admin=user_in.is_admin
         )
         self.user_repo.add(user)
         return user
@@ -119,7 +120,7 @@ class HBnBFacade:
     def get_all_users(self):
         """Retrieve all users."""
         return self.user_repo.get_all()
-    
+
     def delete_user(self, user_id):
         """Delete an user by ID."""
         print("delete_user called with user_id:", user_id)
@@ -222,7 +223,7 @@ class HBnBFacade:
         amenity_in = AmenityCreate(**amenity_data)
 
         amenity = Amenity(
-            id = str(uuid.uuid4()),
+            id=str(uuid.uuid4()),
             name=amenity_in.name,
             description=amenity_in.description
         )
@@ -393,7 +394,7 @@ class HBnBFacade:
         """
         booking = self.get_booking(booking_id)
         if booking.status == BookingStatus.PENDING.value:
-                booking.set_status(BookingStatus.CANCELLED.value)
+            booking.set_status(BookingStatus.CANCELLED.value)
         return booking
 
     def update_booking(self, booking_id, booking_data):

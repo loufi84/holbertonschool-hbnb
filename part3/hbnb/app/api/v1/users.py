@@ -10,7 +10,8 @@ from datetime import datetime
 from blacklist import blacklist
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
-from app.models.user import UserCreate, LoginRequest, UserPublic, RevokedToken, AdminCreate
+from app.models.user import UserCreate, LoginRequest
+from app.models.user import UserPublic, RevokedToken, AdminCreate
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from argon2.exceptions import VerifyMismatchError
@@ -156,9 +157,9 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
 
         if (user_id != str(user_to_delete.id)
-            and user.is_admin == False):
+           and user.is_admin is False):
             return {'error': "Only an admin or the account owner can delete"
-            "this account"}, 403
+                    "this account"}, 403
 
         facade.delete_user(user_id)
         return {'message': 'User deleted successfully'}, 200
@@ -183,7 +184,8 @@ class Login(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         try:
-            facade.passwd_hasher.verify(user.hashed_password, login_data.password)
+            facade.passwd_hasher.verify(
+                user.hashed_password, login_data.password)
         except VerifyMismatchError:
             return {'error': 'Invalid password or email'}, 401
 
@@ -197,6 +199,7 @@ class Login(Resource):
             'refresh_token': refresh_token
         }, 200
 
+
 @api.route('/refresh')
 class TokenRefresh(Resource):
     @jwt_required()
@@ -204,7 +207,8 @@ class TokenRefresh(Resource):
         identity = get_jwt_identity()
         new_token = create_access_token(identity=identity)
         return {"access_token": new_token}, 200
-    
+
+
 @api.route('/logout')
 class Logout(Resource):
     @jwt_required()
@@ -218,7 +222,8 @@ class Logout(Resource):
         db.session.commit()
 
         return {"message": "Access token revoked"}, 200
-    
+
+
 @api.route('/logout_refresh')
 class LogoutRefresh(Resource):
     @jwt_required(refresh=True)
@@ -232,6 +237,7 @@ class LogoutRefresh(Resource):
         db.session.commit()
 
         return {"message": "Refresh token revoked"}, 200
+
 
 @api.route('/admin_creation')
 class AdminCreation(Resource):

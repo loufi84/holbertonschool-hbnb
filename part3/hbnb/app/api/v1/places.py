@@ -135,7 +135,7 @@ class PlaceResource(Resource):
             return {'error': 'Place not found'}, 404
 
         if (existing_place.owner_id != user_id
-        and user.is_admin == False ):
+           and user.is_admin is False):
             return {'error': 'You must own this place to modify it'}, 403
 
         update_data = request.json
@@ -173,7 +173,7 @@ class PlaceResource(Resource):
             return {'error': 'Place not found'}, 404
 
         if (existing_place.owner_id != user_id
-        and user.is_admin == False ):
+           and user.is_admin is False):
             return {'error': 'You must own the place to delete it'}, 403
 
         facade.delete_place(place_id)

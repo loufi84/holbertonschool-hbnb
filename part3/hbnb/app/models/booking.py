@@ -126,15 +126,20 @@ class CreateBooking(BaseModel):
             raise ValueError("Start date must be before end date")
         return values
 
+
 class BookingPublic(BaseModel):
+    """
+    This class is used to display public informations when a booking is
+    returned to the client.
+    """
     id: str
     start_date: datetime = Field(...)
     end_date: datetime = Field(...)
-    user: str 
+    user: str
     place: str
     status: str
 
     model_config = ConfigDict(
-    json_encoders={datetime: lambda v: v.isoformat()},
-    from_attributes=True
+                json_encoders={datetime: lambda v: v.isoformat()},
+                from_attributes=True
     )

@@ -32,7 +32,8 @@ class Review(db.Model):
     user_ide = db.Column(db.String, nullable=False)
     user_first_name = db.Column(db.String, nullable=False)
     user_last_name = db.Column(db.String, nullable=False)
-    booking = db.Column(db.String, db.ForeignKey('bookings.id'), nullable=False)
+    booking = db.Column(db.String,
+                        db.ForeignKey('bookings.id'), nullable=False)
     created_at = db.Column(
         db.DateTime, default=datetime.now(timezone.utc), nullable=False
         )
@@ -42,8 +43,9 @@ class Review(db.Model):
         )
     place_rel = db.relationship('Place', back_populates='reviews')
 
-    __table_args__ = ( 
-        db.CheckConstraint('rating >= 0 AND rating <= 5', name='check_rating_range'),
+    __table_args__ = (
+        db.CheckConstraint('rating >= 0 AND rating <= 5',
+                           name='check_rating_range'),
     )
 
     def set_comment(self, comment: str) -> None:
@@ -65,18 +67,6 @@ class Review(db.Model):
         """
         self.rating = rating
         self.updated_at = datetime.now(timezone.utc)
-
-"""class Review(BaseModel):
-
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    comment: str = Field(..., min_length=1, max_length=1000)
-    rating: float = Field(..., ge=0, le=5)  # Rating must be between 0 and 5
-    place: uuid.UUID
-    user: uuid.UUID
-    booking: str
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None"""
 
 
 class ReviewCreate(BaseModel):
@@ -125,7 +115,12 @@ class ReviewCreate(BaseModel):
         """
         return round(value, 1)
 
+
 class ReviewPublic(BaseModel):
+    """
+    This class is used to display public informations when a review is
+    returned to the client.
+    """
     id: str
     comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
@@ -135,6 +130,6 @@ class ReviewPublic(BaseModel):
 
     # Pydantic config to serialize datetime as ISO format strings
     model_config = ConfigDict(
-    json_encoders={datetime: lambda v: v.isoformat()},
-    from_attributes=True
+                json_encoders={datetime: lambda v: v.isoformat()},
+                from_attributes=True
     )

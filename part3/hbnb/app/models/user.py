@@ -66,29 +66,6 @@ class User(db.Model):
         self.updated_at = datetime.now(timezone.utc)
 
 
-"""
-class User(BaseModel):
-
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    first_name: str = Field(..., min_length=1, max_length=50)
-    last_name: str = Field(..., min_length=1, max_length=50)
-    email: EmailStr = Field(...)
-    hashed_password: str
-    is_active: bool = True  # Allows disabling user without deletion
-    is_admin: bool = False
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
-    photo_url: Optional[str] = None
-    places: List[uuid.UUID] = Field(default_factory=list)
-    reviews: List[uuid.UUID] = Field(default_factory=list)
-
-    # Pydantic config to serialize datetime as ISO format strings
-    model_config = ConfigDict(
-        json_encoders={datetime: lambda v: v.isoformat()}
-    )
-"""
-
 class UserCreate(BaseModel):
     """
     Model used when creating a new user account.
@@ -135,6 +112,10 @@ class UserCreate(BaseModel):
 
 
 class UserPublic(BaseModel):
+    """
+    This class is used to display public informations when a user is
+    returned to the client.
+    """
     id: str
     first_name: str
     last_name: str
@@ -142,8 +123,8 @@ class UserPublic(BaseModel):
 
     # Pydantic config to serialize datetime as ISO format strings
     model_config = ConfigDict(
-    json_encoders={datetime: lambda v: v.isoformat()},
-    from_attributes=True
+                json_encoders={datetime: lambda v: v.isoformat()},
+                from_attributes=True
     )
 
 
