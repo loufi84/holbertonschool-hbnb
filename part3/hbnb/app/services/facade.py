@@ -199,6 +199,8 @@ class HBnBFacade:
                     raise Exception(f"Amenity {amenity_id} not found")
                 updated_amenities.append(amenity)
 
+            place.amenities = updated_amenities
+
             update_data.pop('amenity_ids')
 
         self.place_repo.update(place_id, update_data)
