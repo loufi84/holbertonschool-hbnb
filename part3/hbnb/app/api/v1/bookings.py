@@ -90,7 +90,7 @@ class BookingList(Resource):
         booking_list = []
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
-            if booking.status == (BookingStatus.PENDING.value
+            if (booking.status == BookingStatus.PENDING.value
                                   and now > booking_end_aware):
                 booking.set_status(BookingStatus.DONE.value)
                 facade.booking_repo.update(booking.id, booking.__dict__)
