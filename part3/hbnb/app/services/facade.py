@@ -261,6 +261,7 @@ class HBnBFacade:
         """
         booking = self.get_booking(booking_id)
         reviews = self.review_repo.get_all()
+        user = self.get_user(user_id)
         for review in reviews:
             if review.booking == booking_id:
                 raise PermissionError(
@@ -286,7 +287,9 @@ class HBnBFacade:
             rating=review_data.rating,
             booking=str(booking_id),
             place=str(place_id),
-            user=str(user_id)
+            user_ide=str(user_id),
+            user_last_name=user.last_name,
+            user_first_name=user.first_name
         )
         self.review_repo.add(new_review)
         return new_review

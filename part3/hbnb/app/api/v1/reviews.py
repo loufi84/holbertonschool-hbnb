@@ -35,6 +35,7 @@ class ReviewList(Resource):
     def post(self):
         """Register a new review"""
         user_id = get_jwt_identity()
+        user = facade.get_user(user_id)
 
         try:
             review_data = ReviewCreate(**request.json)

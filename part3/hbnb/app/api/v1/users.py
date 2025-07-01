@@ -144,6 +144,7 @@ class UserResource(Resource):
     @api.response(404, 'User not found')
     def delete(self, user_id):
         user_id = get_jwt_identity()
+        user = facade.get_user(user_id)
         """Delete a user"""
         try:
             UUID(user_id)
@@ -154,7 +155,8 @@ class UserResource(Resource):
         if not user_to_delete:
             return {'error': 'User not found'}, 404
 
-        if user_id != str(user_to_delete.id):
+        if (user_id != str(user_to_delete.id)
+            and user.is_admin == False):
             return {'error': "Only an admin or the account owner can delete"
             "this account"}, 403
 

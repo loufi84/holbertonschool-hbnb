@@ -29,7 +29,9 @@ class Review(db.Model):
     comment = db.Column(db.String(2000), nullable=False)
     rating = db.Column(db.Float, nullable=False)
     place = db.Column(db.String, db.ForeignKey('places.id'), nullable=False)
-    user = db.Column(db.String, nullable=False)
+    user_ide = db.Column(db.String, nullable=False)
+    user_first_name = db.Column(db.String, nullable=False)
+    user_last_name = db.Column(db.String, nullable=False)
     booking = db.Column(db.String, db.ForeignKey('bookings.id'), nullable=False)
     created_at = db.Column(
         db.DateTime, default=datetime.now(timezone.utc), nullable=False
@@ -128,6 +130,8 @@ class ReviewPublic(BaseModel):
     comment: str = Field(..., min_length=1, max_length=1000)
     rating: float = Field(..., ge=0, le=5)
     booking: str
+    user_first_name: str
+    user_last_name: str
 
     # Pydantic config to serialize datetime as ISO format strings
     model_config = ConfigDict(
