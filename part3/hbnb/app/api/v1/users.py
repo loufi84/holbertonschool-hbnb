@@ -106,16 +106,25 @@ class UserResource(Resource):
 
         return UserPublic.model_validate(user).model_dump(), 200
 
+    @jwt_required()
     @api.expect(user_update_model)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input or UUID format')
+    @api.response(403, 'Permission error')
     @api.response(404, 'User not found')
     def put(self, user_id):
         """Update an existing user"""
+        current_user_id = get_jwt_identity()
+        current_user = facade.get_user(current_user_id)
         try:
             UUID(user_id)
         except TypeError:
             return {'error': 'Invalid UUID format'}, 400
+
+        if (current_user_id != str(user_id)
+           and current_user.is_admin is False):
+            return {'error': "Only an admin or the account owner can modify "
+                    "this account"}, 403
 
         existing_user = facade.get_user(user_id)
         if not existing_user:
@@ -142,6 +151,7 @@ class UserResource(Resource):
     @jwt_required()
     @api.response(200, 'User deleted successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(403, 'Permission error')
     @api.response(404, 'User not found')
     def delete(self, user_id):
         current_user_id = get_jwt_identity()
@@ -156,7 +166,7 @@ class UserResource(Resource):
         if not user_to_delete:
             return {'error': 'User not found'}, 404
 
-        if (current_user_id != str(user_to_delete.id)
+        if (current_user_id != str(user_id)
            and current_user.is_admin is False):
             return {'error': "Only an admin or the account owner can delete "
                     "this account"}, 403
