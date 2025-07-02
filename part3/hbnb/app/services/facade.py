@@ -123,21 +123,10 @@ class HBnBFacade:
 
     def delete_user(self, user_id):
         """Delete an user by ID."""
-        print("delete_user called with user_id:", user_id)
         user = self.user_repo.get(user_id)
         if not user:
             print(f"User not found for id={user_id}")
             return None
-
-        user_bookings = self.get_booking_list_by_user(user_id)
-        for booking in user_bookings:
-            self.cancel_booking(booking.id)
-
-        user_places = self.place_repo.get_by_attribute(owner_id=user_id)
-        for place in user_places:
-            for review in place.reviews:
-                self.review_repo.delete(review.id)
-            self.place_repo.delete(place.id)
 
         self.user_repo.delete(user_id)
         return ''
