@@ -7,6 +7,9 @@ with validation rules and sensible defaults applied.
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from pydantic import field_validator
 from datetime import datetime, timezone
+from app.models.place import Place
+from app.models.review import Review
+from app.models.booking import Booking
 from typing import Optional
 from extensions import db  # db = SQLAlchemy()
 
@@ -54,8 +57,12 @@ class User(db.Model):
         onupdate=datetime.now(timezone.utc)
         )
     photo_url = db.Column(db.String(2048), nullable=True)
-    places = db.Column(db.JSON, default=list)
-    reviews = db.Column(db.JSON, default=list)
+    places = db.relationship(Place, back_populates='owner_id',
+                             cascade='all, delete-orphan')
+    reviews = db.relationship(Review, back_populates='user_ide',
+                              cascade='all, delete-orphan')
+    bookings = db.relationship(Booking, back_populates='user',
+                               cascade='all, delete-orphan')
 
     def set_first_name(self, first_name):
         self.first_name = first_name

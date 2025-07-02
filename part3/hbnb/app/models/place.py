@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from sqlalchemy import CheckConstraint
 from extensions import db  # db = SQLAlchemy()
 from .review import Review
+from .booking import Booking
 
 # Default image URL to use when no photos are provided for a place
 DEFAULT_PLACE_PHOTO_URL = (
@@ -56,8 +57,9 @@ class Place(db.Model):
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    owner_id = db.Column(db.String, nullable=False)
+    owner_id = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
     rating = db.Column(db.Float, nullable=True)
+    photos_url = db.Column(db.JSON, default=list)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False)
@@ -67,9 +69,10 @@ class Place(db.Model):
         )
     amenities = db.relationship('Amenity', secondary=place_amenities,
                                 back_populates='places')
-    photos_url = db.Column(db.JSON, default=list)
     reviews = db.relationship(Review, back_populates='place_rel',
                               cascade='all, delete-orphan')
+    bookings = db.relationship(Booking, back_populates='place',
+                               cascade='all, delete-orphan')
 
     __table_args__ = (
         CheckConstraint('price >= 0', name='check_price_positive'),

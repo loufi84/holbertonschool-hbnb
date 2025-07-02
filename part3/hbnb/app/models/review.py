@@ -29,7 +29,7 @@ class Review(db.Model):
     comment = db.Column(db.String(2000), nullable=False)
     rating = db.Column(db.Float, nullable=False)
     place = db.Column(db.String, db.ForeignKey('places.id'), nullable=False)
-    user_ide = db.Column(db.String, nullable=False)
+    user_ide = db.Column(db.String, db.ForeignKey('user.id'),nullable=False)
     user_first_name = db.Column(db.String, nullable=False)
     user_last_name = db.Column(db.String, nullable=False)
     booking = db.Column(db.String,
