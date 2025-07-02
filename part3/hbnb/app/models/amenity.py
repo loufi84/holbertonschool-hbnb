@@ -21,7 +21,7 @@ class Amenity(db.Model):
         created_at: Timestamp of creation in UTC.
         updated_at: Optional timestamp for last update in UTC.
     """
-    __tablename__ = 'amenities'
+    __tablename__ = 'amenity'
 
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

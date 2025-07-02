@@ -40,7 +40,7 @@ class User(db.Model):
         places: List of UUIDs referencing places associated with user.
         reviews: List of UUIDs referencing reviews made by user.
     """
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id = db.Column(db.String, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
@@ -57,11 +57,11 @@ class User(db.Model):
         onupdate=datetime.now(timezone.utc)
         )
     photo_url = db.Column(db.String(2048), nullable=True)
-    places = db.relationship(Place, back_populates='owner_id',
+    places = db.relationship(Place, back_populates='owner',
                              cascade='all, delete-orphan')
-    reviews = db.relationship(Review, back_populates='user_ide',
+    reviews = db.relationship(Review, back_populates='user',
                               cascade='all, delete-orphan')
-    bookings = db.relationship(Booking, back_populates='user',
+    bookings = db.relationship(Booking, back_populates='user_rel',
                                cascade='all, delete-orphan')
 
     def set_first_name(self, first_name):

@@ -28,7 +28,7 @@ class Review(db.Model):
     id = db.Column(db.String, primary_key=True)
     comment = db.Column(db.String(2000), nullable=False)
     rating = db.Column(db.Float, nullable=False)
-    place = db.Column(db.String, db.ForeignKey('places.id'), nullable=False)
+    place = db.Column(db.String, db.ForeignKey('place.id'), nullable=False)
     user_ide = db.Column(db.String, db.ForeignKey('user.id'),nullable=False)
     user_first_name = db.Column(db.String, nullable=False)
     user_last_name = db.Column(db.String, nullable=False)
@@ -41,7 +41,12 @@ class Review(db.Model):
         db.DateTime, default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc)
         )
-    place_rel = db.relationship('Place', back_populates='reviews')
+    place_rel = db.relationship(
+        'Place',
+        back_populates='reviews',
+        foreign_keys=[place]
+        )
+    user = db.relationship('User', back_populates='reviews')
 
     __table_args__ = (
         db.CheckConstraint('rating >= 0 AND rating <= 5',

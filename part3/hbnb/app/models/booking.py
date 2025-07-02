@@ -44,8 +44,7 @@ class Booking(db.Model):
         nullable=False
         )
     place = db.Column(db.String, db.ForeignKey('place.id'), nullable=False)
-    place_rel = db.relationship("Place", back_populates='bookings')
-    user = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    users = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(
@@ -55,6 +54,12 @@ class Booking(db.Model):
         db.DateTime, default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc)
         )
+    place_rel = db.relationship(
+        "Place",
+        back_populates='bookings',
+        foreign_keys=[place]
+        )
+    user_rel = db.relationship("User", back_populates='bookings')
 
     __table_args__ = (
         db.CheckConstraint(

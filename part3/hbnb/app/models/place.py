@@ -10,8 +10,8 @@ from typing import Optional, List
 from datetime import datetime, timezone
 from sqlalchemy import CheckConstraint
 from extensions import db  # db = SQLAlchemy()
-from .review import Review
 from .booking import Booking
+
 
 # Default image URL to use when no photos are provided for a place
 DEFAULT_PLACE_PHOTO_URL = (
@@ -23,9 +23,9 @@ DEFAULT_PLACE_PHOTO_URL = (
 
 place_amenities = db.Table(
     'place_amenities',
-    db.Column('place_id', db.String, db.ForeignKey('places.id'),
+    db.Column('place_id', db.String, db.ForeignKey('place.id'),
               primary_key=True),
-    db.Column('amenity.id', db.String, db.ForeignKey('amenities.id'),
+    db.Column('amenity.id', db.String, db.ForeignKey('amenity.id'),
               primary_key=True)
 )
 
@@ -49,7 +49,7 @@ class Place(db.Model):
         reviews: List of Review objects linked to this place.
         rating: Average rating calculated from reviews, default 0.0.
     """
-    __tablename__ = 'places'
+    __tablename__ = 'place'
 
     id = db.Column(db.String, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
@@ -69,10 +69,11 @@ class Place(db.Model):
         )
     amenities = db.relationship('Amenity', secondary=place_amenities,
                                 back_populates='places')
-    reviews = db.relationship(Review, back_populates='place_rel',
+    reviews = db.relationship("Review", back_populates='place_rel',
                               cascade='all, delete-orphan')
-    bookings = db.relationship(Booking, back_populates='place',
-                               cascade='all, delete-orphan')
+    bookings = db.relationship(Booking, back_populates='place_rel',
+                               cascade='all, delete-orphan', foreign_keys=[Booking.place])
+    owner = db.relationship('User', back_populates='places')
 
     __table_args__ = (
         CheckConstraint('price >= 0', name='check_price_positive'),
