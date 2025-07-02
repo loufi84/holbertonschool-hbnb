@@ -10,7 +10,7 @@ from datetime import datetime
 from blacklist import blacklist
 from pydantic import ValidationError, EmailStr, TypeAdapter
 from uuid import UUID
-from app.models.user import UserCreate, LoginRequest
+from app.models.user import UserCreate, LoginRequest, UserUpdate
 from app.models.user import UserPublic, RevokedToken, AdminCreate
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
@@ -130,7 +130,11 @@ class UserResource(Resource):
         if not existing_user:
             return {'error': 'User not found'}, 404
 
-        update_data = request.json
+        try:
+            update_data = (UserUpdate.model_validate(request.json)
+                           .model_dump(exclude_unset=True))
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
         if "email" in update_data:
             try:
                 TypeAdapter(EmailStr).validate_python(update_data["email"])

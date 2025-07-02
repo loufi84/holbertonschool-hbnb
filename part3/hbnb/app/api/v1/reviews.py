@@ -95,12 +95,15 @@ class ReviewResource(Resource):
 
         return ReviewPublic.model_validate(review).model_dump(), 200
 
+    @jwt_required()
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data or UUID format')
     def put(self, review_id):
         """Update a review's information"""
+        current_user_id = get_jwt_identity()
+
         try:
             UUID(review_id)
         except ValueError:
@@ -109,6 +112,10 @@ class ReviewResource(Resource):
         review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
+
+        if current_user_id != str(review.user_ide):
+            return {'error': "Only the account owner can update "
+                    "this review"}, 403
 
         update_data = request.json
         place_id = review.place

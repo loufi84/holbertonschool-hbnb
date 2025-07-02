@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models.place import PlacePublic
+from app.models.place import PlacePublic, PlaceUpdate
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
@@ -138,7 +138,11 @@ class PlaceResource(Resource):
            and user.is_admin is False):
             return {'error': 'You must own this place to modify it'}, 403
 
-        update_data = request.json
+        try:
+            update_data = (PlaceUpdate.model_validate(request.json)
+                           .model_dump(exclude_unset=True))
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
         try:
             updated_place = facade.update_place(place_id, update_data)
         except ValidationError as e:

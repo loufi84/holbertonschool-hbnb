@@ -82,6 +82,7 @@ class UserCreate(BaseModel):
         last_name: Last name, required, 1-50 chars, cannot be blank.
         email: Valid email address.
         password: Raw password, required, 1-50 chars, cannot be blank.
+        photo_url: Url for an avatar.
     """
 
     first_name: str = Field(..., min_length=1, max_length=50)
@@ -102,13 +103,53 @@ class UserCreate(BaseModel):
     def no_blank_strings(cls, value: str) -> str:
         """
         Validates that the given field is not empty or only whitespace.
-
         Args:
             value (str): The input string value.
-
         Raises:
             ValueError: If the string is empty or only whitespace.
+        Returns:
+            str: The trimmed string value.
+        """
+        value = value.strip()
+        if not value:
+            raise ValueError("Field cannot be empty or just whitespace")
+        return value
 
+
+class UserUpdate(BaseModel):
+    """
+    Model used when updating a new user account.
+
+    Fields:
+        first_name: First name, required, 1-50 chars, cannot be blank.
+        last_name: Last name, required, 1-50 chars, cannot be blank.
+        email: Valid email address.
+        password: Raw password, required, 1-50 chars, cannot be blank.
+        photo_url: Url for an avatar.
+    """
+
+    first_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    last_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(None, min_length=1, max_length=50)
+    photo_url: Optional[str] = None
+
+    @field_validator("photo_url")
+    @classmethod
+    def set_default_photo(cls, photo_url):
+        if not photo_url:
+            return DEFAULT_USER_PHOTO_URL
+        return photo_url
+
+    @field_validator('first_name', 'last_name', 'password')
+    @classmethod
+    def no_blank_strings(cls, value: str) -> str:
+        """
+        Validates that the given field is not empty or only whitespace.
+        Args:
+            value (str): The input string value.
+        Raises:
+            ValueError: If the string is empty or only whitespace.
         Returns:
             str: The trimmed string value.
         """

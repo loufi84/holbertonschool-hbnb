@@ -25,7 +25,7 @@ place_amenities = db.Table(
     'place_amenities',
     db.Column('place_id', db.String, db.ForeignKey('place.id'),
               primary_key=True),
-    db.Column('amenity_id', db.String, db.ForeignKey('amenity.id'),
+    db.Column('amenity.id', db.String, db.ForeignKey('amenity.id'),
               primary_key=True)
 )
 
@@ -219,7 +219,7 @@ class PlaceCreate(BaseModel):
     amenity_ids: Optional[List[uuid.UUID]] = []
 
     @field_validator('price')
-    def round_price(cls, v: float) -> float:
+    def round_price(cls, value: float) -> float:
         """
         Round the price to 2 decimal places for consistency.
 
@@ -229,7 +229,7 @@ class PlaceCreate(BaseModel):
         Returns:
             float: Rounded price value.
         """
-        return round(v, 2)
+        return round(value, 2)
 
     @field_validator('title', 'description')
     def no_blank_strings(cls, value: str) -> str:
@@ -251,6 +251,56 @@ class PlaceCreate(BaseModel):
             raise ValueError("Field cannot be empty or just whitespace")
         return value
 
+
+class PlaceUpdate(BaseModel):
+    """
+    Schema for updating a Place object. All attributes are optional.
+
+    Attributes:
+        title: Title of the place (required, 1 to 100 characters).
+        description: Description of the place (required, 1 to 1000 characters).
+        price: Price for the place (required, must be non-negative).
+        latitude: Latitude coordinate (required, between -90 and 90).
+        longitude: Longitude coordinate (required, between -180 and 180).
+        rating: Initial rating, defaults to 0.0.
+        owner_id: Owner's user ID.
+        amenity_ids: list of UUIDs referencing amenities.
+    """
+
+    title: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, min_length=1, max_length=1000)
+    price: Optional[float] = Field(None, ge=0)
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
+    amenity_ids: Optional[List[uuid.UUID]] = []
+
+    @field_validator('price')
+    def round_price(cls, value: float) -> float:
+        """
+        Round the price to 2 decimal places for consistency.
+        Args:
+            v (float): Original price value.
+        Returns:
+            float: Rounded price value.
+        """
+        return round(value, 2)
+
+    @field_validator('title', 'description')
+    def no_blank_strings(cls, value: str) -> str:
+        """
+        Ensure that title and description fields are
+        not blank or whitespace-only.
+        Args:
+            value (str): Field value to validate.
+        Raises:
+            ValueError: If the value is empty or only whitespace.
+        Returns:
+            str: Trimmed string value.
+        """
+        value = value.strip()
+        if not value:
+            raise ValueError("Field cannot be empty or just whitespace")
+        return value
 
 class PlacePublic(BaseModel):
     """
