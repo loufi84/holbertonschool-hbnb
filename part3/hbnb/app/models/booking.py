@@ -60,6 +60,7 @@ class Booking(db.Model):
         foreign_keys=[place]
         )
     user_rel = db.relationship("User", back_populates='bookings')
+    reviews = db.relationship('Review', back_populates='booking_rel')
 
     __table_args__ = (
         db.CheckConstraint(
