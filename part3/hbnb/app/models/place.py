@@ -59,7 +59,6 @@ class Place(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     owner_id = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
     rating = db.Column(db.Float, nullable=True)
-    photos_url = db.Column(db.JSON, default=list)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False)
@@ -67,6 +66,7 @@ class Place(db.Model):
         db.DateTime, default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc)
         )
+    photos_url = db.Column(db.JSON, default=list)
     amenities = db.relationship('Amenity', secondary=place_amenities,
                                 back_populates='places')
     reviews = db.relationship("Review", back_populates='place_rel',
