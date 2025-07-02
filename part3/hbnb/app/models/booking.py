@@ -44,7 +44,7 @@ class Booking(db.Model):
         nullable=False
         )
     place = db.Column(db.String, db.ForeignKey('place.id'), nullable=False)
-    users = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    user = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(
