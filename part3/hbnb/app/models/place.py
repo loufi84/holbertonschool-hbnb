@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from sqlalchemy import CheckConstraint
 from extensions import db  # db = SQLAlchemy()
 from .booking import Booking
-
+import re
 
 # Default image URL to use when no photos are provided for a place
 DEFAULT_PLACE_PHOTO_URL = (
@@ -246,7 +246,7 @@ class PlaceCreate(BaseModel):
         Returns:
             str: Trimmed string value.
         """
-        value = value.strip()
+        value = re.sub(r'\s+', ' ', value).strip()
         if not value:
             raise ValueError("Field cannot be empty or just whitespace")
         return value
@@ -297,7 +297,7 @@ class PlaceUpdate(BaseModel):
         Returns:
             str: Trimmed string value.
         """
-        value = value.strip()
+        value = re.sub(r'\s+', ' ', value).strip()
         if not value:
             raise ValueError("Field cannot be empty or just whitespace")
         return value

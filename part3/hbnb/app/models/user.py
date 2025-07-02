@@ -12,6 +12,7 @@ from app.models.review import Review
 from app.models.booking import Booking
 from typing import Optional
 from extensions import db  # db = SQLAlchemy()
+import re
 
 
 # Default profile picture URL used when no photo_url is provided by the user
@@ -110,7 +111,7 @@ class UserCreate(BaseModel):
         Returns:
             str: The trimmed string value.
         """
-        value = value.strip()
+        value = re.sub(r'\s+', ' ', value).strip()
         if not value:
             raise ValueError("Field cannot be empty or just whitespace")
         return value
@@ -153,7 +154,7 @@ class UserUpdate(BaseModel):
         Returns:
             str: The trimmed string value.
         """
-        value = value.strip()
+        value = re.sub(r'\s+', ' ', value).strip()
         if not value:
             raise ValueError("Field cannot be empty or just whitespace")
         return value

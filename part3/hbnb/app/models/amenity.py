@@ -39,7 +39,6 @@ class Amenity(db.Model):
     def set_name(self, name: str):
         """
         Update the amenity's name and refresh the updated_at timestamp.
-
         Args:
             name (str): New name for the amenity.
         """
@@ -49,7 +48,6 @@ class Amenity(db.Model):
     def set_description(self, description: str):
         """
         Update the amenity's description and refresh the updated_at timestamp.
-
         Args:
             description (str): New description for the amenity.
         """
@@ -61,7 +59,6 @@ class AmenityCreate(BaseModel):
     """
     Schema for creating an amenity with validation that
     'name' and 'description' are non-empty and non-whitespace strings.
-
     Attributes:
         name: Name of the amenity.
         description: Description of the amenity.
@@ -76,13 +73,10 @@ class AmenityCreate(BaseModel):
         """
         Validate that 'name' and 'description'
         fields are not empty or whitespace only.
-
         Args:
             values (dict): The input values to validate.
-
         Raises:
             ValueError: If either field is empty or whitespace only.
-
         Returns:
             dict: The validated and stripped values.
         """

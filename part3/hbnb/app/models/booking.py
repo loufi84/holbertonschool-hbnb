@@ -7,6 +7,7 @@ enforcing constraints such as valid date ranges and status values.
 from extensions import db  # db = SQLAlchemy()
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, model_validator, ConfigDict
+from typing import Optional
 from enum import Enum
 
 
@@ -104,7 +105,6 @@ class CreateBooking(BaseModel):
     """
     Schema used for booking creation, enforcing that start_date
     must be strictly before end_date.
-
     Attributes:
         start_date: Desired start datetime of the booking.
         end_date: Desired end datetime of the booking.
@@ -117,13 +117,10 @@ class CreateBooking(BaseModel):
     def check_dates(cls, values):
         """
         Validator to ensure start_date is before end_date.
-
         Args:
             values (dict): Input values dictionary.
-
         Raises:
             ValueError: If start_date is not before end_date.
-
         Returns:
             dict: Validated values.
         """
@@ -133,6 +130,36 @@ class CreateBooking(BaseModel):
             raise ValueError("Start date must be before end date")
         return values
 
+
+class UpdateBooking(BaseModel):
+    """
+    Schema used for booking update, enforcing that start_date
+    must be strictly before end_date.
+    Attributes:
+        start_date: Desired start datetime of the booking.
+        end_date: Desired end datetime of the booking.
+    """
+
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)
+    status: Optional[str] = None
+
+    @model_validator(mode='before')
+    def check_dates(cls, values):
+        """
+        Validator to ensure start_date is before end_date.
+        Args:
+            values (dict): Input values dictionary.
+        Raises:
+            ValueError: If start_date is not before end_date.
+        Returns:
+            dict: Validated values.
+        """
+        start = values.get("start_date")
+        end = values.get("end_date")
+        if start and end and start >= end:
+            raise ValueError("Start date must be before end date")
+        return values
 
 class BookingPublic(BaseModel):
     """

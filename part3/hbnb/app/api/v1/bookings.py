@@ -7,6 +7,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from app.models.booking import CreateBooking, BookingPublic, BookingStatus
+from app.models.booking import UpdateBooking
 from pydantic import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
@@ -18,7 +19,6 @@ api = Namespace('bookings', description='Booking operations')
 
 # Swagger model for booking
 booking_model = api.model('Booking', {
-    'place_id': fields.String(required=True, description='ID of the place'),
     'start_date': fields.DateTime(required=True, description='Start date'),
     'end_date': fields.DateTime(required=True, description='End date')
 })
@@ -42,18 +42,41 @@ def ensure_aware(dt):
 
 @api.route('/')
 class BookingList(Resource):
+    @api.response(200, 'List of bookings retrieved successfully')
+    def get(self):
+        """Retrieve a list of all bookings"""
+        bookings = facade.get_all_bookings()
+        if not bookings:
+            return {"message": "No booking yet"}, 200
+
+        now = datetime.now(timezone.utc)
+
+        booking_list = []
+        for booking in bookings:
+            booking_end_aware = ensure_aware(booking.end_date)
+            if (booking.status == BookingStatus.PENDING.value
+                                  and now > booking_end_aware):
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
+
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
+
+        return booking_list, 200
+
+@api.route('/<place_id>')
+class BookingCreate(Resource):
     @jwt_required()
     @api.expect(booking_model, validate=True)
     @api.response(201, 'Booking succesfully created')
     @api.response(400, 'Invalid input data')
-    def post(self):
+    def post(self, place_id):
         """Create a new booking"""
         user_id = get_jwt_identity()
         data = request.json
-        place_id = data.get("place_id")
 
         try:
-            uuid.UUID(data.get("place_id"))
+            uuid.UUID(place_id)
             booking_data = CreateBooking(**data)
         except ValidationError as e:
             return {'errors': json.loads(e.json())}, 400
@@ -77,29 +100,7 @@ class BookingList(Resource):
 
         return (BookingPublic.model_validate(
             new_booking).model_dump(mode='json')), 201
-
-    @api.response(200, 'List of bookings retrieved successfully')
-    def get(self):
-        """Retrieve a list of all bookings"""
-        bookings = facade.get_all_bookings()
-        if not bookings:
-            return {"message": "No booking yet"}, 200
-
-        now = datetime.now(timezone.utc)
-
-        booking_list = []
-        for booking in bookings:
-            booking_end_aware = ensure_aware(booking.end_date)
-            if (booking.status == BookingStatus.PENDING.value
-                                  and now > booking_end_aware):
-                booking.set_status(BookingStatus.DONE.value)
-                facade.booking_repo.update(booking.id, booking.__dict__)
-
-            booking_list.append(BookingPublic.model_validate(
-                booking).model_dump(mode='json'))
-
-        return booking_list, 200
-
+    
 
 @api.route('/<booking_id>')
 class BookingResource(Resource):
@@ -145,15 +146,15 @@ class BookingResource(Resource):
             return {'error': 'Booking not found'}, 404
 
         current_user = get_jwt_identity()
-        update_data = request.json
-
         try:
-            if update_data.get('start_date'):
-                update_data['start_date'] = isoparse(update_data['start_date'])
-            if update_data.get('end_date'):
-                update_data['end_date'] = isoparse(update_data['end_date'])
-        except ValueError as e:
-            return {'error': 'Invalid date format'}, 400
+            update_data = (UpdateBooking.model_validate(request.json)
+                           .model_dump(exclude_unset=True))
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
+
+        now = datetime.now(timezone.utc)
+        if 'start_date' in update_data and update_data['start_date'] < now:
+            return {'error': 'Cannot create a booking in the past'}, 400
 
         if "status" in update_data:
             place = facade.get_place(booking.place)
