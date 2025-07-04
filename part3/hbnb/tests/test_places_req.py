@@ -103,15 +103,8 @@ assert token, "No access token"
 # Return the good authorization header
 headers = {"Authorization": f"Bearer {token}"}
 
-# Delete the place
-res = requests.delete(f"{BASE_URL}/places/{place_id}", headers=headers)
-print("Status:", res.status_code)
-try:
-    print("Body:", res.json())
-except ValueError:
-    print("Body (Non-JSON):", res.text)
 
-# Delete an user
+# Delete an user, this also delete the place created
 res = requests.delete(f"{BASE_URL}/users/{user1_id}", headers=headers)
 print("Status:", res.status_code)
 try:
