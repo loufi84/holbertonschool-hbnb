@@ -51,6 +51,7 @@ login_model = api.model('Login', {
 
 @api.route('/')
 class UserList(Resource):
+    @api.doc(security=[])
     @api.expect(user_model)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered or invalid input')
@@ -68,6 +69,7 @@ class UserList(Resource):
 
         return UserPublic.model_validate(new_user).model_dump(), 201
 
+    @api.doc(security=[])
     @api.doc(params={'email': 'Filter user by email (optional)'})
     @api.response(200, 'User(s) found')
     @api.response(404, 'User not found')
@@ -90,6 +92,7 @@ class UserList(Resource):
 
 @api.route('/<user_id>')
 class UserResource(Resource):
+    @api.doc(security=[])
     @api.response(200, 'user details retrieved successfully')
     @api.response(404, 'User not found')
     @api.response(400, 'Invalid UUID format')
@@ -97,7 +100,7 @@ class UserResource(Resource):
         """Get user details by ID"""
         try:
             UUID(user_id)
-        except TypeError:
+        except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
         user = facade.get_user(user_id)
@@ -110,7 +113,8 @@ class UserResource(Resource):
     @api.expect(user_update_model)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input or UUID format')
-    @api.response(403, 'Permission error')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
     @api.response(404, 'User not found')
     def put(self, user_id):
         """Update an existing user"""
@@ -155,7 +159,8 @@ class UserResource(Resource):
     @jwt_required()
     @api.response(200, 'User deleted successfully')
     @api.response(400, 'Invalide UUID format')
-    @api.response(403, 'Permission error')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
     @api.response(404, 'User not found')
     def delete(self, user_id):
         current_user_id = get_jwt_identity()
@@ -181,10 +186,10 @@ class UserResource(Resource):
 
 @api.route('/login')
 class Login(Resource):
+    @api.doc(security=[])
     @api.expect(login_model, validate=True)
-    @api.response(201, 'Token created')
-    @api.response(400, 'Pydantic validation error')
-    @api.response(401, 'Bad credentials')
+    @api.response(200, 'Token created')
+    @api.response(400, 'Invalid password or email')
     @api.response(404, 'User not found')
     def post(self):
         """Login the user"""
@@ -201,7 +206,7 @@ class Login(Resource):
             facade.passwd_hasher.verify(
                 user.hashed_password, login_data.password)
         except VerifyMismatchError:
-            return {'error': 'Invalid password or email'}, 401
+            return {'error': 'Invalid password or email'}, 400
 
         access_token = create_access_token(
             identity=user.id,
@@ -217,6 +222,8 @@ class Login(Resource):
 @api.route('/refresh')
 class TokenRefresh(Resource):
     @jwt_required()
+    @api.response(200, 'Refresh token created')
+    @api.response(401, 'Unauthorized')
     def post(self):
         identity = get_jwt_identity()
         new_token = create_access_token(identity=identity)
@@ -225,6 +232,8 @@ class TokenRefresh(Resource):
 
 @api.route('/logout')
 class Logout(Resource):
+    @api.response(200, 'Access token revoked')
+    @api.response(401, 'Unauthorized')
     @jwt_required()
     def post(self):
         jwt_data = get_jwt()
@@ -240,6 +249,8 @@ class Logout(Resource):
 
 @api.route('/logout_refresh')
 class LogoutRefresh(Resource):
+    @api.response(200, 'Refresh token revoked')
+    @api.response(401, 'Unauthorized')
     @jwt_required(refresh=True)
     def post(self):
         jwt_data = get_jwt()
@@ -258,13 +269,14 @@ class AdminCreation(Resource):
     @api.expect(user_model)
     @api.response(201, 'Admin successfully created')
     @api.response(400, 'Email already registered or invalid input')
-    @api.response(401, 'You are not allowed to create an admin')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
     @jwt_required()
     def post(self):
         identity = get_jwt_identity()
         user = facade.get_user(identity)
         if not user.is_admin:
-            return {'error': 'You are not allowed'}, 401
+            return {'error': 'You are not allowed'}, 403
         try:
             admin_data = AdminCreate(**request.json)
         except ValidationError as e:

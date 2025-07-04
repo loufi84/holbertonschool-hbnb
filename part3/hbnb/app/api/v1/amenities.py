@@ -28,7 +28,8 @@ class AmenityList(Resource):
     @api.expect(amenity_model)
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Amenity already exists or invalid input data')
-    @api.response(403, 'Admin privileges required')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
     def post(self):
         """Register a new amenity"""
         user_id = get_jwt_identity()
@@ -47,6 +48,7 @@ class AmenityList(Resource):
         new_amenity = facade.create_amenity(amenity_data.model_dump())
         return AmenityPublic.model_validate(new_amenity).model_dump(), 200
 
+    @api.doc(security=[])
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
         """Get a list of amenities"""
@@ -59,13 +61,15 @@ class AmenityList(Resource):
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):
+    @api.doc(security=[])
     @api.response(200, 'Amenity details retrieved successfully')
+    @api.response(400, 'Invalid input data')
     @api.response(404, 'Amenity not found')
     def get(self, amenity_id):
         """Get amenity details by ID"""
         try:
             UUID(amenity_id)
-        except TypeError:
+        except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
         amenity = facade.get_amenity(amenity_id)
@@ -77,8 +81,10 @@ class AmenityResource(Resource):
     @jwt_required()
     @api.expect(amenity_model)
     @api.response(200, 'Amenity updated successfully')
-    @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Amenity not found')
     def put(self, amenity_id):
         """Update an amenity's information"""
         user_id = get_jwt_identity()
@@ -106,6 +112,8 @@ class AmenityResource(Resource):
     @jwt_required()
     @api.response(200, 'Amenity deleted successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
     @api.response(404, 'Amenity not found')
     def delete(self, amenity_id):
         """Delete an amenity"""

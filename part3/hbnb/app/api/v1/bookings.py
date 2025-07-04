@@ -42,6 +42,7 @@ def ensure_aware(dt):
 
 @api.route('/')
 class BookingList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of bookings retrieved successfully')
     def get(self):
         """Retrieve a list of all bookings"""
@@ -70,6 +71,7 @@ class BookingCreate(Resource):
     @api.expect(booking_model, validate=True)
     @api.response(201, 'Booking succesfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(401, 'Unauthorized')
     def post(self, place_id):
         """Create a new booking"""
         user_id = get_jwt_identity()
@@ -104,8 +106,10 @@ class BookingCreate(Resource):
 
 @api.route('/<booking_id>')
 class BookingResource(Resource):
+    @api.doc(security=[])
     @api.response(200, 'Booking details retrieved successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(401, 'Unauthorized')
     @api.response(404, 'Booking not found')
     def get(self, booking_id):
         """Get booking details by ID"""
@@ -131,8 +135,10 @@ class BookingResource(Resource):
 
     @api.expect(booking_update_model)
     @api.response(200, 'Booking updated successfully')
-    @api.response(404, 'Booking not found')
     @api.response(400, 'Invalid input data or UUID format')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Booking not found')
     @jwt_required()
     def put(self, booking_id):
         """Update a booking's information"""
@@ -180,6 +186,7 @@ class BookingResource(Resource):
 
 @api.route('/places/<place_id>/booking')
 class PlaceBookingList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of booking for the place retrieved successfully')
     @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Place not found')
@@ -189,6 +196,9 @@ class PlaceBookingList(Resource):
             uuid.UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
+        place = facade.get_place(place_id)
+        if not place:
+            return {'message': 'Place not found'}, 404
         bookings = facade.get_booking_list_by_place(place_id)
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
@@ -211,16 +221,19 @@ class PlaceBookingList(Resource):
 
 @api.route('/places/<place_id>/pending_booking')
 class PlaceBookingList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of booking for the place retrieved successfully')
     @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all pending bookings for a specific place"""
-        print(f"GET /places/{place_id}/pending_booking called")
         try:
             uuid.UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
+        place = facade.get_place(place_id)
+        if not place:
+            return {'message': 'Place not found'}, 404
         bookings = facade.get_pending_booking_list_by_place(place_id)
         if not bookings:
             return {'message': 'No pending booking for this place yet'}, 200
@@ -242,14 +255,19 @@ class PlaceBookingList(Resource):
 
 @api.route('/users/<user_id>/booking')
 class UserBookingList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of booking of the user retrieved successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(404, 'User not found')
     def get(self, user_id):
         """Get all bookings of a user"""
         try:
             uuid.UUID(user_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
+        user = facade.get_place(user_id)
+        if not user:
+            return {'message': 'User not found'}, 404
         bookings = facade.get_booking_list_by_user(user_id)
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200

@@ -24,6 +24,7 @@ review_model = api.model('Review', {
 
 @api.route('/')
 class ReviewList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
         """Retrieve a list of all reviews"""
@@ -42,6 +43,7 @@ class CreateReview(Resource):
     @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(401, 'Unauthorized')
     @api.response(403, 'Permission error')
     @api.response(404, 'Place not found')
     def post(self, booking_id):
@@ -85,6 +87,7 @@ class CreateReview(Resource):
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
+    @api.doc(security=[])
     @api.response(200, 'Review details retrieved successfully')
     @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Review not found')
@@ -107,6 +110,7 @@ class ReviewResource(Resource):
     @api.response(404, 'Review not found')
     @api.response(403, 'Permission error')
     @api.response(400, 'Invalid input data or UUID format')
+    @api.response(401, 'Unauthorized')
     def put(self, review_id):
         """Update a review's information"""
         current_user_id = get_jwt_identity()
@@ -144,6 +148,7 @@ class ReviewResource(Resource):
     @jwt_required()
     @api.response(200, 'Review deleted successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(401, 'Unauthorized')
     @api.response(403, 'Permission error')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
@@ -170,6 +175,7 @@ class ReviewResource(Resource):
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of reviews for the place retrieved successfully')
     @api.response(400, 'Invalid UUID format')
     @api.response(404, 'Place not found')

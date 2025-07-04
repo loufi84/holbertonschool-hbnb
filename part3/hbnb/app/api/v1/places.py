@@ -51,7 +51,6 @@ class PlaceList(Resource):
     @jwt_required()
     @api.expect(place_model)
     @api.response(201, 'Place successfully created')
-    @api.response(403, 'User must be connected to create a place')
     @api.response(400, 'Invalid input')
     @api.response(401, 'Unauthorized')
     def post(self):
@@ -63,8 +62,6 @@ class PlaceList(Resource):
             new_place = facade.create_place(data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
-        except Exception as e:
-            return {'error': str(e)}, 500
         amenities = []
         for amenity in new_place.amenities:
             amenities.append({
@@ -74,6 +71,7 @@ class PlaceList(Resource):
             })
         return PlacePublic.model_validate(new_place).model_dump(), 201
 
+    @api.doc(security=[])
     @api.response(200, 'Places found')
     @api.response(404, 'No places found')
     def get(self):
@@ -91,7 +89,9 @@ class PlaceList(Resource):
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
+    @api.doc(security=[])
     @api.response(200, 'Place(s) found')
+    @api.response(400, 'Invalid UUID format')
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get a place by ID"""
@@ -99,7 +99,7 @@ class PlaceResource(Resource):
             try:
                 UUID(place_id)
             except ValueError:
-                return {'error': 'invalid UUID format'}
+                return {'error': 'invalid UUID format'}, 400
 
             place = facade.get_place(place_id)
             if not place:
@@ -119,6 +119,7 @@ class PlaceResource(Resource):
     @api.expect(place_model_update)
     @api.response(200, 'Place successfully updated')
     @api.response(400, 'Invalid input or UUID')
+    @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
     @api.response(404, 'Place not found')
     def put(self, place_id):
@@ -160,8 +161,9 @@ class PlaceResource(Resource):
 
     @jwt_required()
     @api.response(200, 'Place successfully deleted')
-    @api.response(400, 'Invalid ID')
-    @api.response(401, 'Invalid credentials')
+    @api.response(400, 'Invalid UUID')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
     @api.response(404, 'Place not found')
     def delete(self, place_id):
         """Method to delete a place"""
