@@ -2,6 +2,7 @@ import requests
 
 BASE_URL = "http://localhost:5001/api/v1"
 
+# Testing user creation
 def register(email):
     res = requests.post(f"{BASE_URL}/users", json={
         "email": email,

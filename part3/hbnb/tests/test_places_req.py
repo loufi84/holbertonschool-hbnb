@@ -18,8 +18,10 @@ def register(email):
     else:
         raise Exception(f"Unexpected response: {res.status_code} - {res.text}")
 
-user_id = register("user1@example.com")
-assert user_id is not None
+user1_id = register("user1@example.com")
+assert user1_id is not None
+user2_id = register("user2@example.com")
+assert user2_id is not None
 
 # Login user
 res = requests.post(f"{BASE_URL}/users/login", json={
@@ -51,6 +53,56 @@ except ValueError:
 
 place_id = data.get("id")
 
+# Update the place
+res = requests.put(f"{BASE_URL}/places/{place_id}", json={
+    "title": "C'est une maison modifiée"
+}, headers=headers)
+print("Status:", res.status_code)
+try:
+    print("Body:", res.json())
+except ValueError:
+    print("Body (Non-JSON):", res.text)
+
+# Login the second user
+res = requests.post(f"{BASE_URL}/users/login", json={
+    "email": "user2@example.com",
+    "password": "123456"
+})
+
+token = res.json().get("access_token")
+assert token, "No access token"
+
+# Modify the authorization header
+headers = {"Authorization": f"Bearer {token}"}
+
+# User2 tries to delete user1 place
+res = requests.delete(f"{BASE_URL}/places/{place_id}", headers=headers)
+print("Status", res.status_code)
+try:
+    print("Body:", res.json())
+except ValueError:
+    print("Body (Non-JSON):", res.text)
+
+# User2 deletes itself (keep the DB clean)
+res = requests.delete(f"{BASE_URL}/users/{user2_id}", headers=headers)
+print("Status:", res.status_code)
+try:
+    print("Body:", res.json())
+except ValueError:
+    print("Body (Non-JSON):", res.text)
+
+# User1 log again
+res = requests.post(f"{BASE_URL}/users/login", json={
+    "email": "user1@example.com",
+    "password": "123456"
+})
+
+token = res.json().get("access_token")
+assert token, "No access token"
+
+# Return the good authorization header
+headers = {"Authorization": f"Bearer {token}"}
+
 # Delete the place
 res = requests.delete(f"{BASE_URL}/places/{place_id}", headers=headers)
 print("Status:", res.status_code)
@@ -60,7 +112,7 @@ except ValueError:
     print("Body (Non-JSON):", res.text)
 
 # Delete an user
-res = requests.delete(f"{BASE_URL}/users/{user_id}", headers=headers)
+res = requests.delete(f"{BASE_URL}/users/{user1_id}", headers=headers)
 print("Status:", res.status_code)
 try:
     print("Body:", res.json())
