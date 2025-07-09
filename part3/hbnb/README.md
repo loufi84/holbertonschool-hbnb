@@ -1,4 +1,13 @@
-# HBnB Project — Part 3: Enhanced Backend with Authentication and Database Integration
+<p align="center">
+  <a href="https://hbnb.fly.dev/">
+    <img src="https://s3.amazonaws.com/intranet-projects-files/holbertonschool-higher-level_programming+/263/HBTN-hbnb-Final.png" alt="Holberton School HBnB logo">
+  </a>
+</p>
+<center>
+<h1>HBnB Project — Part 3:</h1>
+<em>Enhanced Backend with Authentication and Database Integration</em>
+
+</center>
 
 ## 📖 Project Overview
 
