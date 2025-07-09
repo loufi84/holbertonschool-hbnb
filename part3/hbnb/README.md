@@ -1,6 +1,6 @@
-HBnB Project — Part 3: Enhanced Backend with Authentication and Database Integration
+# HBnB Project — Part 3: Enhanced Backend with Authentication and Database Integration
 
-📖 Project Overview
+## 📖 Project Overview
 
 This repository contains Part 3 of the HBnB Project. In this phase, we significantly enhance the backend by introducing JWT authentication, role-based access control, and persistent database integration using SQLAlchemy with SQLite (for development) and preparation for MySQL (for production).
 
@@ -8,22 +8,22 @@ We’re transitioning from a prototype to a real-world backend architecture that
 
 ⸻
 
-🚀 Objectives
+## 🚀 Objectives
 
 By the end of this phase, we aim to:
-    •   Secure the API with JWT-based authentication (Flask-JWT-Extended),
-    •   Implement role-based access control, using is_admin flag on users,
-    •   Replace in-memory storage with SQLite + SQLAlchemy ORM,
-    •   Define and map database relationships between all entities,
-    •   Visualize the database schema,
-    •   Enforce data consistency and validation in models and routes.
+
++ Secure the API with JWT-based authentication (Flask-JWT-Extended),
++ Implement role-based access control, using is_admin flag on users,
++ Replace in-memory storage with SQLite + SQLAlchemy ORM,
++ Define and map database relationships between all entities,
++ Visualize the database schema,
++ Enforce data consistency and validation in models and routes.
 
 ⸻
 
-🗂 Project Structure
+## 🗂 Project Structure
 
-```
-hbnb/
+```hbnb/
 ├── app/
 │   ├── __init__.py
 │   ├── api/
@@ -58,59 +58,56 @@ hbnb/
 ├── run.py
 ├── SQL.sql
 ├── tests/
-└── utils.py
-```
+└── utils.py```
 
 ⸻
 
-🔧 Technologies Used
+## 🔧 Technologies Used
 
-    Python 3.x
-    Flask
-    Flask-RESTx
-    Flask-JWT-Extended
-    SQLAlchemy
-    SQLite
-    argon2 (for secure password hashing)
-    draw.io (for ER diagrams)
-    Pydantic
-
-⸻
-
-🧩 Key Features
-
-    •   JWT Authentication: Secure login/logout and token-based access to protected endpoints,
-    •   Role-Based Access Control: Admin vs. regular user permissions (e.g., only admins can create an amenity),
-    •   Persistent Storage: Switched from in-memory to SQLite + SQLAlchemy ORM for full persistence,
-    •   Entity Relationship Diagram: Design and visualize relational database schemas with draw.io,
-    •   Validation & Error Handling: Model-level and route-level data checks and exception handling.
+- Python 3.x
+- Flask
+- Flask-RESTx
+- Flask-JWT-Extended
+- SQLAlchemy
+- SQLite
+- argon2 (for secure password hashing)
+- draw.io (for ER diagrams)
+- Pydantic
 
 ⸻
 
-📚 Learning Outcomes
+## 🧩 Key Features
 
-    •   Implement secure login/auth flows using JWT tokens,
-    •   Enforce fine-grained permissions based on user roles,
-    •   Manage persistent data with SQLAlchemy ORM,
-    •   Design and visualize relational database schemas with draw.io,
-    •   Prepare backend architecture for deployment in real environments.
++ JWT Authentication: Secure login/logout and token-based access to protected endpoints,
++ Role-Based Access Control: Admin vs. regular user permissions (e.g., only admins can create an amenity),
++ Persistent Storage: Switched from in-memory to SQLite + SQLAlchemy ORM for full persistence,
++ Entity Relationship Diagram: Design and visualize relational database schemas with draw.io,
++ Validation & Error Handling: Model-level and route-level data checks and exception handling.
 
 ⸻
 
-🛠 How to Run
+## 📚 Learning Outcomes
+
++ Implement secure login/auth flows using JWT tokens,
++ Enforce fine-grained permissions based on user roles,
++ Manage persistent data with SQLAlchemy ORM,
++ Design and visualize relational database schemas with draw.io,
++ Prepare backend architecture for deployment in real environments.
+
+⸻
+
+## 🛠 How to Run
 
 1️⃣ Clone the repository:
 
-```git clone https://github.com/Proser-V/holbertonschool-hbnb.git```
-```cd holbertonschool-hbnb/part3/hbnb```
+```git clone https://github.com/Proser-V/holbertonschool-hbnb.git
+cd holbertonschool-hbnb/part3/hbnb```
 
 2️⃣ Install dependencies:
 
-```
-python3 -m venv venv
+```python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-```
+pip install -r requirements.txt```
 
 3️⃣ Run the application:
 
@@ -124,14 +121,14 @@ pip install -r requirements.txt
 
 ⸻
 
-🧪 Testing
+## 🧪 Testing
 
 Run automatic tests:
 
 While the server running:
-    •   Open a new terminal
-    •   ```cd tests/```
-    •   ```./run_tests.py```
++ Open a new terminal
++ ```cd tests/```
++ ```./run_tests.py```
 
 Automatic tests are for place, user and amenity.
 
@@ -140,13 +137,13 @@ You can also test individual endpoints using Swagger UI, Postman, or cURL.
 
 ⸻
 
-🧬 ER Diagram (made with draw.io)
+## 🧬 ER Diagram (made with draw.io)
 
 ![alt text](HBnB - Entity Relationship Diagram.jpg)
 
 ⸻
 
-🚧 Roadmap
+## 🚧 Roadmap
 
 ✅ Part 1: Project Design
 ✅ Part 2: Business Logic and API Endpoints
@@ -155,19 +152,19 @@ You can also test individual endpoints using Swagger UI, Postman, or cURL.
 
 ⸻
 
-🤝 Contributions
+## 🤝 Contributions
 
 Contributions are welcome! Open an issue or submit a PR to suggest features or improvements.
 
 ⸻
 
-📄 License
+## 📄 License
 
 MIT License — see LICENSE file for details.
 
 ⸻
 
-🤝 Authors
+## 🤝 Authors
 
-Quentin Lataste : [github.com/loufi84](https://github.com/loufi84)
-Valentin Dumont : [github.com/Proser-V](https://github.com/Proser-V)
+* Quentin Lataste : [github.com/loufi84](https://github.com/loufi84)
+* Valentin Dumont : [github.com/Proser-V](https://github.com/Proser-V)
