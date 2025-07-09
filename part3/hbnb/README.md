@@ -121,7 +121,7 @@ python3 -m run
 
 4️⃣ Access Swagger UI:
 
-[http://localhost:5001/](http://localhost:5001/)
+[http://localhost:5001/](http://localhost:5001/)  
 (We moved the port to 5001 as it was tested with a Mac and port 5000 is AirPlay on MacOS)
 
 ## 🧪 Testing
