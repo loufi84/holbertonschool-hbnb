@@ -6,7 +6,8 @@ It defines the CRUD methods for the bookings.
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from app.models.booking import CreateBooking
+from app.models.booking import CreateBooking, BookingPublic, BookingStatus
+from app.models.booking import UpdateBooking
 from pydantic import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
@@ -18,7 +19,6 @@ api = Namespace('bookings', description='Booking operations')
 
 # Swagger model for booking
 booking_model = api.model('Booking', {
-    'place_id': fields.String(required=True, description='ID of the place'),
     'start_date': fields.DateTime(required=True, description='Start date'),
     'end_date': fields.DateTime(required=True, description='End date')
 })
@@ -34,36 +34,15 @@ booking_update_model = api.model('BookingUpdate', {
 })
 
 
+def ensure_aware(dt):
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 @api.route('/')
 class BookingList(Resource):
-    @jwt_required()
-    @api.expect(booking_model, validate=True)
-    @api.response(201, 'Booking succesfully created')
-    @api.response(400, 'Invalid input data')
-    def post(self):
-        """Create a new booking"""
-        user_id = get_jwt_identity()
-        data = request.json
-
-        try:
-            place_id = uuid.UUID(data.get("place_id"))
-            booking_data = CreateBooking(**data)
-        except ValidationError as e:
-            return {'errors': json.loads(e.json())}, 400
-        except ValueError as e:
-            return {'error': str(e)}, 400
-
-        booking_list = facade.get_booking_list_by_place(place_id)
-        for booking in booking_list:
-            if (
-                booking.start_date < booking_data.end_date
-                and booking_data.start_date < booking.end_date
-               ):
-                return {"error": "Already booked"}, 400
-        new_booking = facade.create_booking(user_id, place_id, booking_data)
-
-        return new_booking.model_dump(mode="json"), 201
-
+    @api.doc(security=[])
     @api.response(200, 'List of bookings retrieved successfully')
     def get(self):
         """Retrieve a list of all bookings"""
@@ -71,163 +50,239 @@ class BookingList(Resource):
         if not bookings:
             return {"message": "No booking yet"}, 200
 
-        booking_list = []
         now = datetime.now(timezone.utc)
+
+        booking_list = []
         for booking in bookings:
-            if booking.status == "PENDING" and now > booking.end_date:
-                booking.set_status("DONE")
-            booking_list.append({
-                'id': str(booking.id),
-                'place_id': str(booking.place),
-                'user_id': str(booking.user),
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-            })
+            booking_end_aware = ensure_aware(booking.end_date)
+            if (booking.status == BookingStatus.PENDING.value
+                                  and now > booking_end_aware):
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
+
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
+
         return booking_list, 200
 
+@api.route('/<place_id>')
+class BookingCreate(Resource):
+    @jwt_required()
+    @api.expect(booking_model, validate=True)
+    @api.response(201, 'Booking succesfully created')
+    @api.response(400, 'Invalid input data')
+    @api.response(401, 'Unauthorized')
+    def post(self, place_id):
+        """Create a new booking"""
+        user_id = get_jwt_identity()
+        data = request.json
+
+        try:
+            uuid.UUID(place_id)
+            booking_data = CreateBooking(**data)
+        except ValidationError as e:
+            return {'errors': json.loads(e.json())}, 400
+        except ValueError as e:
+            return {'error': str(e)}, 400
+
+        booking_list = facade.get_pending_booking_list_by_place(place_id)
+        for booking in booking_list:
+            booking_start = ensure_aware(booking.start_date)
+            booking_end = ensure_aware(booking.end_date)
+            new_start = ensure_aware(booking_data.start_date)
+            new_end = ensure_aware(booking_data.end_date)
+
+            if booking_start < new_end and new_start < booking_end:
+                return {'error': 'Already booked'}, 400
+        now = datetime.now(timezone.utc)
+        if booking_data.start_date < now:
+            return {'error': 'Cannot create a booking in the past'}, 400
+
+        new_booking = facade.create_booking(user_id, place_id, booking_data)
+
+        return (BookingPublic.model_validate(
+            new_booking).model_dump(mode='json')), 201
+    
 
 @api.route('/<booking_id>')
 class BookingResource(Resource):
+    @api.doc(security=[])
     @api.response(200, 'Booking details retrieved successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(401, 'Unauthorized')
     @api.response(404, 'Booking not found')
     def get(self, booking_id):
         """Get booking details by ID"""
         try:
-            booking_uuid = uuid.UUID(booking_id)
+            uuid.UUID(booking_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        booking = facade.get_booking(booking_uuid)
+        booking = facade.get_booking(booking_id)
         if not booking:
             return {'error': 'Booking not found'}, 404
 
-        if (
-            booking.status == "PENDING"
-            and datetime.now(timezone.utc) > booking.end_date
-        ):
-            booking.set_status("DONE")
-        return {
-                'id': str(booking.id),  # UUID -> str pour le JSON
-                'user_id': str(booking.user),
-                'place_id': str(booking.place),
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-        }, 200
+        now = datetime.now(timezone.utc)
+        booking_end_aware = ensure_aware(booking.end_date)
+
+        if (booking.status == BookingStatus.PENDING.value
+           and now > booking_end_aware):
+            booking.set_status(BookingStatus.DONE.value)
+            facade.booking_repo.update(booking_id, booking.__dict__)
+
+        return (BookingPublic.model_validate(
+            booking).model_dump(mode='json')), 200
 
     @api.expect(booking_update_model)
     @api.response(200, 'Booking updated successfully')
-    @api.response(404, 'Booking not found')
     @api.response(400, 'Invalid input data or UUID format')
+    @api.response(401, 'Unauthorized')
+    @api.response(403, 'Forbidden')
+    @api.response(404, 'Booking not found')
     @jwt_required()
     def put(self, booking_id):
         """Update a booking's information"""
         try:
-            booking_uuid = uuid.UUID(booking_id)
+            uuid.UUID(booking_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
-        booking = facade.get_booking(booking_uuid)
+        booking = facade.get_booking(booking_id)
         if not booking:
             return {'error': 'Booking not found'}, 404
 
         current_user = get_jwt_identity()
-        update_data = request.json
-
         try:
-            if update_data.get('start_date'):
-                update_data['start_date'] = isoparse(update_data['start_date'])
-            if update_data.get('end_date'):
-                update_data['end_date'] = isoparse(update_data['end_date'])
-        except ValueError as e:
-            return {'error': 'Invalid date format'}, 400
+            update_data = (UpdateBooking.model_validate(request.json)
+                           .model_dump(exclude_unset=True))
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
+
+        now = datetime.now(timezone.utc)
+        if 'start_date' in update_data and update_data['start_date'] < now:
+            return {'error': 'Cannot create a booking in the past'}, 400
 
         if "status" in update_data:
             place = facade.get_place(booking.place)
-            if not place or str(place.owner_id) != str(current_user):
+            if not place or place.owner_id != str(current_user):
                 return {
                     'error': 'Only the owner of a place can update the status'
                     }, 403
-            if update_data['status'] not in ("DONE", "PENDING", "CANCELED"):
+            if update_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
                 return {
-                    'error': "Status must be DONE, PENDING, or CANCELED"
+                    'error': "Status must be DONE, PENDING, or CANCELLED"
                     }, 400
 
         try:
-            updated_booking = facade.update_booking(booking_uuid, update_data)
+            updated_booking = facade.update_booking(booking_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
         except PermissionError as e:
             return {'error': str(e)}, 403
 
-        return [
-            {
-                'id': str(updated_booking.id),  # UUID -> str pour le JSON
-                'start_date': updated_booking.start_date.isoformat(),
-                'end_date': updated_booking.end_date.isoformat(),
-                'status': updated_booking.status,
-            }
-        ], 200
+        return (BookingPublic.model_validate(
+            updated_booking).model_dump(mode='json')), 200
 
 
 @api.route('/places/<place_id>/booking')
 class PlaceBookingList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of booking for the place retrieved successfully')
     @api.response(400, 'Invalide UUID format')
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all bookings for a specific place"""
         try:
-            place_uuid = uuid.UUID(place_id)
+            uuid.UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
-        bookings = facade.get_booking_list_by_place(place_uuid)
+        place = facade.get_place(place_id)
+        if not place:
+            return {'message': 'Place not found'}, 404
+        bookings = facade.get_booking_list_by_place(place_id)
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
-        booking_list = []
         now = datetime.now(timezone.utc)
+
+        booking_list = []
         for booking in bookings:
-            if booking.status == "PENDING" and now > booking.end_date:
-                booking.set_status("DONE")
-            booking_list.append({
-                'id': str(booking.id),
-                'place_id': str(booking.place),
-                'user_id': str(booking.user),
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-            })
+            booking_end_aware = ensure_aware(booking.end_date)
+            if (booking.status == BookingStatus.PENDING.value
+               and now > booking_end_aware):
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
+
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
+
+        return booking_list, 200
+
+
+@api.route('/places/<place_id>/pending_booking')
+class PlaceBookingList(Resource):
+    @api.doc(security=[])
+    @api.response(200, 'List of booking for the place retrieved successfully')
+    @api.response(400, 'Invalide UUID format')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """Get all pending bookings for a specific place"""
+        try:
+            uuid.UUID(place_id)
+        except ValueError:
+            return {'error': 'Invalid UUID format'}, 400
+        place = facade.get_place(place_id)
+        if not place:
+            return {'message': 'Place not found'}, 404
+        bookings = facade.get_pending_booking_list_by_place(place_id)
+        if not bookings:
+            return {'message': 'No pending booking for this place yet'}, 200
+
+        now = datetime.now(timezone.utc)
+        booking_list = []
+        for booking in bookings:
+            booking_end_aware = ensure_aware(booking.end_date)
+            if (booking.status == BookingStatus.PENDING.value
+               and now > booking_end_aware):
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
+            else:
+                booking_list.append(BookingPublic.model_validate(booking)
+                                    .model_dump(mode='json'))
+
         return booking_list, 200
 
 
 @api.route('/users/<user_id>/booking')
 class UserBookingList(Resource):
+    @api.doc(security=[])
     @api.response(200, 'List of booking of the user retrieved successfully')
     @api.response(400, 'Invalide UUID format')
+    @api.response(404, 'User not found')
     def get(self, user_id):
         """Get all bookings of a user"""
         try:
-            user_uuid = uuid.UUID(user_id)
+            uuid.UUID(user_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
-        bookings = facade.get_booking_list_by_user(user_uuid)
+        user = facade.get_place(user_id)
+        if not user:
+            return {'message': 'User not found'}, 404
+        bookings = facade.get_booking_list_by_user(user_id)
         if not bookings:
             return {'message': 'No booking for this place yet'}, 200
 
-        booking_list = []
         now = datetime.now(timezone.utc)
+
+        booking_list = []
         for booking in bookings:
-            if booking.status == "PENDING" and now > booking.end_date:
-                booking.set_status("DONE")
-            booking_list.append({
-                'id': str(booking.id),
-                'place_id': str(booking.place),
-                'user_id': str(booking.user),
-                'start_date': booking.start_date.isoformat(),
-                'end_date': booking.end_date.isoformat(),
-                'status': booking.status,
-            })
+            booking_end_aware = ensure_aware(booking.end_date)
+            if (booking.status == BookingStatus.PENDING.value
+               and now > booking_end_aware):
+                booking.set_status(BookingStatus.DONE.value)
+                facade.booking_repo.update(booking.id, booking.__dict__)
+
+            booking_list.append(BookingPublic.model_validate(
+                booking).model_dump(mode='json'))
+
         return booking_list, 200

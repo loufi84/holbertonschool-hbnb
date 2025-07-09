@@ -4,13 +4,13 @@ It handles creation, validation, and management of Amenity objects,
 enforcing constraints on fields like name and description.
 """
 
-from pydantic import BaseModel, Field, model_validator
-import uuid
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from datetime import datetime, timezone
-from typing import Optional
+from app.models.place import place_amenities
+from extensions import db  # db = SQLAlchemy()
 
 
-class Amenity(BaseModel):
+class Amenity(db.Model):
     """
     Represents an amenity with unique ID, name, description, and timestamps.
 
@@ -21,18 +21,24 @@ class Amenity(BaseModel):
         created_at: Timestamp of creation in UTC.
         updated_at: Optional timestamp for last update in UTC.
     """
+    __tablename__ = 'amenity'
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1, max_length=500)
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
+    id = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        nullable=False)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+    places = db.relationship('Place', secondary=place_amenities,
+                             back_populates='amenities')
 
     def set_name(self, name: str):
         """
         Update the amenity's name and refresh the updated_at timestamp.
-
         Args:
             name (str): New name for the amenity.
         """
@@ -42,7 +48,6 @@ class Amenity(BaseModel):
     def set_description(self, description: str):
         """
         Update the amenity's description and refresh the updated_at timestamp.
-
         Args:
             description (str): New description for the amenity.
         """
@@ -54,7 +59,6 @@ class AmenityCreate(BaseModel):
     """
     Schema for creating an amenity with validation that
     'name' and 'description' are non-empty and non-whitespace strings.
-
     Attributes:
         name: Name of the amenity.
         description: Description of the amenity.
@@ -69,13 +73,10 @@ class AmenityCreate(BaseModel):
         """
         Validate that 'name' and 'description'
         fields are not empty or whitespace only.
-
         Args:
             values (dict): The input values to validate.
-
         Raises:
             ValueError: If either field is empty or whitespace only.
-
         Returns:
             dict: The validated and stripped values.
         """
@@ -86,3 +87,18 @@ class AmenityCreate(BaseModel):
                     f"{field_name} cannot be empty or just whitespace")
             values[field_name] = value.strip()
         return values
+
+
+class AmenityPublic(BaseModel):
+    """
+    This class is used to display public informations when an amenity is
+    returned to the client.
+    """
+    id: str
+    name: str
+    description: str
+
+    model_config = ConfigDict(
+                json_encoders={datetime: lambda v: v.isoformat()},
+                from_attributes=True
+    )

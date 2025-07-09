@@ -5,11 +5,13 @@ including associated amenities, reviews, and photo handling.
 """
 
 import uuid
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional, List
 from datetime import datetime, timezone
-from app.models.amenity import Amenity
-from app.models.review import Review
+from sqlalchemy import CheckConstraint
+from extensions import db  # db = SQLAlchemy()
+from .booking import Booking
+import re
 
 # Default image URL to use when no photos are provided for a place
 DEFAULT_PLACE_PHOTO_URL = (
@@ -19,7 +21,16 @@ DEFAULT_PLACE_PHOTO_URL = (
 )
 
 
-class Place(BaseModel):
+place_amenities = db.Table(
+    'place_amenities',
+    db.Column('place_id', db.String, db.ForeignKey('place.id'),
+              primary_key=True),
+    db.Column('amenity.id', db.String, db.ForeignKey('amenity.id'),
+              primary_key=True)
+)
+
+
+class Place(db.Model):
     """
     Represents a physical place listing with detailed information.
 
@@ -38,21 +49,44 @@ class Place(BaseModel):
         reviews: List of Review objects linked to this place.
         rating: Average rating calculated from reviews, default 0.0.
     """
+    __tablename__ = 'place'
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str = Field(..., min_length=1, max_length=50)
-    description: str = Field(..., min_length=1, max_length=1000)
-    price: float = Field(..., ge=0)  # price must be zero or positive
-    latitude: float = Field(..., ge=-90, le=90)
-    longitude: float = Field(..., ge=-180, le=180)
-    owner_id: str
-    amenities: List[Amenity] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
-    photos: List[str] = Field(default_factory=list)
-    reviews: List[Review] = Field(default_factory=list)
-    rating: float = 0.0
+    id = db.Column(db.String, primary_key=True)
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    rating = db.Column(db.Float, nullable=True)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        nullable=False)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+    photos_url = db.Column(db.JSON, default=list)
+    amenities = db.relationship('Amenity', secondary=place_amenities,
+                                back_populates='places')
+    reviews = db.relationship("Review", back_populates='place_rel',
+                              cascade='all, delete-orphan')
+    bookings = db.relationship(Booking, back_populates='place_rel',
+                               cascade='all, delete-orphan', foreign_keys=[Booking.place])
+    owner = db.relationship('User', back_populates='places')
+
+    __table_args__ = (
+        CheckConstraint('price >= 0', name='check_price_positive'),
+        CheckConstraint('rating >= 0 AND rating <= 5', name='check_rating'),
+        CheckConstraint('latitude >= -90 AND latitude <= 90',
+                        name='check_latitude'),
+        CheckConstraint('longitude >= -180 AND longitude <= 180',
+                        name='check_longitude')
+    )
+
+    @property
+    def amenity_ids(self):
+        return [a.id for a in self.amenities]
 
     @field_validator("photos")
     @classmethod
@@ -185,7 +219,7 @@ class PlaceCreate(BaseModel):
     amenity_ids: Optional[List[uuid.UUID]] = []
 
     @field_validator('price')
-    def round_price(cls, v: float) -> float:
+    def round_price(cls, value: float) -> float:
         """
         Round the price to 2 decimal places for consistency.
 
@@ -195,7 +229,7 @@ class PlaceCreate(BaseModel):
         Returns:
             float: Rounded price value.
         """
-        return round(v, 2)
+        return round(value, 2)
 
     @field_validator('title', 'description')
     def no_blank_strings(cls, value: str) -> str:
@@ -212,7 +246,79 @@ class PlaceCreate(BaseModel):
         Returns:
             str: Trimmed string value.
         """
-        value = value.strip()
+        value = re.sub(r'\s+', ' ', value).strip()
         if not value:
             raise ValueError("Field cannot be empty or just whitespace")
         return value
+
+
+class PlaceUpdate(BaseModel):
+    """
+    Schema for updating a Place object. All attributes are optional.
+
+    Attributes:
+        title: Title of the place (required, 1 to 100 characters).
+        description: Description of the place (required, 1 to 1000 characters).
+        price: Price for the place (required, must be non-negative).
+        latitude: Latitude coordinate (required, between -90 and 90).
+        longitude: Longitude coordinate (required, between -180 and 180).
+        rating: Initial rating, defaults to 0.0.
+        owner_id: Owner's user ID.
+        amenity_ids: list of UUIDs referencing amenities.
+    """
+
+    title: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, min_length=1, max_length=1000)
+    price: Optional[float] = Field(None, ge=0)
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
+    amenity_ids: Optional[List[uuid.UUID]] = []
+
+    @field_validator('price')
+    def round_price(cls, value: float) -> float:
+        """
+        Round the price to 2 decimal places for consistency.
+        Args:
+            v (float): Original price value.
+        Returns:
+            float: Rounded price value.
+        """
+        return round(value, 2)
+
+    @field_validator('title', 'description')
+    def no_blank_strings(cls, value: str) -> str:
+        """
+        Ensure that title and description fields are
+        not blank or whitespace-only.
+        Args:
+            value (str): Field value to validate.
+        Raises:
+            ValueError: If the value is empty or only whitespace.
+        Returns:
+            str: Trimmed string value.
+        """
+        value = re.sub(r'\s+', ' ', value).strip()
+        if not value:
+            raise ValueError("Field cannot be empty or just whitespace")
+        return value
+
+class PlacePublic(BaseModel):
+    """
+    This class is used to display public informations when a place is
+    returned to the client.
+    """
+    id: str
+    title: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=1000)
+    price: float = Field(..., ge=0)
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    rating: Optional[float]
+    owner_id: str
+    amenity_ids: Optional[List[str]] = []
+
+    model_config = ConfigDict(
+                json_encoders={datetime: lambda v: v.isoformat(),
+                               uuid.UUID: lambda v: str(v)},
+                from_attributes=True
+    )

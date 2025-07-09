@@ -4,14 +4,14 @@ It supports creation, validation, and management of Booking objects,
 enforcing constraints such as valid date ranges and status values.
 """
 
-import uuid
+from extensions import db  # db = SQLAlchemy()
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from typing import Optional
 from enum import Enum
 
 
-class BookingStatus(str, Enum):
+class BookingStatus(Enum):
     """
     Enumeration of possible booking statuses.
     """
@@ -20,7 +20,7 @@ class BookingStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
-class Booking(BaseModel):
+class Booking(db.Model):
     """
     Represents a booking record linking a user to a place over a date range.
 
@@ -33,18 +33,42 @@ class Booking(BaseModel):
         start_date: Start datetime of the booking.
         end_date: End datetime of the booking.
         created_at: Timestamp when the booking was created.
-        updated_at: Timestamp for the last update, optional.
+        updated_at: Timestamp for the last update.
     """
 
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    status: BookingStatus = Field(default=BookingStatus.PENDING, strict=True)
-    place: uuid.UUID
-    user: uuid.UUID
-    start_date: datetime = Field(...)
-    end_date: datetime = Field(...)
-    created_at: datetime = Field(default_factory=lambda:
-                                 datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
+    __tablename__ = 'bookings'
+
+    id = db.Column(db.String, primary_key=True)
+    status = db.Column(
+        db.String(20),
+        default=BookingStatus.PENDING.value,
+        nullable=False
+        )
+    place = db.Column(db.String, db.ForeignKey('place.id'), nullable=False)
+    user = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc), nullable=False
+        )
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc)
+        )
+    place_rel = db.relationship(
+        "Place",
+        back_populates='bookings',
+        foreign_keys=[place]
+        )
+    user_rel = db.relationship("User", back_populates='bookings')
+    reviews = db.relationship('Review', back_populates='booking_rel')
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "status IN ('DONE', 'PENDING', 'CANCELLED')",
+            name="check_booking_status"
+        ),
+    )
 
     def set_status(self, status: BookingStatus):
         """
@@ -81,7 +105,6 @@ class CreateBooking(BaseModel):
     """
     Schema used for booking creation, enforcing that start_date
     must be strictly before end_date.
-
     Attributes:
         start_date: Desired start datetime of the booking.
         end_date: Desired end datetime of the booking.
@@ -94,13 +117,10 @@ class CreateBooking(BaseModel):
     def check_dates(cls, values):
         """
         Validator to ensure start_date is before end_date.
-
         Args:
             values (dict): Input values dictionary.
-
         Raises:
             ValueError: If start_date is not before end_date.
-
         Returns:
             dict: Validated values.
         """
@@ -109,3 +129,51 @@ class CreateBooking(BaseModel):
         if start and end and start >= end:
             raise ValueError("Start date must be before end date")
         return values
+
+
+class UpdateBooking(BaseModel):
+    """
+    Schema used for booking update, enforcing that start_date
+    must be strictly before end_date.
+    Attributes:
+        start_date: Desired start datetime of the booking.
+        end_date: Desired end datetime of the booking.
+    """
+
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)
+    status: Optional[str] = None
+
+    @model_validator(mode='before')
+    def check_dates(cls, values):
+        """
+        Validator to ensure start_date is before end_date.
+        Args:
+            values (dict): Input values dictionary.
+        Raises:
+            ValueError: If start_date is not before end_date.
+        Returns:
+            dict: Validated values.
+        """
+        start = values.get("start_date")
+        end = values.get("end_date")
+        if start and end and start >= end:
+            raise ValueError("Start date must be before end date")
+        return values
+
+class BookingPublic(BaseModel):
+    """
+    This class is used to display public informations when a booking is
+    returned to the client.
+    """
+    id: str
+    start_date: datetime = Field(...)
+    end_date: datetime = Field(...)
+    user: str
+    place: str
+    status: str
+
+    model_config = ConfigDict(
+                json_encoders={datetime: lambda v: v.isoformat()},
+                from_attributes=True
+    )

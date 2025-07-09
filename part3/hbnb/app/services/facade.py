@@ -6,16 +6,23 @@ for the application. It centralizes operations on users, places, amenities,
 reviews, and bookings, using repositories to handle data persistence.
 """
 
-from app.persistence.repository import InMemoryRepository
+from app.persistence.repository import SQLAlchemyRepository
 from app.models.amenity import Amenity, AmenityCreate
 from app.models.place import Place, PlaceCreate
-from app.models.review import Review, ReviewCreate
-from app.models.user import User, UserCreate
+from app.models.review import Review
+from app.models.user import User, UserCreate, AdminCreate
 from app.models.booking import Booking, BookingStatus
-from pydantic import ValidationError
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
-import hashlib
+from argon2 import PasswordHasher
+import uuid
+from app import db
+
+
+def ensure_aware(dt):
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 class HBnBFacade:
@@ -32,11 +39,22 @@ class HBnBFacade:
     """
     def __init__(self):
         """Initialize repositories for each entity."""
-        self.user_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
-        self.booking_repo = InMemoryRepository()
+        self.user_repo = SQLAlchemyRepository(User)
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
+        self.booking_repo = SQLAlchemyRepository(Booking)
+        self.ph = PasswordHasher(
+            time_cost=2,  # Base recommended (number of hash iterations)
+            memory_cost=62500,  # Memory allowed (64Mb)
+            parallelism=2,  # Number of threads used
+            hash_len=24,
+            salt_len=16
+        )
+
+    @property
+    def passwd_hasher(self):
+        return self.ph
 
     # ------------------ User management ------------------
 
@@ -45,13 +63,32 @@ class HBnBFacade:
         Create a new user with hashed password.
         """
         user_in = UserCreate(**user_data)
-        hashed_pw = hashlib.sha256(user_in.password.encode()).hexdigest()
+        hashed_pw = self.ph.hash(user_in.password)
 
         user = User(
+            id=str(uuid.uuid4()),
             first_name=user_in.first_name,
             last_name=user_in.last_name,
             email=user_in.email,
-            hashed_password=hashed_pw
+            hashed_password=hashed_pw,
+        )
+        self.user_repo.add(user)
+        return user
+
+    def create_user_admin(self, user_data):
+        """
+        Create a new user with hashed password.
+        """
+        user_in = AdminCreate(**user_data)
+        hashed_pw = self.ph.hash(user_in.password)
+
+        user = User(
+            id=str(uuid.uuid4()),
+            first_name=user_in.first_name,
+            last_name=user_in.last_name,
+            email=user_in.email,
+            hashed_password=hashed_pw,
+            is_admin=user_in.is_admin
         )
         self.user_repo.add(user)
         return user
@@ -73,15 +110,26 @@ class HBnBFacade:
             return None
 
         if "password" in update_data:
-            update_data["hashed_password"] = hashlib.sha256(
-                update_data.pop("password").encode()).hexdigest()
+            update_data["hashed_password"] = self.ph.hash(
+                update_data.pop("password")
+            )
 
-        self.user_repo.update(user_id, update_data)
-        return self.user_repo.get(user_id)
+        self.user_repo.update(str(user_id), update_data)
+        return self.user_repo.get(str(user_id))
 
     def get_all_users(self):
         """Retrieve all users."""
         return self.user_repo.get_all()
+
+    def delete_user(self, user_id):
+        """Delete an user by ID."""
+        user = self.user_repo.get(user_id)
+        if not user:
+            print(f"User not found for id={user_id}")
+            return None
+
+        self.user_repo.delete(user_id)
+        return ''
 
     # ------------------ Place management ------------------
 
@@ -140,18 +188,12 @@ class HBnBFacade:
                     raise Exception(f"Amenity {amenity_id} not found")
                 updated_amenities.append(amenity)
 
+            place.amenities = updated_amenities
+
             update_data.pop('amenity_ids')
-            update_data['amenities'] = updated_amenities
 
-        update_fields = {}
-        for key, value in update_data.items():
-            if hasattr(place, key):
-                update_fields[key] = value
-
-        update_fields["updated_at"] = datetime.now(timezone.utc)
-
-        updated_place = self.place_repo.update(place_id, update_fields)
-        return updated_place
+        self.place_repo.update(place_id, update_data)
+        return self.place_repo.get(place_id)
 
     def delete_place(self, place_id):
         """
@@ -172,6 +214,7 @@ class HBnBFacade:
         amenity_in = AmenityCreate(**amenity_data)
 
         amenity = Amenity(
+            id=str(uuid.uuid4()),
             name=amenity_in.name,
             description=amenity_in.description
         )
@@ -198,21 +241,32 @@ class HBnBFacade:
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
-        try:
-            updated_amenity = amenity.copy(update=amenity_data)
-        except ValidationError as e:
-            raise e
+        self.amenity_repo.update(amenity_id, amenity_data)
+        return self.amenity_repo.get(amenity_id)
 
-        self.amenity_repo._storage[str(amenity_id)] = updated_amenity
-        return updated_amenity
+    def delete_amenity(self, amenity_id):
+        """Delete an amenity by ID."""
+        amenity = self.amenity_repo.get(amenity_id)
+        if not amenity:
+            return None
+        self.amenity_repo.delete(amenity_id)
+        return ''
 
     # ------------------ Review management ------------------
 
     def create_review(self, review_data, booking_id, place_id, user_id):
         """
         Create a review only if booking is done and user visited the place.
+        One review per booking.
         """
         booking = self.get_booking(booking_id)
+        reviews = self.review_repo.get_all()
+        user = self.get_user(user_id)
+        for review in reviews:
+            if review.booking == booking_id:
+                raise PermissionError(
+                    "User can review a place once per booking."
+                    )
 
         if not self.user_repo.get(user_id):
             raise ValueError("User not found")
@@ -221,16 +275,21 @@ class HBnBFacade:
         if not booking:
             raise ValueError("Booking not found")
 
-        if (booking.status != BookingStatus.DONE or
-                booking.end_date >= datetime.now(timezone.utc)):
+        end_date_aware = ensure_aware(booking.end_date)
+
+        if (booking.status != BookingStatus.DONE.value or
+                end_date_aware >= datetime.now(timezone.utc)):
             raise PermissionError("User must visit the place to post review.")
 
         new_review = Review(
+            id=str(uuid.uuid4()),
             comment=review_data.comment,
             rating=review_data.rating,
             booking=str(booking_id),
             place=str(place_id),
-            user=str(user_id)
+            user_ide=str(user_id),
+            user_last_name=user.last_name,
+            user_first_name=user.first_name
         )
         self.review_repo.add(new_review)
         return new_review
@@ -245,8 +304,7 @@ class HBnBFacade:
 
     def get_reviews_by_place(self, place_id):
         """Retrieve all reviews for a specific place."""
-        reviews = self.review_repo.get_all()
-        return [review for review in reviews if review.place == place_id]
+        return Review.query.filter(Review.place == str(place_id)).all()
 
     def update_review(self, review_id, review_data):
         """
@@ -255,13 +313,8 @@ class HBnBFacade:
         review = self.review_repo.get(review_id)
         if not review:
             return None
-        try:
-            updated_review = review.copy(update=review_data)
-        except ValidationError as e:
-            raise e
-
-        self.review_repo._storage[str(review_id)] = updated_review
-        return updated_review
+        self.review_repo.update(review_id, review_data)
+        return self.review_repo.get(review_id)
 
     def delete_review(self, review_id):
         """Delete a review by ID."""
@@ -282,11 +335,12 @@ class HBnBFacade:
         if not self.place_repo.get(place_id):
             raise ValueError("Place not found")
         new_booking = Booking(
+            id=str(uuid.uuid4()),
             place=place_id,
             user=user_id,
             start_date=booking_data.start_date,
             end_date=booking_data.end_date,
-            status=BookingStatus.PENDING
+            status=BookingStatus.PENDING.value
         )
         self.booking_repo.add(new_booking)
         return new_booking
@@ -301,17 +355,38 @@ class HBnBFacade:
 
     def get_booking_list_by_place(self, place_id):
         """Retrieve all bookings for a specific place."""
-        return [
-            booking for booking in self.booking_repo._storage.values()
-            if str(booking.place) == str(place_id)
-        ]
+        return (
+            db.session.query(Booking)
+            .filter(Booking.place == str(place_id))
+            .all()
+        )
+
+    def get_pending_booking_list_by_place(self, place_id):
+        """Retrieve all pending bookings for a specific place."""
+        return (
+            db.session.query(Booking)
+            .filter(Booking.place == str(place_id),
+                    Booking.status == BookingStatus.PENDING.value)
+            .all()
+        )
 
     def get_booking_list_by_user(self, user_id):
         """Retrieve all bookings for a specific user."""
-        return [
-            booking for booking in self.booking_repo._storage.values()
-            if str(booking.user) == str(user_id)
-        ]
+        return (
+            db.session.query(Booking)
+            .filter_by(user=user_id)
+            .all()
+        )
+
+    def cancel_booking(self, booking_id):
+        """
+        Cancel a booking.
+        Only the owner of the place or an admin can update booking status.
+        """
+        booking = self.get_booking(booking_id)
+        if booking.status == BookingStatus.PENDING.value:
+            booking.set_status(BookingStatus.CANCELLED.value)
+        return booking
 
     def update_booking(self, booking_id, booking_data):
         """
@@ -329,13 +404,8 @@ class HBnBFacade:
             if str(place.owner_id) != str(user_id):
                 raise PermissionError("Only the owner of a place"
                                       "can update the status")
-            if booking_data['status'] not in ("DONE", "PENDING", "CANCELED"):
-                raise ValueError("Status must be DONE, PENDING, or CANCELED")
+            if booking_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
+                raise ValueError("Status must be DONE, PENDING, or CANCELLED")
 
-        try:
-            updated_booking = booking.copy(update=booking_data)
-        except ValidationError as e:
-            raise e
-
-        self.booking_repo._storage[str(booking_id)] = updated_booking
-        return updated_booking
+        self.booking_repo.update(booking_id, booking_data)
+        return self.booking_repo.get(booking_id)
