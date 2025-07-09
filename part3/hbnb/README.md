@@ -6,8 +6,6 @@ This repository contains Part 3 of the HBnB Project. In this phase, we significa
 
 We’re transitioning from a prototype to a real-world backend architecture that is secure, scalable, and production-ready.
 
-⸻
-
 ## 🚀 Objectives
 
 By the end of this phase, we aim to:
@@ -19,62 +17,56 @@ By the end of this phase, we aim to:
 + Visualize the database schema,
 + Enforce data consistency and validation in models and routes.
 
-⸻
-
 ## 🗂 Project Structure
 
-```hbnb/
-├── app/
-│   ├── __init__.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── v1/
-│   │       ├── __init__.py
-│   │       ├── amenities.py
-│   │       ├── bookings.py
-│   │       ├── places.py
-│   │       ├── reviews.py
-│   │       └── users.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── amenity.py
-│   │   ├── booking.py
-│   │   ├── place.py
-│   │   ├── review.py
-│   │   └── user.py
-│   ├── persistence/
-│   │   ├── __init__.py
-│   │   └── repository.py
-│   └── services/
-│       ├── __init__.py
-│       └── facade.py
-├── blacklist.py
-├── config.py
-├── extensions.py
-├── HBnB - Entity Relationship Diagram.pdf
-├── HBnB - Entity Relationship Diagram.jpg
-├── README.md
-├── requirements.txt
-├── run.py
-├── SQL.sql
-├── tests/
-└── utils.py```
-
-⸻
+hbnb/  
+├── app/  
+│   ├── __init__.py  
+│   ├── api/  
+│   │   ├── __init__.py  
+│   │   └── v1/  
+│   │       ├── __init__.py  
+│   │       ├── amenities.py  
+│   │       ├── bookings.py  
+│   │       ├── places.py  
+│   │       ├── reviews.py  
+│   │       └── users.py  
+│   ├── models/  
+│   │   ├── __init__.py  
+│   │   ├── amenity.py  
+│   │   ├── booking.py  
+│   │   ├── place.py  
+│   │   ├── review.py  
+│   │   └── user.py  
+│   ├── persistence/  
+│   │   ├── __init__.py  
+│   │   └── repository.py  
+│   └── services/  
+│       ├── __init__.py  
+│       └── facade.py  
+├── blacklist.py  
+├── config.py  
+├── extensions.py  
+├── HBnB - Entity Relationship Diagram.pdf  
+├── HBnB - Entity Relationship Diagram.jpg  
+├── README.md  
+├── requirements.txt  
+├── run.py  
+├── SQL.sql  
+├── tests/  
+└── utils.py  
 
 ## 🔧 Technologies Used
 
-- Python 3.x
-- Flask
-- Flask-RESTx
-- Flask-JWT-Extended
-- SQLAlchemy
-- SQLite
-- argon2 (for secure password hashing)
-- draw.io (for ER diagrams)
-- Pydantic
-
-⸻
++ Python 3.x
++ Flask
++ Flask-RESTx
++ Flask-JWT-Extended
++ SQLAlchemy
++ SQLite
++ argon2 (for secure password hashing)
++ draw.io (for ER diagrams)
++ Pydantic
 
 ## 🧩 Key Features
 
@@ -84,8 +76,6 @@ By the end of this phase, we aim to:
 + Entity Relationship Diagram: Design and visualize relational database schemas with draw.io,
 + Validation & Error Handling: Model-level and route-level data checks and exception handling.
 
-⸻
-
 ## 📚 Learning Outcomes
 
 + Implement secure login/auth flows using JWT tokens,
@@ -94,32 +84,34 @@ By the end of this phase, we aim to:
 + Design and visualize relational database schemas with draw.io,
 + Prepare backend architecture for deployment in real environments.
 
-⸻
-
 ## 🛠 How to Run
 
 1️⃣ Clone the repository:
 
-```git clone https://github.com/Proser-V/holbertonschool-hbnb.git
-cd holbertonschool-hbnb/part3/hbnb```
+```bash
+git clone https://github.com/Proser-V/holbertonschool-hbnb.git
+cd holbertonschool-hbnb/part3/hbnb
+```
 
 2️⃣ Install dependencies:
 
-```python3 -m venv venv
+```bash
+python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt```
+pip install -r requirements.txt
+```
 
 3️⃣ Run the application:
 
-```python3 -m run```
+```bash
+python3 -m run
+```
 (You must be in the hbnb folder)
 
 4️⃣ Access Swagger UI:
 
 [http://localhost:5001/](http://localhost:5001/)
 (We moved the port to 5001 as it was tested with a Mac and port 5000 is AirPlay on MacOS)
-
-⸻
 
 ## 🧪 Testing
 
@@ -135,36 +127,26 @@ Automatic tests are for place, user and amenity.
 You can also test individual endpoints using Swagger UI, Postman, or cURL.
 (Tested functional with SwaggerUI on web browser)
 
-⸻
-
 ## 🧬 ER Diagram (made with draw.io)
 
-![alt text](HBnB - Entity Relationship Diagram.jpg)
-
-⸻
+![Entity Relationship Diagram for HBnB project](HBnB%20-%20Entity%20Relationship%20Diagram.jpg)
 
 ## 🚧 Roadmap
 
-✅ Part 1: Project Design
-✅ Part 2: Business Logic and API Endpoints
-🟢 Part 3: Authentication and Database Integration (You are here)
-🔒 Part 4: Web Client (HTML + JS UI)
-
-⸻
+✅ Part 1: Project Design  
+✅ Part 2: Business Logic and API Endpoints  
+🟢 Part 3: Authentication and Database Integration (You are here)  
+🔒 Part 4: Web Client (HTML + JS UI)  
 
 ## 🤝 Contributions
 
 Contributions are welcome! Open an issue or submit a PR to suggest features or improvements.
 
-⸻
-
 ## 📄 License
 
 MIT License — see LICENSE file for details.
 
-⸻
-
 ## 🤝 Authors
 
-* Quentin Lataste : [github.com/loufi84](https://github.com/loufi84)
-* Valentin Dumont : [github.com/Proser-V](https://github.com/Proser-V)
++ Quentin Lataste : [github.com/loufi84](https://github.com/loufi84)
++ Valentin Dumont : [github.com/Proser-V](https://github.com/Proser-V)
