@@ -169,6 +169,7 @@ class UserPublic(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    is_active: bool
 
     # Pydantic config to serialize datetime as ISO format strings
     model_config = ConfigDict(
@@ -195,6 +196,13 @@ class AdminCreate(UserCreate):
 
     """
     is_admin: bool = True
+
+
+class UserModeration(BaseModel):
+    """
+
+    """
+    is_active: bool = Field(..., description="User active status (True/False)")
 
 
 class RevokedToken(db.Model):

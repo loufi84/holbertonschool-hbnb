@@ -185,7 +185,7 @@ class HBnBFacade:
             for amenity_id in to_add:
                 amenity = self.get_amenity(amenity_id)
                 if not amenity:
-                    raise Exception(f"Amenity {amenity_id} not found")
+                    raise ValueError(f"Amenity {amenity_id} not found")
                 updated_amenities.append(amenity)
 
             place.amenities = updated_amenities

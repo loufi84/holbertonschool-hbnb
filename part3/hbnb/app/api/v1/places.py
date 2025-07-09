@@ -148,6 +148,8 @@ class PlaceResource(Resource):
             updated_place = facade.update_place(place_id, update_data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
+        except ValueError as e:
+            return {'error': str(e)}, 404
 
         amenities = []
         for amenity in updated_place.amenities:
