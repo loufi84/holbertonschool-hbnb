@@ -1,11 +1,11 @@
--- Création de la table booking pour HBnB (ajoutée car référencée dans reviews)
+-- A script to create table booking for HBnB
 CREATE TABLE IF NOT EXISTS booking (
     id CHAR(36) PRIMARY KEY,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- Trigger pour booking.updated_at
+-- Trigger for booking.updated_at
 CREATE TRIGGER IF NOT EXISTS update_booking_timestamp
 AFTER UPDATE ON booking
 FOR EACH ROW
@@ -13,7 +13,7 @@ BEGIN
     UPDATE booking SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
--- Création de la table user pour HBnB
+-- A script to create table user for HBnB
 CREATE TABLE IF NOT EXISTS user (
     id CHAR(36) PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS user (
     photo_url VARCHAR(2048)
 );
 
--- Trigger pour user.updated_at
+-- Trigger for user.updated_at
 CREATE TRIGGER IF NOT EXISTS update_user_timestamp
 AFTER UPDATE ON user
 FOR EACH ROW
@@ -35,7 +35,7 @@ BEGIN
     UPDATE user SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
--- Création de la table place pour HBnB
+-- A script to create table place for HBnB
 CREATE TABLE IF NOT EXISTS place (
     id CHAR(36) PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS place (
     FOREIGN KEY (owner_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- Trigger pour place.updated_at
+-- Trigger for place.updated_at
 CREATE TRIGGER IF NOT EXISTS update_place_timestamp
 AFTER UPDATE ON place
 FOR EACH ROW
@@ -59,7 +59,7 @@ BEGIN
     UPDATE place SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
--- Création de la table amenity pour HBnB (corrigé : suppression de la virgule en trop)
+-- A script to create table amenity for HBnB
 CREATE TABLE IF NOT EXISTS amenity (
     id CHAR(36) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS amenity (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- Trigger pour amenity.updated_at
+-- Trigger for amenity.updated_at
 CREATE TRIGGER IF NOT EXISTS update_amenity_timestamp
 AFTER UPDATE ON amenity
 FOR EACH ROW
@@ -76,7 +76,7 @@ BEGIN
     UPDATE amenity SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
--- Création de la table d'association place_amenity pour HBnB
+-- A script to create relationship table place_amenity for HBnB
 CREATE TABLE IF NOT EXISTS place_amenity (
     place_id VARCHAR(36),
     amenity_id VARCHAR(36),
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS place_amenity (
     FOREIGN KEY (amenity_id) REFERENCES amenity(id)
 );
 
--- Création de la table reviews pour HBnB
+-- A script to create table reviews for HBnB
 CREATE TABLE IF NOT EXISTS reviews (
     id CHAR(36) PRIMARY KEY,
     comment VARCHAR(2000) NOT NULL,
@@ -102,10 +102,19 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (booking) REFERENCES booking(id)
 );
 
--- Trigger pour reviews.updated_at
+-- Trigger for reviews.updated_at
 CREATE TRIGGER IF NOT EXISTS update_reviews_timestamp
 AFTER UPDATE ON reviews
 FOR EACH ROW
 BEGIN
     UPDATE reviews SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
+
+-- Create an admin
+INSERT INTO user (
+	id, first_name, last_name, email, hashed_password,
+	is_active, is_admin, created_at, updated_at)
+	VALUES (
+		'36c9050e-ddd3-4c3b-9731-9f487208bbc1', 'Test', 'User', 'tu@mail.com',
+		'$argon2id$v=19$m=62500,t=2,p=2$0tnvcK7OXJghDSOlMeu19A$v+q44IHr2ctzwfdYn57g/U8VjNkBKnNb', 'True', 'True', '2025-06-30 14:43:50.268972',
+		'2025-06-30 14:43:50.268972');
