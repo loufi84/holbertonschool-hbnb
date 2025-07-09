@@ -28,6 +28,7 @@ By the end of this phase, we aim to:
 
 ## 🗂 Project Structure
 
+```bash
 hbnb/  
 ├── app/  
 │   ├── __init__.py  
@@ -64,6 +65,7 @@ hbnb/
 ├── SQL.sql  
 ├── tests/  
 └── utils.py  
+```
 
 ## 🔧 Technologies Used
 
