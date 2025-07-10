@@ -62,7 +62,7 @@ class BookingList(Resource):
         for booking in bookings:
             booking_end_aware = ensure_aware(booking.end_date)
             if (booking.status == BookingStatus.PENDING.value
-                                  and now > booking_end_aware):
+                    and now > booking_end_aware):
                 booking.set_status(BookingStatus.DONE.value)
                 facade.booking_repo.update(booking.id, booking.__dict__)
 
@@ -137,7 +137,7 @@ class BookingResource(Resource):
             return {'error': 'Place not found'}, 404
         if (current_user_id != booking.user
             and current_user_id != place.owner_id
-            and current_user.is_admin is False):
+                and current_user.is_admin is False):
             return {'error': "Only an admin, the place owner or the visitor "
                     "can view these informations"}, 403
 
@@ -190,9 +190,10 @@ class BookingResource(Resource):
             if not place:
                 return {'error': 'Associated place not found'}, 404
             if (str(place.owner_id) != str(current_user_id)
-            and not current_user.is_admin):
+               and not current_user.is_admin):
                 return {
-                    "error": "Only the owner of a place or an admin can update the status"
+                    "error": "Only the owner of a place or an"
+                    "admin can update the status"
                     }, 403
             if update_data['status'] not in ("CANCELLED"):
                 return {

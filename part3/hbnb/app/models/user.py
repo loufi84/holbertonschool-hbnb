@@ -96,6 +96,8 @@ class UserCreate(BaseModel):
     @field_validator("photo_url")
     @classmethod
     def validate_image(cls, url):
+        if url is None:
+            return None
         try:
             # HEAD request
             response = requests.head(str(url), timeout=5, allow_redirects=True)
@@ -105,14 +107,16 @@ class UserCreate(BaseModel):
                     return url
             # GET partial content
             headers = {'Range': 'bytes=0-1023'}
-            response = requests.get(str(url), headers=headers, timeout=5, stream=True, allow_redirects=True)
+            response = requests.get(str(url), headers=headers, timeout=5,
+                                    stream=True, allow_redirects=True)
             if response.status_code in (200, 206):
                 content_type = response.headers.get('Content-Type', '')
                 if content_type.startswith('image/'):
                     return url
             raise ValueError("The URL is not a valid image")
         except requests.RequestException as e:
-            raise ValueError(f"An error occured while the verification of the image")
+            raise ValueError(f"An error occured while the verification"
+                             " of the image")
 
     @classmethod
     def set_default_photo(cls, photo_url):
@@ -159,6 +163,8 @@ class UserUpdate(BaseModel):
     @field_validator("photo_url")
     @classmethod
     def validate_image(cls, url):
+        if url is None:
+            return None
         try:
             # HEAD request
             response = requests.head(str(url), timeout=5, allow_redirects=True)
@@ -168,14 +174,16 @@ class UserUpdate(BaseModel):
                     return url
             # GET partial content
             headers = {'Range': 'bytes=0-1023'}
-            response = requests.get(str(url), headers=headers, timeout=5, stream=True, allow_redirects=True)
+            response = requests.get(str(url), headers=headers, timeout=5,
+                                    stream=True, allow_redirects=True)
             if response.status_code in (200, 206):
                 content_type = response.headers.get('Content-Type', '')
                 if content_type.startswith('image/'):
                     return url
             raise ValueError("The URL is not a valid image")
         except requests.RequestException as e:
-            raise ValueError(f"An error occured while the verification of the image")
+            raise ValueError(f"An error occured while the verification"
+                             " of the image")
 
     @classmethod
     def set_default_photo(cls, photo_url):

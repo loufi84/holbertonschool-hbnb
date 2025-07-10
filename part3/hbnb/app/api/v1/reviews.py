@@ -167,7 +167,7 @@ class ReviewResource(Resource):
             return {'error': 'Review not found'}, 404
 
         if (current_user_id != str(review_to_delete.user_ide)
-            and current_user.is_admin is False):
+           and current_user.is_admin is False):
             return {'error': "You must be the review's"
                     " creator or admin to delete it"}, 403
 

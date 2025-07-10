@@ -152,8 +152,10 @@ class UserResource(Resource):
             update_user = UserUpdate.model_validate(request.json)
             if update_user.photo_url is not None:
                 if not UserUpdate.validate_image(update_user.photo_url):
-                    return {'message': 'L\'URL ne pointe pas vers une image valide'}, 400
-            update_data = update_user.model_dump(exclude_unset=True, mode="json")
+                    return {'message': 'L\'URL ne pointe pas'
+                            ' vers une image valide'}, 400
+            update_data = update_user.model_dump(exclude_unset=True,
+                                                 mode="json")
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
         if "email" in update_data:
@@ -225,8 +227,8 @@ class Login(Resource):
                 user.hashed_password, login_data.password)
         except VerifyMismatchError:
             return {'error': 'Invalid password or email'}, 400
-        
-        if user.is_active == False:
+
+        if user.is_active is False:
             return {'error': 'User account deactivated'}, 403
 
         access_token = create_access_token(

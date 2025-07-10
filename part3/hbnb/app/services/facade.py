@@ -405,7 +405,7 @@ class HBnBFacade:
 
         if 'status' in booking_data:
             if (str(place.owner_id) != str(user_id)
-                and not user.is_admin):
+               and not user.is_admin):
                 raise PermissionError("Only the owner of a place or an admin"
                                       " can update the status")
             if booking_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
