@@ -151,6 +151,8 @@ class UserResource(Resource):
         try:
             update_data = (UserUpdate.model_validate(request.json)
                            .model_dump(exclude_unset=True))
+            if not UserCUpdate.validate_image(user_data.photo_url):
+                return {'message': 'L\'URL ne pointe pas vers une image valide'}, 400
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
         if "email" in update_data:
@@ -224,7 +226,7 @@ class Login(Resource):
             return {'error': 'Invalid password or email'}, 400
         
         if user.is_active == False:
-            return {'error': 'User account desactivated'}, 403
+            return {'error': 'User account deactivated'}, 403
 
         access_token = create_access_token(
             identity=user.id,
@@ -321,7 +323,7 @@ class ModerateUser(Resource):
     @api.response(403, 'Forbidden')
     def patch(self, user_id):
         """
-        Desactive or active an user account
+        Deactive or activate an user account
         """
         identity = get_jwt_identity()
         user = facade.get_user(identity)

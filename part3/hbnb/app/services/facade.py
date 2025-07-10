@@ -71,6 +71,7 @@ class HBnBFacade:
             last_name=user_in.last_name,
             email=user_in.email,
             hashed_password=hashed_pw,
+            photo_url=str(user_in.photo_url)
         )
         self.user_repo.add(user)
         return user
