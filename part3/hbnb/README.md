@@ -57,14 +57,24 @@ hbnb/
 ├── blacklist.py  
 ├── config.py  
 ├── extensions.py  
-├── HBnB - Entity Relationship Diagram.pdf  
-├── HBnB - Entity Relationship Diagram.jpg  
+├── instance/  
+│   └── development.db  
 ├── README.md  
 ├── requirements.txt  
 ├── run.py  
-├── SQL.sql  
+├── SQL/  
+│   ├── SQL_test.sql  
+│   └── SQL.sql  
 ├── tests/  
-└── utils.py  
+│   ├── init_admin.sql  
+│   ├── run_tests.py  
+│   ├── test_amenities_req.py  
+│   ├── test_places_req.py  
+│   └── test_users_req.py  
+├── utils.py  
+├── HBnB - Entity Relationship Diagram.jpg  
+├── HBnB - Entity Relationship Diagram.pdf  
+└── LICENSE.txt  
 ```
 
 ## 🔧 Technologies Used
@@ -136,8 +146,8 @@ To :
 ```python
 SQLALCHEMY_DATABASE_URI = 'sqlite:///testDB.db.db'
 ```
-Start the server.
-While the server running:
+Start the server.  
+While it's running:
 + Open a new terminal
  ```bash
 cd /tests
@@ -148,6 +158,25 @@ Automatic tests are for place, user and amenity.
 
 You can also test individual endpoints using Swagger UI, Postman, or cURL.
 (Tested functional with SwaggerUI on web browser)
+
+It is also possible to test the project by going (starting from /hbnb) :
+```bash
+cd SQL
+sqlite3 ./instance/testDB.db < SQL_test.sql
+```
+For it to work, you need to have already created the database testDB.db by changing the URI (see the first part of Testing)
+Then, you can
+```bash
+cd ..
+cd instance
+sqlite3 testDB.db
+```
+And type some SQL to check the insertions :
+```SQL
+SELECT * FROM user;
+SELECT * FROM place;
+```
+Or even try some CRUD operations!
 
 ## 🧬 ER Diagram (made with draw.io)
 
@@ -172,3 +201,29 @@ MIT License — see LICENSE file for details.
 
 + Quentin Lataste : [github.com/loufi84](https://github.com/loufi84)
 + Valentin Dumont : [github.com/Proser-V](https://github.com/Proser-V)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="position: fixed; bottom: 5px; right: 5px; opacity: 0.3;">
+  <img src="https://pbs.twimg.com/media/ETY9xdlXgAE05ji.jpg" width="40" alt="Petit clin d'œil">
+</p>
