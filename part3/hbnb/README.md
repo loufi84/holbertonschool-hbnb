@@ -73,8 +73,7 @@ hbnb/
 │   └── test_users_req.py  
 ├── utils.py  
 ├── HBnB - Entity Relationship Diagram.jpg  
-├── HBnB - Entity Relationship Diagram.pdf  
-└── LICENSE.txt  
+└── HBnB - Entity Relationship Diagram.pdf  
 ```
 
 ## 🔧 Technologies Used
@@ -204,26 +203,6 @@ MIT License — see LICENSE file for details.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="position: fixed; bottom: 5px; right: 5px; opacity: 0.3;">
-  <img src="https://pbs.twimg.com/media/ETY9xdlXgAE05ji.jpg" width="40" alt="Petit clin d'œil">
+<p style="position: fixed; bottom: 5px; right: 5px; opacity: 0.1;">
+  <img src="https://pbs.twimg.com/media/ETY9xdlXgAE05ji.jpg" width="30" alt="Petit clin d'œil">
 </p>
