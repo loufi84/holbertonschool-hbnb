@@ -194,9 +194,9 @@ class BookingResource(Resource):
                 return {
                     "error": "Only the owner of a place or an admin can update the status"
                     }, 403
-            if update_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
+            if update_data['status'] not in ("CANCELLED"):
                 return {
-                    'error': "Status must be DONE, PENDING, or CANCELLED"
+                    'error': "Status must be CANCELLED"
                     }, 400
 
         try:
