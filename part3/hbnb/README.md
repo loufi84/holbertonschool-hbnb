@@ -200,9 +200,3 @@ MIT License — see LICENSE file for details.
 
 + Quentin Lataste : [github.com/loufi84](https://github.com/loufi84)
 + Valentin Dumont : [github.com/Proser-V](https://github.com/Proser-V)
-
-
-
-<p style="position: fixed; bottom: 5px; right: 5px; opacity: 0.1;">
-  <img src="https://pbs.twimg.com/media/ETY9xdlXgAE05ji.jpg" width="30" alt="Petit clin d'œil">
-</p>
