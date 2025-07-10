@@ -128,6 +128,15 @@ python3 -m run
 
 Run automatic tests:
 
+In ```config.py``` change this line :
+```python
+SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db'
+```
+To :
+```python
+SQLALCHEMY_DATABASE_URI = 'sqlite:///testDB.db.db'
+```
+Start the server.
 While the server running:
 + Open a new terminal
  ```bash
@@ -149,7 +158,7 @@ You can also test individual endpoints using Swagger UI, Postman, or cURL.
 ✅ Part 1: Project Design  
 ✅ Part 2: Business Logic and API Endpoints  
 🟢 Part 3: Authentication and Database Integration (You are here)  
-🔒 Part 4: Web Client (HTML + JS UI)  
+🔒 Part 4: Web Client (HTML5/CSS3 + JS UI)  
 
 ## 🤝 Contributions
 
