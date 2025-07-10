@@ -151,7 +151,7 @@ class UserResource(Resource):
         try:
             update_data = (UserUpdate.model_validate(request.json)
                            .model_dump(exclude_unset=True))
-            if not UserCUpdate.validate_image(user_data.photo_url):
+            if not UserUpdate.validate_image(update_data.photo_url):
                 return {'message': 'L\'URL ne pointe pas vers une image valide'}, 400
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
