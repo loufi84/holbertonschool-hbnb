@@ -4,7 +4,7 @@ It calls the basic business logic from the facade (/app/services/facade).
 It defines the CRUD methods for the bookings.
 """
 from flask_restx import Namespace, Resource, fields
-from flask import request
+from flask import request, jsonify
 from app.services import facade
 from app.models.booking import CreateBooking, BookingPublic, BookingStatus
 from app.models.booking import UpdateBooking
@@ -191,7 +191,6 @@ class BookingResource(Resource):
                 return {'error': 'Associated place not found'}, 404
             if (str(place.owner_id) != str(current_user_id)
             and not current_user.is_admin):
-                print(f"[DEBUG] user_id={current_user_id}, is_admin={current_user.is_admin}, owner={place.owner_id}")
                 return {
                     "error": "Only the owner of a place or an admin can update the status"
                     }, 403

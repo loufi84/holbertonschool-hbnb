@@ -401,11 +401,13 @@ class HBnBFacade:
         place_id = booking.place
         place = self.place_repo.get(place_id)
         user_id = booking.user
+        user = self.get_user(user_id)
 
         if 'status' in booking_data:
-            if str(place.owner_id) != str(user_id):
-                raise PermissionError("Only the owner of a place"
-                                      "can update the status")
+            if (str(place.owner_id) != str(user_id)
+                and not user.is_admin):
+                raise PermissionError("Only the owner of a place or an admin"
+                                      " can update the status")
             if booking_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
                 raise ValueError("Status must be DONE, PENDING, or CANCELLED")
 
