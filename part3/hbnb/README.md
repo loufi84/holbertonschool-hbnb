@@ -131,8 +131,8 @@ Run automatic tests:
 While the server running:
 + Open a new terminal
  ```bash
-+ cd /tests
-+ python3 -m run_tests
+cd /tests
+python3 -m run_tests
 ```
 
 Automatic tests are for place, user and amenity.
