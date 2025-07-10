@@ -176,8 +176,8 @@ class PlaceResource(Resource):
         user = facade.get_user(user_id)
         try:
             UUID(place_id)
-        except ValidationError as e:
-            return {'error': json.loads(e.json())}, 400
+        except ValueError as e:
+            return {'error': 'Invalid UUID'}, 400
 
         existing_place = facade.get_place(place_id)
         if not existing_place:
