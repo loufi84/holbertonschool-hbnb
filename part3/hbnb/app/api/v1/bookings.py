@@ -133,6 +133,8 @@ class BookingResource(Resource):
         if not booking:
             return {'error': 'Booking not found'}, 404
         place = facade.get_place(booking.place)
+        if not place:
+            return {'error': 'Place not found'}, 404
         if (current_user_id != booking.user
             and current_user_id != place.owner_id
             and current_user.is_admin is False):
@@ -155,7 +157,7 @@ class BookingResource(Resource):
     @api.response(400, 'Invalid input data or UUID format')
     @api.response(401, 'Unauthorized')
     @api.response(403, 'Forbidden')
-    @api.response(404, 'Booking not found')
+    @api.response(404, 'Entity not found')
     @jwt_required()
     def put(self, booking_id):
         """Update a booking's information"""
@@ -167,8 +169,12 @@ class BookingResource(Resource):
         booking = facade.get_booking(booking_id)
         if not booking:
             return {'error': 'Booking not found'}, 404
-
-        current_user = get_jwt_identity()
+        if booking.status != "PENDING":
+            return {
+                'error': 'Cannot modifiy an already done or cancelled booking'
+                }, 400
+        current_user_id = get_jwt_identity()
+        current_user = facade.get_user(current_user_id)
         try:
             update_data = (UpdateBooking.model_validate(request.json)
                            .model_dump(exclude_unset=True))
@@ -181,9 +187,13 @@ class BookingResource(Resource):
 
         if "status" in update_data:
             place = facade.get_place(booking.place)
-            if not place or place.owner_id != str(current_user):
+            if not place:
+                return {'error': 'Associated place not found'}, 404
+            if (str(place.owner_id) != str(current_user_id)
+            and not current_user.is_admin):
+                print(f"[DEBUG] user_id={current_user_id}, is_admin={current_user.is_admin}, owner={place.owner_id}")
                 return {
-                    'error': 'Only the owner of a place can update the status'
+                    "error": "Only the owner of a place or an admin can update the status"
                     }, 403
             if update_data['status'] not in ("DONE", "PENDING", "CANCELLED"):
                 return {
@@ -285,7 +295,7 @@ class UserBookingList(Resource):
             uuid.UUID(user_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
-        user = facade.get_place(user_id)
+        user = facade.get_user(user_id)
         if not user:
             return {'message': 'User not found'}, 404
         bookings = facade.get_booking_list_by_user(user_id)

@@ -160,13 +160,22 @@ class UserUpdate(BaseModel):
     @classmethod
     def validate_image(cls, url):
         try:
-            response = response.head(url, timeout=5)
+            # HEAD request
+            response = requests.head(str(url), timeout=5, allow_redirects=True)
             if response.status_code == 200:
-                content_type = response.headers.get('content-type', '')
-                return content_type.startswith('image/')
-            return False
-        except requests.RequestException:
-            return False
+                content_type = response.headers.get('Content-Type', '')
+                if content_type.startswith('image/'):
+                    return url
+            # GET partial content
+            headers = {'Range': 'bytes=0-1023'}
+            response = requests.get(str(url), headers=headers, timeout=5, stream=True, allow_redirects=True)
+            if response.status_code in (200, 206):
+                content_type = response.headers.get('Content-Type', '')
+                if content_type.startswith('image/'):
+                    return url
+            raise ValueError("The URL is not a valid image")
+        except requests.RequestException as e:
+            raise ValueError(f"An error occured while the verification of the image")
 
     @classmethod
     def set_default_photo(cls, photo_url):

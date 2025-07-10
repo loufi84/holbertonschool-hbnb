@@ -136,7 +136,7 @@ class UserResource(Resource):
         current_user = facade.get_user(current_user_id)
         try:
             UUID(user_id)
-        except TypeError:
+        except ValueError:
             return {'error': 'Invalid UUID format'}, 400
 
         if (current_user_id != str(user_id)
@@ -149,10 +149,11 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
 
         try:
-            update_data = (UserUpdate.model_validate(request.json)
-                           .model_dump(exclude_unset=True))
-            if not UserCUpdate.validate_image(user_data.photo_url):
-                return {'message': 'L\'URL ne pointe pas vers une image valide'}, 400
+            update_user = UserUpdate.model_validate(request.json)
+            if update_user.photo_url is not None:
+                if not UserUpdate.validate_image(update_user.photo_url):
+                    return {'message': 'L\'URL ne pointe pas vers une image valide'}, 400
+            update_data = update_user.model_dump(exclude_unset=True, mode="json")
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
         if "email" in update_data:
@@ -323,7 +324,7 @@ class ModerateUser(Resource):
     @api.response(403, 'Forbidden')
     def patch(self, user_id):
         """
-        Deactive or activate an user account
+        Deactivate or activate an user account
         """
         identity = get_jwt_identity()
         user = facade.get_user(identity)
