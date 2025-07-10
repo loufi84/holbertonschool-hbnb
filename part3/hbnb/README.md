@@ -130,8 +130,10 @@ Run automatic tests:
 
 While the server running:
 + Open a new terminal
-+ ```cd tests/```
-+ ```./run_tests.py```
+ ```bash
++ cd /tests
++ python3 -m run_tests
+```
 
 Automatic tests are for place, user and amenity.
 
