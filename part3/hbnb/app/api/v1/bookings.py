@@ -4,7 +4,7 @@ It calls the basic business logic from the facade (/app/services/facade).
 It defines the CRUD methods for the bookings.
 """
 from flask_restx import Namespace, Resource, fields
-from flask import request, jsonify
+from flask import request
 from app.services import facade
 from app.models.booking import CreateBooking, BookingPublic, BookingStatus
 from app.models.booking import UpdateBooking
@@ -12,7 +12,6 @@ from pydantic import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import uuid
 from datetime import datetime, timezone
-from dateutil.parser import isoparse
 import json
 
 api = Namespace('bookings', description='Booking operations')
