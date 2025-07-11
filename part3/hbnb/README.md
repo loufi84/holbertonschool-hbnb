@@ -143,7 +143,7 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db'
 ```
 To :
 ```python
-SQLALCHEMY_DATABASE_URI = 'sqlite:///testDB.db.db'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///testDB.db'
 ```
 Start the server.  
 While it's running:
