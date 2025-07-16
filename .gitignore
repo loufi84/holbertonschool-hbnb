@@ -6,3 +6,4 @@ test_root.py
 .pytest_cache
 alembic
 alembic.ini
+venv

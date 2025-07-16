@@ -413,3 +413,15 @@ class HBnBFacade:
 
         self.booking_repo.update(booking_id, booking_data)
         return self.booking_repo.get(booking_id)
+    
+    def manage_bookingstatus(self, booking_id):
+        print("Je suis passé par là")
+        booking = self.get_booking(booking_id)
+        now = datetime.now(timezone.utc)
+        booking_end_aware = ensure_aware(booking.end_date)
+
+        if (booking.status == BookingStatus.PENDING.value
+           and now > booking_end_aware):
+            booking.set_status(BookingStatus.DONE.value)
+            self.booking_repo.update(booking_id, booking.__dict__)
+        return booking.status
