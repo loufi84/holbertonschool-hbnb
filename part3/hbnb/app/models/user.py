@@ -99,13 +99,13 @@ class UserCreate(BaseModel):
         if url is None:
             return None
         try:
-            # HEAD request
+
             response = requests.head(str(url), timeout=5, allow_redirects=True)
             if response.status_code == 200:
                 content_type = response.headers.get('Content-Type', '')
                 if content_type.startswith('image/'):
                     return url
-            # GET partial content
+
             headers = {'Range': 'bytes=0-1023'}
             response = requests.get(str(url), headers=headers, timeout=5,
                                     stream=True, allow_redirects=True)
