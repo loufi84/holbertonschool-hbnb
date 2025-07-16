@@ -225,6 +225,9 @@ class PlaceCreate(BaseModel):
     @field_validator("photos_url")
     @classmethod
     def validate_image(cls, photos):
+        if photos is None:
+            return []
+        validated = []
         for url in photos:
             if url is None:
                 return None
@@ -233,7 +236,8 @@ class PlaceCreate(BaseModel):
                 if response.status_code == 200:
                     content_type = response.headers.get('Content-Type', '')
                     if content_type.startswith('image/'):
-                        return url
+                        validated.append(str(url))
+                        continue
 
                 headers = {'Range': 'bytes=0-1023'}
                 response = requests.get(str(url), headers=headers, timeout=5,
@@ -246,6 +250,7 @@ class PlaceCreate(BaseModel):
             except requests.RequestException as e:
                 raise ValueError(f"An error occured while the verification"
                                 " of the image")
+        return validated
 
     @field_validator('price')
     def round_price(cls, value: float) -> float:
@@ -307,6 +312,9 @@ class PlaceUpdate(BaseModel):
     @field_validator("photos_url")
     @classmethod
     def validate_image(cls, photos):
+        if photos is None:
+            return []
+        validated = []
         for url in photos:
             if url is None:
                 return None
@@ -315,7 +323,8 @@ class PlaceUpdate(BaseModel):
                 if response.status_code == 200:
                     content_type = response.headers.get('Content-Type', '')
                     if content_type.startswith('image/'):
-                        return url
+                        validated.append(str(url))
+                        continue
 
                 headers = {'Range': 'bytes=0-1023'}
                 response = requests.get(str(url), headers=headers, timeout=5,
@@ -328,6 +337,7 @@ class PlaceUpdate(BaseModel):
             except requests.RequestException as e:
                 raise ValueError(f"An error occured while the verification"
                                 " of the image")
+        return validated
 
     @field_validator('price')
     def round_price(cls, value: float) -> float:
@@ -372,6 +382,7 @@ class PlacePublic(BaseModel):
     rating: Optional[float]
     owner_id: str
     amenity_ids: Optional[List[str]] = []
+    photos_url: Optional[List[AnyUrl]] = []
 
     model_config = ConfigDict(
                 json_encoders={datetime: lambda v: v.isoformat(),
