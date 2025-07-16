@@ -222,7 +222,7 @@ class PlaceCreate(BaseModel):
     amenity_ids: Optional[List[uuid.UUID]] = []
     photos_url: Optional[List[AnyUrl]] = []
 
-    @field_validator("photo_url")
+    @field_validator("photos_url")
     @classmethod
     def validate_image(cls, photos):
         for url in photos:
@@ -304,7 +304,7 @@ class PlaceUpdate(BaseModel):
     amenity_ids: Optional[List[uuid.UUID]] = []
     photos_url: Optional[List[AnyUrl]] = []
 
-    @field_validator("photo_url")
+    @field_validator("photos_url")
     @classmethod
     def validate_image(cls, photos):
         for url in photos:

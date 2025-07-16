@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
 from pydantic import ValidationError
-from app.models.place import PlacePublic, PlaceUpdate
+from app.models.place import PlacePublic, PlaceUpdate, PlaceCreate
 from uuid import UUID
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
@@ -27,7 +27,9 @@ place_model = api.model('Place', {
     'longitude': fields.Float(required=True,
                               description='The longitude of the place'),
     'amenity_ids': fields.List(fields.String, required=False,
-                               description='List of amenity IDs')
+                               description='List of amenity IDs'),
+    'photos_url': fields.List(fields.String, required=False,
+                              description='List of photos for the place')
 })
 
 place_model_update = api.model('PlaceUpdate', {
@@ -42,7 +44,9 @@ place_model_update = api.model('PlaceUpdate', {
     'longitude': fields.Float(required=False,
                               description='The longitude of the place'),
     'amenity_ids': fields.List(fields.String, required=False,
-                               description='List of amenity IDs')
+                               description='List of amenity IDs'),
+    'photos_url': fields.List(fields.String, required=False,
+                              description='List of photos for the place')
 })
 
 
@@ -72,6 +76,19 @@ class PlaceList(Resource):
                 'name': amenity.name,
                 'description': amenity.description
             })
+
+        photos = []
+        try:
+            for photo in new_place.photos_url:
+                if new_place.photos_url is not None:
+                    if not PlaceCreate.validate_image(new_place.photos_url):
+                        return {'message': 'L\'URL ne pointe pas'
+                                ' vers une image valide'}, 400
+                    photos.append(photo)
+        except ValidationError as e:
+            return {'error': json.loads(e.json())}, 400
+        
+
         return PlacePublic.model_validate(new_place).model_dump(), 201
 
     @api.doc(security=[])
