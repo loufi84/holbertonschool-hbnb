@@ -52,10 +52,10 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)  # Allows disabling user
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(
-        db.DateTime, default=datetime.now(timezone.utc), nullable=False
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
         )
     updated_at = db.Column(
-        db.DateTime, default=datetime.now(timezone.utc),
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc)
         )
     photo_url = db.Column(db.String(2048), nullable=True)

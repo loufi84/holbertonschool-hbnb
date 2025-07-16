@@ -63,7 +63,7 @@ class Place(db.Model):
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         nullable=False)
     updated_at = db.Column(
-        db.DateTime, default=datetime.now(timezone.utc),
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc)
         )
     photos_url = db.Column(db.JSON, default=list)
