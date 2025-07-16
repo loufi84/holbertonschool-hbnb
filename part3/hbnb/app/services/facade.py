@@ -415,7 +415,7 @@ class HBnBFacade:
         return self.booking_repo.get(booking_id)
     
     def manage_bookingstatus(self, booking_id):
-        print("Je suis passé par là")
+
         booking = self.get_booking(booking_id)
         now = datetime.now(timezone.utc)
         booking_end_aware = ensure_aware(booking.end_date)

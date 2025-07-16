@@ -50,16 +50,16 @@ class CreateReview(Resource):
     def post(self, booking_id):
         """Register a new review"""
         current_user_id = get_jwt_identity()
-        print(">>> DÉBUT méthode POST /from_booking")
+
         try:
             UUID(booking_id)
         except ValueError:
             return {"error": "Invalid booking UUID format"}, 400
-        print("Call avant booking_managestatus.")
+
         bookingstatus = facade.manage_bookingstatus(booking_id)
         if bookingstatus != "DONE":
             return {'error': 'Booking status must be DONE to review.'}, 403
-        print("Call après booking_managestatus.")
+
         try:
             review_data = ReviewCreate(**request.json)
         except ValidationError as e:
