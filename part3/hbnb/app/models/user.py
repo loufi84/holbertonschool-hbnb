@@ -242,14 +242,14 @@ class LoginRequest(BaseModel):
 
 class AdminCreate(UserCreate):
     """
-
+    The class to create an admin.
     """
     is_admin: bool = True
 
 
 class UserModeration(BaseModel):
     """
-
+    The class that handles the moderation of a user.
     """
     is_active: bool = Field(..., description="User active status (True/False)")
 
