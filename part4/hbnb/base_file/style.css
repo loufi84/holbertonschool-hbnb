@@ -1,5 +1,5 @@
 html, body {
-    background-color: #FFFCF2;
+    background-color: #000000;
     height: 100%;
     margin: 0;
     display: flex;
@@ -11,17 +11,10 @@ main {
     padding: 2rem;
 }
 
-hr {
-    height: 2px;
-    margin: 2rem 0;
-    background-color: #FF0000;
-    border: none;
-    background: linear-gradient(to right, transparent, #d63c3c, transparent);
-}
 
 #footer {
-    background-color: #F9ECCC;
-    color: #064789;
+    background-color: #111111;
+    color: #FFFFFF;
     font-family: sans-serif;
     font-size: 0.8rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -35,12 +28,13 @@ hr {
 }
 
 #header {
-    background-color: #F9ECCC;
-    color: #064789;
+    background-color: #000000;
+    color: #FFFFFF;
     display: flex;
     padding: 1rem 2rem;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    position: relative;
     font-family: sans-serif;
     font-size: 1.2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -53,12 +47,23 @@ hr {
 }
 
 header a {
-    color: #064789;
+    color: #FFFFFF;
     text-decoration: none;
     padding: 0.5rem 1rem;
-    border: 2px solid #064789;
+    border: 2px solid #111111;
     border-radius: 5px;
     transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+}
+
+#logo {
+    margin: 0;
 }
 
 header a:hover {
