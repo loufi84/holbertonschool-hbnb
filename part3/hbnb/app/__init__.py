@@ -10,6 +10,7 @@ from utils import purge_expired_tokens
 from extensions import db, jwt
 from app.models.user import RevokedToken
 from utils import purge_expired_tokens, delete_invalid_amenities
+from flask_cors import CORS
 
 
 def create_app(config_name='default'):
@@ -75,4 +76,5 @@ def create_app(config_name='default'):
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
     api.add_namespace(bookings_ns, path='/api/v1/bookings')
 
+    CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500"]}})
     return app
