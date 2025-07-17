@@ -79,6 +79,11 @@ header a:hover {
     box-sizing: border-box;
 }
 
+label {
+    color: #FFFFFF !important;
+    font-family: sans-serif;
+}
+
 @media (min-width: 768px) {
     .container {
         width: 85%;
