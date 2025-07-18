@@ -9,13 +9,14 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     </head>
     <body>
+        <div class="light-effect"></div>
         <header id="header">
             <img src="images/logo.png" alt="Logo HBnB" id="logo">
             <section id="filter">
-                <label for="price-filter">Max price:</label>
-                <select id="price-filter">
-                    <!-- JS here -->
-                </select>
+                <section id="price-filter">
+                    <label for="price-slider">Max price : <span id="price-value">35</span> €</label>
+                    <input type="range" id="price-slider" min="5" max="120" step="5" value="35">
+                </section>
             </section>
             <nav>
                 <a href="login.html">Login</a>
@@ -26,12 +27,9 @@
             </section>
         </main>
         <footer id="footer">
-            HBnB<br>
-            Front-end : <strong>Quentin LATASTE</strong><br>
-            Back-end : <strong>Valentin DUMONT</strong> & <strong>Quentin LATASTE</strong><br>
-            For Holberton School Dijon - July 2025<br>
-            All rights reserved
+            HBnB&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Front-end: <strong>Quentin LATASTE</strong>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Back-end: <strong>Valentin DUMONT</strong> & <strong>Quentin LATASTE</strong>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;For Holberton School Dijon - July 2025&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;All rights reserved.
         </footer>
+        <div id="overlay"></div>
         <script src="place_fetch.js"></script>
     </body>
 </html>

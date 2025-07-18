@@ -11,6 +11,9 @@ from extensions import db, jwt
 from app.models.user import RevokedToken
 from utils import purge_expired_tokens, delete_invalid_amenities
 from flask_cors import CORS
+from app.api.v1.places import place_pages
+import os
+
 
 
 def create_app(config_name='default'):
@@ -19,7 +22,10 @@ def create_app(config_name='default'):
     JWT functions.
     """
     print("create_app() called")
-    app = Flask(__name__)
+    template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../part4/hbnb/templates'))
+    static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../part4/hbnb/static'))
+    print("Template folder absolute path:", template_dir)
+    app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(config[config_name])
 
     db.init_app(app)
@@ -77,4 +83,5 @@ def create_app(config_name='default'):
     api.add_namespace(bookings_ns, path='/api/v1/bookings')
 
     CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500"]}})
+    app.register_blueprint(place_pages)
     return app

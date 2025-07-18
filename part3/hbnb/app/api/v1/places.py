@@ -4,7 +4,7 @@ It calls the basic business logic from the facade (/app/services/facade).
 It defines the CRUD methods for the places.
 """
 from flask_restx import Namespace, Resource, fields
-from flask import request
+from flask import request, Blueprint, render_template, abort
 from app.services import facade
 from pydantic import ValidationError, AnyUrl
 from app.models.place import PlacePublic, PlaceUpdate, PlaceCreate
@@ -239,3 +239,19 @@ class PlaceResource(Resource):
 
         facade.delete_place(place_id)
         return {'message': 'Place deleted successfully'}, 200
+
+place_pages = Blueprint('place_pages', __name__)
+
+@place_pages.route('/places/<place_id>')
+def show_places(place_id):
+    
+    try:
+        UUID(place_id)
+    except ValueError:
+        abort(400, description='Invalid UUID')
+
+    place = facade.get_place(place_id)
+    if not place:
+        abort(404, description='Place not found')
+
+    return render_template('place.html', place=place)

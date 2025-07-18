@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ place.title }} - HBnB</title>
+        <link rel="stylesheet" href="../static/styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    </head>   
+    <body data-place-id="{{ place.id }}">
+        <div class="light-effect"></div>
+        <header id="header">
+            <a href="../static/index.html">Back home</a>
+            <h1 class="title">{{ place.title }}</h1>
+        </header>
+
+        <main>
+            <section class="gallery">
+                {% if place.photos_url %}
+                    {% for url in place.photos_url %}
+                        <img src="{{ url }}" alt="Photos du logement">
+                    {% endfor %}
+                {% else %}
+                    <p>There is no photos here</p>
+                {% endif %}
+            </section>
+
+            <section class="description">
+                <p>{{ place.description }}</p>
+
+                {% if place.price < 5 %}
+                    <p><em>Luxury have no price, but here you can spend : {{ place.price }}€ for the best time of your life.</em></p>
+                {% else %}
+                    <p><strong>Only {{ place.price }}€ for this luxurious place.</strong></p>
+                {% endif %}
+
+                <div id="rating-container"
+                data-rating="{{ place.rating if place.rating is not none else '' }}">
+                </div>
+            </section>
+            <section class="booking-form">
+                <h2>Books this magnificent place</h2>
+                <div id="date-range"></div>
+                <button id="book-button" style="display:none;">Book now</button>
+            </section>
+        </main>
+        <script src="../static/place_details.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <footer id="footer">
+            Front-end : <strong>Quentin LATASTE</strong><br>
+            Back-end : <strong>Valentin DUMONT</strong> & <strong>Quentin LATASTE</strong><br>
+            For Holberton School Dijon - July 2025<br>
+            All rights reserved
+        </footer>
+    </body>
+</html>
