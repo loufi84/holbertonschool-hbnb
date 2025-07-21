@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="icon" href="../static/images/icon.png">
 </head>
 <body>
     <div class="light-effect"></div>
     <header id="header">
-        <img src="images/logo.png" alt="Logo HBnB" id="logo">
+        <img src="../static/images/logo.png" alt="Logo HBnB" id="logo">
     </header>
     <main>
         <form id="login-form">
@@ -23,7 +24,7 @@
             <button type="submit">Login</button>
         </form>
     </main>
-    {% include footer.html %}
-    <script src="scripts.js"></script>
+    {% include 'footer.html' %}
+    <script src="../static/login.js"></script>
 </body>
 </html>

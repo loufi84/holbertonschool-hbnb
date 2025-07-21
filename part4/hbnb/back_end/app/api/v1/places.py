@@ -239,19 +239,3 @@ class PlaceResource(Resource):
 
         facade.delete_place(place_id)
         return {'message': 'Place deleted successfully'}, 200
-
-place_pages = Blueprint('place_pages', __name__)
-
-@place_pages.route('/places/<place_id>')
-def show_places(place_id):
-    
-    try:
-        UUID(place_id)
-    except ValueError:
-        abort(400, description='Invalid UUID')
-
-    place = facade.get_place(place_id)
-    if not place:
-        abort(404, description='Place not found')
-
-    return render_template('place.html', place=place)

@@ -13,7 +13,14 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow-y: auto;
     overflow-x: hidden;
+}
+
+html, body {
+    height: 100%;
+    min-height: 100vh;
+    background-color: #FFFCF2;
 }
 
 .light-effect {
@@ -77,7 +84,6 @@ main {
     gap: 2rem;
     padding-top: 100px !important;
     padding-bottom: 50px;
-    overflow-y: auto;
     background: transparent !important;
     position: relative;
     contain: layout;
@@ -119,9 +125,6 @@ label {
 }
 
 #footer {
-    bottom: 0;
-    left: 0;
-    right: 0;
     background-color: #000000;
     color: #FFFFFF;
     font-family: sans-serif;
@@ -134,7 +137,7 @@ label {
     background-position: top center;
     background-size: 100% 2px;
     opacity: 0.8;
-    z-index: 10000;
+    z-index: 100;
     flex-shrink: 0;
     text-align: center;
 }
@@ -196,6 +199,7 @@ header a:hover {
     border: 2px solid #F9ECCC;
 }
 
+
 .container {
     width: 100%;
     padding: 0 2rem;
@@ -218,14 +222,15 @@ header a:hover {
     border: 1px solid #D63C3C;
 }
 
+
 .place-card.expanded {
     position: fixed;
     top: 30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 80vw;
+    width: 70vw;
     height: auto;
-    max-height: calc(100vh - 130px);
+    max-height: 75vh;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     border-radius: 12px;
     z-index: 10001;
@@ -267,8 +272,8 @@ header a:hover {
 }
 
 .place-card.expanded .place-image {
-    height: 50vh;
-    width: 50vw;
+    height: 40vh;
+    width: 45vw;
     border-radius: 12px;
     transform: none !important;
 }
@@ -446,8 +451,11 @@ header a:hover {
 }
 
 .booking-form {
-    margin: auto auto 2rem auto;
-    width: 320px;
+    flex-grow: 1;
+    margin: 2rem auto;
+    width: 75vw;      /* au lieu de 320px */
+    max-width: 900px; /* max raisonnable */
+    min-width: 320px; /* minimum pour garder un bon rendu sur petit écran */
     background-color: #121212;
     border-radius: 20px;
     padding: 1.5rem 1.5rem 2rem 1.5rem;
@@ -466,13 +474,15 @@ header a:hover {
 
 #date-range {
     width: 100% !important;
-    max-width: 800px;
+    max-width: 100%; /* enlever la limite à 800px */
     background-color: #121212 !important;
     border-radius: 20px;
     box-shadow:
         0 0 12px 2px rgba(100, 210, 255, 0.25),
         inset 0 0 10px rgba(255, 255, 255, 0.05);
     padding: 12px 10px 10px 10px;
+    height: 60vh;
+    overflow-y: auto;
 }
 
 .flatpickr-calendar {
@@ -573,4 +583,34 @@ header a:hover {
 #login-form {
     display: flex;
     text-align: center;
+}
+
+#book-button {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    z-index: 1;
+    color: #FFFFFF;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    transition: color 0.5s ease;
+    background-color: transparent;
+    max-width: 20vw;
+}
+
+#book-button:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+#book-button:hover {
+    color: #F9ECCC;
+    border: 2px solid #F9ECCC;
+}
+.align {
+    align-items: center;
+    justify-content: center;
+    display: flex;
 }

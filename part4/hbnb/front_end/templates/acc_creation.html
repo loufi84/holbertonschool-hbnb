@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../static/styles.css">
+        <title>Account creation</title>
+        <link rel="icon" href="../static/images/icon.png">
+        <script src="../static/account_creation.js"></script>
+    </head>
+    <body>
+        <div class="light-effect"></div>
+        <header class="header">
+            <img src="../static/images/logo.png">
+        </header>
+        <main>
+            <form id="account_creation">
+                <label for="first_name">First name</label>
+                <input type="text" id="first_name" name="first_name" required>
+
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="photo_url">Link to you profile picture</label>
+                <input type="text" id="photo_url" name="photo_url" >
+
+                <button type="submit" id="book-button">Create your account</button>
+            </form>
+        </main>
+        {% include 'footer.html' %}
+    </body>
+</html>

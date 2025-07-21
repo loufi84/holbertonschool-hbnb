@@ -38,11 +38,9 @@
                 data-rating="{{ place.rating if place.rating is not none else '' }}">
                 </div>
             </section>
-            <section class="booking-form">
-                <h2>Books this magnificent place</h2>
-                <div id="date-range"></div>
-                <button id="book-button" style="display:none;">Book now</button>
-            </section>
+            <div class="align">
+                <a href="{{ url_for('place_pages.booking', place_id=place.id) }}" id="book-button">Book this place now!</a>
+            </div>            
         </main>
         <script src="../static/place_details.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

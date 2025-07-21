@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastScrollTop = 0;
     const header = document.getElementById('header');
 
+    // Scroll behavior for header
     window.addEventListener('scroll', () => {
         const currentScroll = window.scrollY;
         if (currentScroll > lastScrollTop) {
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
     });
 
+    // Load places from API
     fetch('http://127.0.0.1:5001/api/v1/places/')
         .then(response => {
             if (!response.ok) throw new Error('Error while fetching places');
@@ -25,10 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
             data.forEach(place => {
                 const placeCard = document.createElement('article');
                 placeCard.classList.add('place-card');
-
-                const galleryHTML = place.photos_urls
-                    ? place.photos_urls.map(url => `<img src="${url}" alt="Photo">`).join('')
-                    : '';
 
                 const rating = place.rating !== null ? place.rating : 0;
                 const maxRating = 5;
@@ -48,18 +46,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     place.rating !== null ? place.rating + '/5' : 'No reviews yet'
                 }</span></div>`;
 
+                // Gestion de l'image principale
+                let imageUrl = '/static/images/default-placeholder.png';
+                if (typeof place.photos_url === 'string') {
+                    try {
+                        const parsedPhotos = JSON.parse(place.photos_url);
+                        if (Array.isArray(parsedPhotos) && parsedPhotos.length > 0) {
+                            imageUrl = parsedPhotos[0];
+                        } else if (place.photos_url) {
+                            imageUrl = place.photos_url;
+                        }
+                    } catch (e) {
+                        if (place.photos_url) {
+                            imageUrl = place.photos_url;
+                        }
+                    }
+                } else if (Array.isArray(place.photos_url) && place.photos_url.length > 0) {
+                    imageUrl = place.photos_url[0];
+                }
+
                 placeCard.innerHTML = `
-                    <img src="${place.photos_url}" alt="Image de ${place.title}" class="place-image" />
+                    <img src="${imageUrl}" alt="Image de ${place.title}" class="place-image" />
                     <div class="place-summary">
                         <h3>${place.title}</h3>
-                        <p class="price">${place.price}€</p>
+                        <p class="price">${place.price}€ per night</p>
                     </div>
                     <div class="place-details">
-                        <div class="gallery">${galleryHTML}</div>
                         ${ratingHTML}
                         <p class="description">${place.description}</p>
-                        <button class="details-button" data-id="${place.id || ''}">More details</button>
                     </div>
+                    <button class="details-button" data-id="${place.id || ''}">More details</button>
                 `;
 
                 const detailButton = placeCard.querySelector('.details-button');
@@ -107,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(err);
         });
 
+    // Collapse on outside click
     document.addEventListener('click', (e) => {
         if (expandedCard && !e.target.closest('.place-card')) {
             expandedCard.classList.remove('expanded');
@@ -120,13 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Price slider
     const slider = document.getElementById('price-slider');
     const priceValue = document.getElementById('price-value');
 
     if (slider && priceValue) {
         slider.addEventListener('input', () => {
             priceValue.textContent = slider.value;
-            // Places filter
+            // Optionally: filter places here
         });
     }
 });

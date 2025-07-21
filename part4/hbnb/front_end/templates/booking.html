@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Booking</title>
+        <link rel="stylesheet" href="../static/styles.css">
+        <link rel="icon" href="../static/images/icon.png">
+    </head>>
+    <body>
+        <header>
+            <img src="../static/images/logo.png">
+        </header>
+        <main>
+            <h1>COUCOU {{ place.name }}</h1>
+            <section class="booking-form">
+                <h2>Books this magnificent place</h2>
+                <div id="date-range"></div>
+                <button id="book-button" style="display:none;">Book now</button>
+            </section>
+            <script src="../static/booking.js"></script>
+        </main>
+        {% include 'footer.html' %}
+    </body>
+</html>
