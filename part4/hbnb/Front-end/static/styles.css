@@ -4,7 +4,7 @@ html {
 }
 
 body {
-    background: linear-gradient(to bottom, #000000 0%, #DDDDDD 100%);
+    background: #DDDDDD linear-gradient(to bottom, #000000 0%, #DDDDDD 100%);
     min-height: 100vh;
     margin: 0;
     padding: 0;
@@ -30,7 +30,7 @@ body {
         rgba(0, 0, 0, 1) 85%,
         rgba(0, 0, 0, 1) 100%
     );
-    z-index: -2;
+    z-index: 0;
     opacity: 0.8;
     animation: glow 10s ease-in-out infinite;
     pointer-events: none;
@@ -568,4 +568,9 @@ header a:hover {
         padding: 1rem;
         padding-top: 80px !important;
     }
+}
+
+#login-form {
+    display: flex;
+    text-align: center;
 }
