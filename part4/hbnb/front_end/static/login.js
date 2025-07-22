@@ -13,14 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('http://127.0.0.1:5001/api/v1/users/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email, password })
             });
 
             const result = await response.json();
 
-            if (response.ok && result.access_token) {
-                localStorage.setItem('access_token', result.access_token);
-                localStorage.setItem('refresh_token', result.refresh_token);
+            if (response.ok) {
                 window.location.href = '/static/index.html';
             } else {
                 alert(result.error || 'Invalid password or email');

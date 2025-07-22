@@ -4,7 +4,7 @@ It calls the basic business logic from the facade (/app/services/facade).
 It defines the CRUD methods for the users.
 """
 from flask_restx import Namespace, Resource, fields
-from flask import request
+from flask import request, make_response
 from app.services import facade
 from datetime import datetime
 from blacklist import blacklist
@@ -218,7 +218,7 @@ class Login(Resource):
             login_data = LoginRequest(**data)
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
-
+        
         user = facade.get_user_by_email(login_data.email)
         if not user:
             return {'error': 'User not found'}, 404
@@ -227,19 +227,20 @@ class Login(Resource):
                 user.hashed_password, login_data.password)
         except VerifyMismatchError:
             return {'error': 'Invalid password or email'}, 400
-
+        
         if user.is_active is False:
             return {'error': 'User account deactivated'}, 403
-
+        
         access_token = create_access_token(
             identity=user.id,
             additional_claims={"is_admin": user.is_admin}
         )
         refresh_token = create_refresh_token(identity=user.id)
-        return {
-            'access_token': access_token,
-            'refresh_token': refresh_token
-        }, 200
+
+        response = make_response({'msg': 'Login successfull'})
+        response.set_cookie('acess_token', access_token, httponly=True, secure=False, samesite='Lax')
+        response.set_cookie('refresh_token', refresh_token, httponly=True, secure=False, samesite='Lax')
+        return response
 
 
 @api.route('/refresh')
@@ -250,7 +251,10 @@ class TokenRefresh(Resource):
     def post(self):
         identity = get_jwt_identity()
         new_token = create_access_token(identity=identity)
-        return {"access_token": new_token}, 200
+
+        response = make_response({'msg': 'Token refreshed'})
+        response.set_cookie('access_token', new_token, httponly=True, secure=False, samesite='Lax')
+        return response
 
 
 @api.route('/logout')
@@ -259,15 +263,9 @@ class Logout(Resource):
     @api.response(401, 'Unauthorized')
     @jwt_required()
     def post(self):
-        jwt_data = get_jwt()
-        jti = jwt_data["jti"]
-        exp = jwt_data["exp"]
-        expires_at = datetime.utcfromtimestamp(exp)
-
-        db.session.add(RevokedToken(jti=jti, expires_at=expires_at))
-        db.session.commit()
-
-        return {"message": "Access token revoked"}, 200
+        response = make_response({"Message": "Access token revoked"})
+        response.delete_cookie('access_token')
+        return response
 
 
 @api.route('/logout_refresh')
@@ -276,15 +274,9 @@ class LogoutRefresh(Resource):
     @api.response(401, 'Unauthorized')
     @jwt_required(refresh=True)
     def post(self):
-        jwt_data = get_jwt()
-        jti = jwt_data["jti"]
-        exp = jwt_data["exp"]
-        expires_at = datetime.utcfromtimestamp(exp)
-
-        db.session.add(RevokedToken(jti=jti, expires_at=expires_at))
-        db.session.commit()
-
-        return {"message": "Refresh token revoked"}, 200
+        response = make_response({"Message": "Refresh token revoked"})
+        response.delete_cookie('refresh_token')
+        return response
 
 
 @api.route('/admin_creation')

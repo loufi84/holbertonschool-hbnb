@@ -28,6 +28,11 @@ def create_app(config_name='default'):
     static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../front_end/static'))
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(config[config_name])
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_COOKIE_SECURE'] = False
+    app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
+    app.config['JWT_REFRESH_COOKIE_NAME'] = 'refresh_token'
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
     db.init_app(app)
     jwt.init_app(app)
