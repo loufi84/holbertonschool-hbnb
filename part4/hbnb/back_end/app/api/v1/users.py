@@ -238,8 +238,8 @@ class Login(Resource):
         refresh_token = create_refresh_token(identity=user.id)
 
         response = make_response({'msg': 'Login successfull'})
-        response.set_cookie('acess_token', access_token, httponly=True, secure=False, samesite='Lax')
-        response.set_cookie('refresh_token', refresh_token, httponly=True, secure=False, samesite='Lax')
+        response.set_cookie('access_token', access_token, httponly=True, secure=False, samesite='Lax', path='/')
+        response.set_cookie('refresh_token', refresh_token, httponly=True, secure=False, samesite='Lax', path='/')
         return response
 
 
@@ -338,3 +338,24 @@ class ModerateUser(Resource):
 
         updated_user = facade.update_user(user_id, user_is_active.model_dump())
         return UserPublic.model_validate(updated_user).model_dump(), 201
+
+@api.route('/me')
+class Me(Resource):
+    @jwt_required()
+    @api.response(200, 'User info retrieved')
+    def get(self):
+        identity = get_jwt_identity()
+        user = facade.get_user(identity)
+
+        if not user:
+            return {'error': 'User not found'}, 404
+        
+        return {
+            'logged_in': True,
+            'user_id': str(user.id),
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_admin': user.is_admin,
+            'photo_url': user.photo_url
+        }, 200

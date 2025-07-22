@@ -5,17 +5,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Booking</title>
         <link rel="stylesheet" href="/static/styles.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_dark.css">
         <link rel="icon" href="/static/images/icon.png">
-    </head>>
-    <body>
+    </head>
+    <body data-place-id="{{ place.id }}">
         <div class="light-effect"></div>
         <header id="header">
             <img src="/static/images/logo.png">
         </header>
         <main class="container">
-            
-            <script src="/static/booking.js"></script>
+            <section class="place_details">
+                {% if place.photos_url %}
+                    <img src="{{ place.photos_url[0] }}" alt="Photo of the place">
+                {% endif %}
+                <img src="{{ place.owner.photo_url }}">
+                <p>Host: {{ place.owner.first_name }} {{ place.owner.last_name }}</p>
+                <p>Rating: {{ place.rating if place.rating is not none else "No rating yet" }}</p>
+            </section>
+
+            <form id="booking-form">
+                <div id="date-range-container">
+                    <label for="date-range">Choose your stay:</label>
+                    <div id="date-range"></div>
+                </div>
+                <button type="submit" id="book-button" style="display:none;">Confirm your booking</button>
+            </form>
         </main>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="/static/booking.js"></script>
         {% include 'footer.html' %}
     </body>
 </html>

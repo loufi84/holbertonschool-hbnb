@@ -1,4 +1,72 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    fetch('http://127.0.0.1:5001/api/v1/users/me', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Not authenticated');
+        return res.json();
+    })
+    .then(user => {
+        userNav.innerHTML = '';
+    
+        const userContainer = document.createElement('div');
+        userContainer.classList.add('user-info');
+    
+        // Clickable image to profile
+        const profileLink = document.createElement('a');
+        profileLink.href = '/profile';
+        const profileImage = document.createElement('img');
+        const photo = user.photo_url;
+        console.log('Photo URL:', user.photo_url);
+        profileImage.src = (typeof photo === 'string' && photo.trim() !== '')
+                            ? photo
+                            : '/static/images/default_profile.png';
+        profileImage.alt = 'Profile picture';
+        profileImage.classList.add('profile-pic');
+        profileLink.appendChild(profileImage);
+    
+        userContainer.appendChild(profileLink);
+    
+        // Admin link if user is admin
+        if (user.is_admin) {
+            const adminLink = document.createElement('a');
+            adminLink.href = '/admin';
+            adminLink.textContent = 'Admin';
+            adminLink.classList.add('admin-link');
+            userContainer.appendChild(adminLink);
+        }
+    
+        // Logout
+        const logoutLink = document.createElement('a');
+        logoutLink.href = "#";
+        logoutLink.textContent = 'Logout';
+        logoutLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch('http://127.0.0.1:5001/api/v1/users/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.reload();
+            } catch (err) {
+                console.error('Logout failed', err);
+            }
+        });
+    
+        userContainer.appendChild(logoutLink);
+    
+        userNav.appendChild(userContainer);
+    })
+    .catch(() => {
+        userNav.innerHTML = `
+            <a href="/acc_creation">Create an account</a>
+            <a href="/login">Login</a>
+        `;
+    });
+    
+
     const placesList = document.getElementById('places-list');
     let expandedCard = null;
     let lastScrollTop = 0;
