@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, send_from_directory
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.services import facade
+import os
 
 auth_pages = Blueprint('auth_pages', __name__)
+static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../front_end/static'))
 
 @auth_pages.route('/login')
 def login():
@@ -10,3 +13,13 @@ def login():
 @auth_pages.route('/acc_creation')
 def acc_creation():
     return render_template('acc_creation.html')
+
+@auth_pages.route('/admin-panel')
+@jwt_required()
+def serve_admin():
+    identity = get_jwt_identity()
+    user = facade.get_user(identity)
+    print(static_dir)
+    if not user or not user.is_admin:
+        return send_from_directory(static_dir, 'index.html')
+    return send_from_directory(static_dir, 'admin-panel.html')

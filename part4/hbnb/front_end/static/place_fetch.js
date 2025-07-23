@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Admin link if user is admin
         if (user.is_admin) {
             const adminLink = document.createElement('a');
-            adminLink.href = '/admin';
+            adminLink.href = '/admin-panel';
             adminLink.textContent = 'Admin';
             adminLink.classList.add('admin-link');
             userContainer.appendChild(adminLink);

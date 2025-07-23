@@ -8,7 +8,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
-    color: #FFFFFF;
+    background-color: transparent;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -19,7 +19,7 @@ body {
 html, body {
     height: 100%;
     min-height: 100vh;
-    background-color: #FFFCF2;
+    background-color: transparent;
 }
 
 .light-effect {

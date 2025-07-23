@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - HBnB</title>
+  <link rel="icon" href="../static/images/icon.png">
+  <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+  <div class="light-effect"></div>
+  <header id="header">
+    <h1>HBnB Admin Dashboard</h1>
+    <nav>
+      <a href="/static/index.html">Home page</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section id="users-section">
+      <h2>Users</h2>
+      <!-- Liste des utilisateurs injectée ici -->
+    </section>
+
+    <section id="places-section">
+      <h2>Places</h2>
+      <!-- Liste des lieux injectée ici -->
+    </section>
+
+    <section id="amenities-section">
+      <h2>Amenities</h2>
+      <!-- Liste des équipements injectée ici -->
+    </section>
+
+    <!-- Section édition place, cachée par défaut -->
+    <section id="edit-place-section" style="display:none;">
+      <h2>Edit Place</h2>
+      <form id="edit-place-form">
+        <input type="hidden" id="place-id" name="place_id" />
+        
+        <label for="title">Title:</label><br/>
+        <input type="text" id="title" name="title" required minlength="1" maxlength="100" /><br/>
+
+        <label for="description">Description:</label><br/>
+        <textarea id="description" name="description" required minlength="1" maxlength="1000"></textarea><br/>
+
+        <label for="price">Price:</label><br/>
+        <input type="number" id="price" name="price" min="0" step="0.01" required/><br/>
+
+        <label for="latitude">Latitude:</label><br/>
+        <input type="number" id="latitude" name="latitude" min="-90" max="90" step="0.000001" required/><br/>
+
+        <label for="longitude">Longitude:</label><br/>
+        <input type="number" id="longitude" name="longitude" min="-180" max="180" step="0.000001" required/><br/>
+
+        <!-- Tu peux ajouter ici amenities et photos plus tard -->
+
+        <button type="submit">Save changes</button>
+        <button type="button" id="cancel-edit">Cancel</button>
+      </form>
+    </section>
+  </main>
+
+  <footer id="footer">
+    HBnB | Front-end: <strong>Quentin LATASTE</strong> | Back-end: <strong>Valentin DUMONT</strong> & <strong>Quentin LATASTE</strong> | For Holberton School Dijon - July 2025 | All rights reserved.
+  </footer>
+  <script type="module" src="../static/admin.js"></script>
+</body>
+</html>
