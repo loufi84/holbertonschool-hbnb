@@ -39,9 +39,16 @@
                 data-rating="{{ place.rating if place.rating is not none else '' }}">
                 </div>
             </section>
+            <section class="amenities" id="amenities-section" data-amenity="{{ place.amenities | map(attribute='id') | join(',') }}">
+                <h2>Amenities</h2>
+                <ul id="amenities-list">
+                    <li>Loading amenities</li>
+                </ul>
+            </section>
             <div class="align">
                 <a href="{{ url_for('place_pages.booking', place_id=place.id) }}" id="book-button">Book this place now!</a>
-            </div>            
+            </div>
+            <div id="review-section"></div>            
         </main>
         <script type="module" src="../static/place_details.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

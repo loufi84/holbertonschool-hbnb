@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const bookButton = document.getElementById('book-button');
 
     try {
-        const res = await fetch('/users/me', {
+        const res = await fetchWithAutoRefresh('/users/me', {
             method: 'GET',
             credentials: 'include'
         });
@@ -49,5 +49,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             bookButton.parentNode.replaceChild(loginButton, bookButton);
         }
+    }
+    const amenitiesSection = document.getElementById('amenities-section');
+    const amenitiesList = document.getElementById('amenities-list');
+    const amenitiesIds = amenitiesSection?.getAttribute('data-amenity');
+
+    if (amenitiesIds) {
+        const amenityIds = amenitiesIds.split(',').map(id => id.trim()).filter(Boolean);
+        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+        try {
+            const amenityPromise = amenityIds
+                .filter(id => UUID_REGEX.test(id))
+                .map(id =>
+                    fetchWithAutoRefresh(`/amenities/${id}`)
+                        .then(res => res.ok ? res.json() : null)
+                );
+
+            const amenities = await Promise.all(amenityPromise);
+            const validAmenities = amenities.filter(Boolean);
+
+            if (validAmenities.length > 0) {
+                amenitiesList.innerHTML = '';
+                validAmenities.forEach(amenity => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="fa fa-check-circle"></i> ${amenity.name}`;
+                    amenitiesList.appendChild(li);
+                });
+            } else {
+                amenitiesList.innerHTML = '<li>No amenities found</li>';
+            }
+        } catch (err) {
+            console.error('Failed to load amenities:', err);
+            amenitiesList.innerHTML = '<li>Error loading amenities</li>';
+        }
+    } else {
+        amenitiesList.innerHTML = '<li>No amenities listed for this place<Li>';
     }
 });
