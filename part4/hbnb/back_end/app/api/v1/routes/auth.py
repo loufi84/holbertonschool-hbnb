@@ -23,3 +23,8 @@ def serve_admin():
     if not user or not user.is_admin:
         return send_from_directory(static_dir, 'index.html')
     return send_from_directory(static_dir, 'admin-panel.html')
+
+@auth_pages.route('/profile')
+@jwt_required()
+def profile():
+    return render_template('profile.html')

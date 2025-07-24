@@ -644,3 +644,211 @@ header a:hover {
     border-radius: 50%;
     object-fit: cover;
 }
+
+
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc; /* Pour visualiser même si l'image ne charge pas */
+  }
+  
+  #profile-container {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .hidden {
+    display: none !important; /* Priorité élevée pour éviter les conflits */
+  }
+  
+  #edit-form {
+    max-width: 400px;
+    margin: 20px auto;
+  }
+  
+  #edit-form input {
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    color: #333; /* Assurer que le texte des inputs est visible */
+    background-color: #fff; /* Fond clair pour les inputs */
+    border: 1px solid #ccc; /* Bordure visible */
+  }
+  
+  #edit-profile-btn {
+    margin: 10px 0;
+  }
+
+  #edit-form button {
+    padding: 8px 16px;
+    margin: 10px 5px;
+    background-color: #D63C3C;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  #edit-form button:hover {
+    background-color: #B32F2F;
+  }
+
+  #login-form {
+    background: rgba(20, 20, 20, 0.9);
+    padding: 2.5rem 3rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(214, 60, 60, 0.6);
+    max-width: 400px;
+    width: 100%;
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  #login-form h2 {
+    margin: 0 0 1rem 0;
+    font-weight: 700;
+    font-size: 2rem;
+    color: #D63C3C;
+    text-shadow: 0 0 8px rgba(214, 60, 60, 0.6);
+  }
+  
+  #login-form label {
+    text-align: left;
+    font-weight: 600;
+    color: #eee;
+  }
+  
+  #login-form input {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: #444444;
+    color: #eee;
+    transition: box-shadow 0.3s ease;
+    outline-offset: 2px;
+  }
+  
+  #login-form input:focus {
+    box-shadow: 0 0 8px 2px #D63C3C;
+    outline: none;
+  }
+  
+  #login-form button {
+    margin-top: 1rem;
+    padding: 0.75rem 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #D63C3C;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 6px 12px rgba(214, 60, 60, 0.8);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  #login-form button:hover {
+    background-color: #B32F2F;
+    box-shadow: 0 8px 16px rgba(179, 47, 47, 0.9);
+  }
+  
+  #login-form button:active {
+    box-shadow: 0 4px 8px rgba(179, 47, 47, 0.7);
+  }
+
+  #form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+    box-sizing: border-box;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+#no-account {
+    display: block;
+    margin: 1rem auto 0 auto;
+    text-align: center;
+    color: #CCCCCC;
+    font-size: 0.9rem;
+    text-decoration: none;
+    max-width: 200px;
+    transition: color 0.3s ease;
+}
+
+#no-account:hover {
+    color: #D63C3C;
+    text-decoration: underline;
+}
+
+form#account_creation {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: rgba(20, 20, 20, 0.9);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+form#accout_creation label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: #FFFFFF;
+}
+
+form#account_creation input {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: #444444;
+    color: #eee;
+    transition: box-shadow 0.3s ease;
+    outline-offset: 2px;
+}
+
+form#account_creation input:focus {
+    box-shadow: 0 0 8px 2px #D63C3C;
+    outline: none;
+}
+
+form#account_creation button {
+    margin-top: 1rem;
+    padding: 0.75rem 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #D63C3C;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 6px 12px rgba(214, 60, 60, 0.8);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  form#account_creation button:hover {
+    background-color: #B32F2F;
+    box-shadow: 0 8px 16px rgba(179, 47, 47, 0.9);
+  }
+  
+  form#account_creation button:active {
+    box-shadow: 0 4px 8px rgba(179, 47, 47, 0.7);
+  }

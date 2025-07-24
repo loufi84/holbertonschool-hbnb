@@ -11,18 +11,22 @@
     <div class="light-effect"></div>
     <header id="header">
         <img src="../static/images/logo.png" alt="Logo HBnB" id="logo">
+        <a href="../static/index.html">Go back home</a>
     </header>
-    <main>
-        <form id="login-form">
-            <h2>Login</h2>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            
-            <button type="submit">Login</button>
-        </form>
+    <main class="container">
+        <section id="form">
+            <form id="login-form">
+                <h2>Login</h2>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <button type="submit">Login</button>
+            </form>
+            <a href="/acc_creation" id="no-account">No account yet?</a>
+        </section>
     </main>
     {% include 'footer.html' %}
     <script src="../static/login.js"></script>

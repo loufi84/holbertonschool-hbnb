@@ -1,3 +1,6 @@
+import apiClient from "./apiClient.js";
+const { fetchWithAutoRefresh } = apiClient || {};
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Rating display
     const ratingContainer = document.getElementById('rating-container');
@@ -22,5 +25,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         ratingHTML += `<span class="score">${rating}/5</span></div>`;
         ratingContainer.innerHTML = ratingHTML;
+    }
+
+    const bookButton = document.getElementById('book-button');
+
+    try {
+        const res = await fetch('/users/me', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!res.ok) throw new Error('Unauthorized');
+        const user = await res.json();
+        console.log('User connecté :', user);
+    } catch (err) {
+        console.warn('Utilisateur non connecté');
+
+        if (bookButton) {
+            const loginButton = document.createElement('a');
+            loginButton.href = '/login';
+            loginButton.id = 'book-button';
+            loginButton.textContent = 'You need to be connected to book this place';
+
+            bookButton.parentNode.replaceChild(loginButton, bookButton);
+        }
     }
 });

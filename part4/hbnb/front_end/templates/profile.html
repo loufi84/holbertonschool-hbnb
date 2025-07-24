@@ -1,4 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../static/styles.css" />
+  <link rel="icon" href="../static/images/icon.png" />
+  <title>Profile</title>
+</head>
+<body>
+  <div class="light-effect"></div>
+
+  <header id="header">
+    <img src="../static/images/logo.png" alt="Logo" />
+    <a href="../static/index.html">Go back home</a>
+  </header>
+
+  <main class="container">
+    <div id="profile-container"></div>
+
+    <button id="edit-profile-btn">Edit your profile</button>
+
+    <form id="edit-form" class="hidden">
+      <input type="text" id="edit_first_name" placeholder="First name" />
+      <input type="text" id="edit_last_name" placeholder="Last name" />
+      <input type="email" id="edit_email" placeholder="Email" />
+      <input type="text" id="edit_photo_url" placeholder="Photo URL" />
+
+      <button id="save-edit">Save</button>
+      <button type="button" id="cancel-edit">Cancel</button>
+    </form>
+  </main>
+
+  <script type="module" src="../static/profile.js"></script>
+  {% include 'footer.html' %}
+</body>
 </html>
