@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, send_from_directory
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.services import facade
+from app.models.user import User
+from extensions import db
+from os import abort
 import os
 
 auth_pages = Blueprint('auth_pages', __name__)
@@ -27,4 +30,9 @@ def serve_admin():
 @auth_pages.route('/profile')
 @jwt_required()
 def profile():
-    return render_template('profile.html')
+    user_id = get_jwt_identity()
+    user = User.query.options(db.joinedload(User.places)).filter_by(id=user_id).first()
+    if not user:
+        abort(404)
+
+    return render_template('profile.html', user=user)

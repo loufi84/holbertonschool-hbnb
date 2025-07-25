@@ -76,6 +76,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     editForm.classList.add('hidden');
   }
 
+
+  async function refreshProfile() {
+    try {
+      const response = await fetchWithAutoRefresh('/users/me', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch profile');
+      const user = await response.json();
+      displayUserInfo(user);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   function prefillForm(user) {
     console.log('Prefilling form with user data:', user);
     firstNameInput.value = user.first_name || '';
@@ -155,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         user = result;
         displayUserInfo(user);
         prefillForm(user);
+        refreshProfile();
       } else {
         alert(result.error || 'Échec de la mise à jour du profil');
       }
@@ -163,4 +178,73 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('Erreur serveur lors de la mise à jour');
     }
   });
+
+  const addPlaceForm = document.getElementById('add-place');
+  const savePlaceBtn = document.getElementById('save-place');
+  const cancelPlaceBtn = document.getElementById('cancel-place');
+  const addPlaceButton = document.getElementById('add-place-btn');
+
+  addPlaceButton.addEventListener('click', () => {
+    addPlaceForm.classList.remove('hidden');
+  })
+
+  cancelPlaceBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    addPlaceForm.classList.add('hidden');
+  });
+
+  savePlaceBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById('place-title').value.trim();
+    const description = document.getElementById('place-description').value.trim();
+    const price = parseFloat(document.getElementById('price').value);
+    const latitude = parseFloat(document.getElementById('latitude').value);
+    const longitude = parseFloat(document.getElementById('longitude').value);
+    const amenitiesIdsRaw = document.getElementById('amenity_ids').value.trim();
+    const photosUrlRaw = document.getElementById('photos_url').value.trim();
+
+    if (!title || !description || isNaN(price) || isNaN(latitude) || isNaN(longitude)) {
+      alert('Please fill the form correctly');
+      return;
+    }
+
+    const amenity_ids = amenitiesIdsRaw ? amenitiesIdsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const photos_url = photosUrlRaw ? photosUrlRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    const placeData = {
+      title,
+      description,
+      price,
+      latitude,
+      longitude,
+      amenity_ids,
+      photos_url,
+    };
+
+    try {
+      const response = await fetchWithAutoRefresh('/places', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(placeData),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        alert(err.error || 'Error while creating place');
+        return;
+      }
+
+      const newPlace = await response.json();
+      alert(`Place created successfully: ${newPlace.title}`);
+
+      addPlaceForm.reset();
+      addPlaceForm.classList.add('hidden');
+      refreshProfile();
+    } catch (error) {
+      console.error('Error creating place:', error);
+      alert('Server or network error');
+    }
+  })
 });

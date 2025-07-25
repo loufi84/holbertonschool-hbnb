@@ -88,11 +88,6 @@ main {
     contain: layout;
 }
 
-label {
-    color: #FFFFFF !important;
-    font-family: sans-serif;
-}
-
 #header {
     position: fixed;
     top: 0;
@@ -647,20 +642,26 @@ header a:hover {
 
 
   .profile-photo {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ccc; /* Pour visualiser même si l'image ne charge pas */
+    border: 2px solid #ccc;
   }
   
   #profile-container {
-    text-align: center;
-    margin: 20px 0;
+    padding: 0;
+    margin: 0 auto;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
+  
   .hidden {
-    display: none !important; /* Priorité élevée pour éviter les conflits */
+    display: none !important;
   }
   
   #edit-form {
@@ -672,9 +673,9 @@ header a:hover {
     width: 100%;
     margin: 10px 0;
     padding: 8px;
-    color: #333; /* Assurer que le texte des inputs est visible */
-    background-color: #fff; /* Fond clair pour les inputs */
-    border: 1px solid #ccc; /* Bordure visible */
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ccc;
   }
   
   #edit-profile-btn {
@@ -885,3 +886,147 @@ form#account_creation button {
 .amenities li i {
     color: #D63C3C;
 }
+
+#show-review-form-btn {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: sans-serif;
+    color: #FFFFFF;
+    background-color: #D63C3C;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    margin: 1rem auto;
+    text-transform: uppercase;
+    z-index: 1;
+    box-shadow: 0 6px 12px rgba(214, 60, 60, 0.8);
+}
+
+#show-review-form-btn:hover {
+    background-color: #B32F2F;
+    box-shadow: 0 8px 16px rgba(179, 47, 47, 0.9);
+    color: #F9ECCC;
+}
+
+#show-review-form-btn:active {
+    box-shadow: 0 4px 8px rgba(179, 47, 47, 0.7);
+}
+
+#review-card-container {
+    max-width: 500px;
+    margin: 1rem auto;
+    background-color: rgba(20, 20, 20, 0.9);
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(214, 60, 60, 0.6);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+}
+
+#review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#review-form label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    text-align: left;
+}
+
+#review-form textarea {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: #444444;
+    color: #eee;
+    resize: vertical;
+    min-height: 80px;
+    transition: box-shadow 0.3s ease;
+}
+
+#review-form textarea:focus {
+    box-shadow: 0 0 8px 2px #D63C3C;
+    outline: none;
+}
+
+/* Conteneur global */
+#user-places-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    z-index: 1; /* au-dessus du fond animé */
+  }
+  
+  /* Chaque place sous forme de "carte" */
+  #user-places-list li {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    padding: 1rem;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #eee;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+  
+  /* Effet hover */
+  #user-places-list li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8);
+  }
+  
+  /* Image */
+  #user-places-list li img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+  }
+  
+  /* Titre */
+  #user-places-list li strong {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    color: #ffd700; /* or doré */
+    text-align: center;
+  }
+  
+  /* Description et prix */
+  #user-places-list li {
+    font-size: 0.9rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+  
+  /* Titre section */
+  h2.user-places {
+    color: #ffd700;
+    text-align: center;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    z-index: 1;
+  }
+  

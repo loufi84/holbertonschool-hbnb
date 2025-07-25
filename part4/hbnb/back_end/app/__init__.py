@@ -84,7 +84,6 @@ def create_app(config_name='default'):
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
     api.add_namespace(bookings_ns, path='/api/v1/bookings')
 
-    CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500"]}})
     app.register_blueprint(place_pages)
     app.register_blueprint(auth_pages)
     return app
