@@ -3,14 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <title>{{ place.title }} - HBnB</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='reviews.css') }}">
+        <link rel="stylesheet" href="../static/CSS/reviews.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>   
     <body data-place-id="{{ place.id }}">
         <header id="header">
-            <a href="../static/HTML/index.html">Back home</a>
+            <a href="../static/index.html">Back home</a>
             <h1 class="title">{{ place.title }}</h1>
         </header>
         <main>
