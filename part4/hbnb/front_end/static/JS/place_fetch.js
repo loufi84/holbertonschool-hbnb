@@ -194,17 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Collapse on outside click
     document.addEventListener('click', (e) => {
         if (expandedCard && !e.target.closest('.place-card')) {
-            expandedCard.classList.remove('expanded');
-            expandedCard = null;
-            const overlay = document.getElementById('overlay');
-            if (overlay) {
-                overlay.classList.remove('active');
-                overlay.style.pointerEvents = 'auto';
-            }
-            document.body.style.overflow = '';
+            collapseCardSmooth(expandedCard);
         }
     });
-
+    
     // Price slider
     const slider = document.getElementById('price-slider');
     const priceValue = document.getElementById('price-value');
@@ -216,3 +209,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+let expandedCard = null;
+
+function collapseCardSmooth(card) {
+    const rect = card.getBoundingClientRect();
+
+    // Figer la carte à sa position actuelle
+    card.style.position = 'fixed';
+    card.style.top = `${rect.top}px`;
+    card.style.left = `${rect.left}px`;
+    card.style.width = `${rect.width}px`;
+    card.style.height = `${rect.height}px`;
+    card.style.zIndex = 10001;
+
+    // Forcer reflow pour prendre en compte les styles
+    void card.offsetWidth;
+
+    // Remplacer la classe .expanded par .collapsing
+    card.classList.remove('expanded');
+    card.classList.add('collapsing');
+
+    // Une fois la transition finie, nettoyer
+    setTimeout(() => {
+        card.classList.remove('collapsing');
+        card.removeAttribute('style');
+        expandedCard = null;
+    }, 500); // match la durée du CSS
+}

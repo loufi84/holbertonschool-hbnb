@@ -214,6 +214,15 @@ header a:hover {
     flex-direction: column;
     align-items: center;
     border: 1px solid #D63C3C;
+    z-index: 1;
+    transition: all 0.5s ease;
+}
+
+.place-card.collapsing {
+    position: fixed;
+    z-index: 10001;
+    transition: all 0.5s ease;
+    transform: translateX(-50%);
 }
 
 
@@ -223,7 +232,7 @@ header a:hover {
     left: 50%;
     transform: translateX(-50%);
     width: 70vw;
-    height: auto;
+    height: 75vh;
     max-height: 75vh;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     border-radius: 12px;
@@ -233,7 +242,7 @@ header a:hover {
     overflow-y: auto;
     padding: 1rem;
     pointer-events: auto;
-    transition: width 0.5s ease, height 0.5s ease, box-shadow 0.5s ease;
+    transition: all 0.5s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
