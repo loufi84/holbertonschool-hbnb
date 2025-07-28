@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                window.location.href = '/static/HTML/index.html';
+                window.location.href = '../static/index.html';
             } else {
                 alert(result.error || 'Invalid password or email');
             }

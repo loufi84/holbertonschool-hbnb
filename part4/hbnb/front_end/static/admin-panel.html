@@ -20,6 +20,27 @@
       <h2>Users</h2>
       <!-- Liste des utilisateurs injectée ici -->
     </section>
+    <h2>Admin Creation</h2>
+    <button id="show-create-admin">Create a new admin</button>
+      <section id="create-admin-section" class="hidden">
+        <h3>Create a new admin</h3>
+        <form id="create-admin-form">
+          <label for="first_name">First name</label><br />
+          <input type="text" id="first_name" name="first_name" required><br />
+
+          <label for="last_name">Last name</label><br />
+          <input type="text" id="last_name" name="last_name" required><br />
+
+          <label for="email">Email</label><br />
+          <input type="email" id="email" name="email" required><br />
+
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required><br />
+
+          <button type="submit">Create the admin</button>
+          <button type="button" id="cancel-create-admin">Cancel</button>
+        </form>
+      </section>
 
     <section id="places-section">
       <h2>Places</h2>
@@ -51,8 +72,6 @@
 
         <label for="longitude">Longitude:</label><br/>
         <input type="number" id="longitude" name="longitude" min="-180" max="180" step="0.000001" required/><br/>
-
-        <!-- Tu peux ajouter ici amenities et photos plus tard -->
 
         <button type="submit">Save changes</button>
         <button type="button" id="cancel-edit">Cancel</button>

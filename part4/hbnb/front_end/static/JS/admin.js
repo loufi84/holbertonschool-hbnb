@@ -1,7 +1,8 @@
-import apiClient from "../static/apiClient.js";
+import apiClient from "../JS/apiClient.js";
 const { fetchWithAutoRefresh } = apiClient;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log("Script chargé");
     try {
         const res = await fetchWithAutoRefresh('/users/me');
         if (!res.ok) throw new Error('Not Authorized');
@@ -19,6 +20,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Access denied');
         window.location.href = '/';
     }
+
+    // Toggle affichage du formulaire
+    console.log("show-create-admin:", document.getElementById('show-create-admin'));
+    document.getElementById('show-create-admin').addEventListener('click', () => {
+        const section = document.getElementById('create-admin-section');
+        section.classList.remove('hidden');
+    });
+        
+    // Bouton annuler pour cacher le formulaire
+    document.getElementById('cancel-create-admin').addEventListener('click', () => {
+        const section = document.getElementById('create-admin-section');
+        section.classList.add('hidden');
+    });
+        
+    // Submit du formulaire
+    document.getElementById('create-admin-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    await createAdmin();
+    });
+
 });
 
 async function loadAdminDashboard() {
@@ -99,6 +120,42 @@ function renderAmenities(amenities) {
         `;
         section.appendChild(div);
     });
+}
+
+async function createAdmin() {
+    const newAdmin = {
+        first_name: document.getElementById('first_name').value.trim(),
+        last_name: document.getElementById('last_name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value
+    };
+
+    try {
+        const res = await fetchWithAutoRefresh('/users/admin_creation', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newAdmin)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => null);
+            throw new Error(errData?.error || 'Error while sending data');
+        }
+
+        const data = await res.json();
+        alert('Admin created successfully');
+
+        // Reset the form and hide it
+        document.getElementById('create-admin-form').reset();
+        document.getElementById('create-admin').style.display = 'none';
+
+        // Reload user list
+        await loadAdminDashboard();
+    } catch (err) {
+        console.error('Error while creating admin:', err);
+        alert('Failed to create admin: ' + err.message);
+    }
 }
 
 function deleteUser(userId) {

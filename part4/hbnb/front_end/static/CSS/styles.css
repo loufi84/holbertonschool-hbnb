@@ -234,6 +234,10 @@ header a:hover {
     padding: 1rem;
     pointer-events: auto;
     transition: width 0.5s ease, height 0.5s ease, box-shadow 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 .place-card .place-image {
@@ -267,19 +271,23 @@ header a:hover {
 
 .place-card.expanded .place-image {
     height: 40vh;
-    width: 45vw;
+    width: 90%;
     border-radius: 12px;
-    transform: none !important;
+    margin-bottom: 1rem;
+    object-fit: cover;
 }
 
 .place-card.expanded .place-summary {
-    text-align: left;
-    padding: 1rem 1.5rem 0.5rem;
-    font-size: 1.5rem;
+    width: 90%;
+    text-align: center;
+    padding: 0;
+    font-size: 1.2rem;
     font-weight: bold;
+    margin-bottom: 0.5rem;
 }
 
 .place-card.expanded .place-details {
+    width: 90%;
     display: block;
     padding: 1rem 1.5rem;
     flex-grow: 1;
@@ -290,6 +298,8 @@ header a:hover {
     text-align: center;
     position: relative;
     z-index: 10002;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .place-details img {
