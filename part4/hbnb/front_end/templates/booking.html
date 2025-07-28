@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Booking</title>
         <link rel="stylesheet" href="/static/CSS/styles.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_dark.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
         <link rel="icon" href="/static/images/icon.png">
     </head>
     <body data-place-id="{{ place.id }}">
@@ -19,15 +19,19 @@
                 {% if place.photos_url %}
                     <img src="{{ place.photos_url[0] }}" alt="Photo of the place">
                 {% endif %}
-                <img src="{{ place.owner.photo_url }}">
+
+                {% if place.owner.photo_url %}
+                    <img src="{{ place.owner.photo_url }}" alt="Owner photo">
+                {% else %}
+                    <img src="{{ url_for('static', filename='/images/default_profile.png') }}" alt="Default owner photo">
+                {% endif %}
                 <p>Host: {{ place.owner.first_name }} {{ place.owner.last_name }}</p>
                 <p>Rating: {{ place.rating if place.rating is not none else "No rating yet" }}</p>
             </section>
 
             <form id="booking-form">
                 <div id="date-range-container">
-                    <label for="date-range">Choose your stay:</label>
-                    <div id="date-range"></div>
+                    <input id="date-range" readonly placeholder="Select your stay" />
                 </div>
                 <button type="submit" id="book-button" style="display:none;">Confirm your booking</button>
             </form>

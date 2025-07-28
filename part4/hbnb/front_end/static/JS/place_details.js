@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ratingStr = ratingContainer?.getAttribute('data-rating');
     const placeAverageRating = ratingStr ? parseFloat(ratingStr) : null;
 
-    if (placeAverageRating === null) {
+    if (placeAverageRating === null || isNaN(placeAverageRating)) {
         ratingContainer.innerHTML = '<p>No rating for the moment</p>';
     } else {
         const scoreDisplay = `<span class="score">${placeAverageRating.toFixed(1)}/5</span>`;

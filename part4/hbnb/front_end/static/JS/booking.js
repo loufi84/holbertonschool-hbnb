@@ -17,10 +17,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (res.ok) {
             const bookings = await res.json();
-            disabeldRanges = bookings.map(b => ({
-                from: toDayOnly(b.start_date),
-                to: toDayOnly(b.end_date)
-            }));
+            console.log('Booking response:', bookings)
+            
+            if (!Array.isArray(bookings)) {
+                disabeldRanges = [];
+            } else {
+                disabeldRanges = bookings.map(b => ({
+                    from: toDayOnly(b.start_date),
+                    to: toDayOnly(b.end_date)
+                }));
+            }
         } else {
             console.warn('Can\'t fetch existing bookings');
         }
