@@ -148,7 +148,7 @@ async function createAdmin() {
 
         // Reset the form and hide it
         document.getElementById('create-admin-form').reset();
-        document.getElementById('create-admin').style.display = 'none';
+        document.getElementById('create-admin-section').style.display = 'none';
 
         // Reload user list
         await loadAdminDashboard();
