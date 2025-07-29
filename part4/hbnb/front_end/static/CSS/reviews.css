@@ -43,18 +43,20 @@ html, body {
     font-family: sans-serif;
     display: flex;
     flex-direction: column;
-  }
-  
-  main {
+}
+
+main {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center; /* tout centré horizontalement */
     gap: 2rem;
     padding: 2rem;
-  }
-  
-  
+}
+
+#logo {
+    width: 100px;
+}
 
 main, #review-card-container, fieldset.rating {
     position: relative;

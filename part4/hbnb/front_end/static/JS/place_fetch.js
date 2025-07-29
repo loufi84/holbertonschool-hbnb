@@ -230,6 +230,13 @@ function collapseCardSmooth(card) {
     card.classList.remove('expanded');
     card.classList.add('collapsing');
 
+    if (overlay) {
+        overlay.classList.remove('active');
+        overlay.style.pointerEvents = 'auto';
+    }
+
+    document.body.style.overflow = '';
+
     // Une fois la transition finie, nettoyer
     setTimeout(() => {
         card.classList.remove('collapsing');
