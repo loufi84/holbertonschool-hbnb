@@ -66,9 +66,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Displaying user info with photo URL:', photo);
 
     profileContainer.innerHTML = `
-      <img src="${photo}" alt="Profile picture" class="profile-photo" onerror="this.src='/static/images/default_profile.png'" />
-      <h2>${user.first_name || 'N/A'} ${user.last_name || 'N/A'}</h2>
-      <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
+      <div class="profile-card">
+        <img src="${photo}" alt="Profile picture" class="profile-photo" onerror="this.src='/static/images/default_profile.png'" />
+        <div class="profile-text">
+          <h2>${user.first_name || 'N/A'} ${user.last_name || 'N/A'}</h2>
+          <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
+        </div>
+      </div>
     `;
 
     profileContainer.classList.remove('hidden');

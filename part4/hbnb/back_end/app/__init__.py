@@ -57,6 +57,10 @@ def create_app(config_name='default'):
     from app.api.v1.reviews import api as reviews_ns
     from app.api.v1.bookings import api as bookings_ns
 
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
+
     @app.route('/')
     def serve_index():
         return send_from_directory(app.static_folder, 'index.html')

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport initial-scale=1.0">
+        <link rel="stylesheet" href="../static/CSS/styles.css">
+        <title>Page not found</title>
+    </head>
+    <body>
+        <div class="light-effect"></div>
+        <header id="header">
+            <img src="../static/images/logo.png">
+        </header>
+        <main id="container">
+            <h1>Error 404: Page not found!</h1>
+            <p>Woops, it seems the page you're looking for doesn't exist anymore (or yet?)</p>
+            <p><a href="{{ url_for('static', filename='index.html') }}">Why don't you take a look at our amazing places?</a></p>
+        </main>
+        {% include 'footer.html' %}
+    </body>
+</html>

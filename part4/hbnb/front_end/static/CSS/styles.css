@@ -638,24 +638,40 @@ header a:hover {
     object-fit: cover;
 }
 
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid #CCCCCC;
+    border-radius: 1rem;
+    max-width: 300px;
+    margin: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .profile-photo {
-    width: 100%;
-    height: 100%;
+.profile-photo {
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #ccc;
-  }
-  
-  #profile-container {
-    padding: 0;
-    margin: 0 auto;
-    width: 150px;
-    height: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+    margin-bottom: 1rem;
+}
+
+.profile-text h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.profile-text p {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    color: #555555;
+    text-align: center;
+}
+
   
   
   .hidden {
