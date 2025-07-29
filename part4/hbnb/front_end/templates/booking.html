@@ -5,14 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Booking</title>
         <link rel="stylesheet" href="/static/CSS/styles.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" />
         <link rel="icon" href="/static/images/icon.png">
     </head>
     <body data-place-id="{{ place.id }}">
         <div class="light-effect"></div>
         <header id="header">
             <img src="/static/images/logo.png">
-            <a href="../static/index.html">Go back home</a>
+            <a href="{{ url_for('static', filename='index.html') }}">Go back home</a>
         </header>
         <main class="container">
             <section class="place_details">

@@ -53,7 +53,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         },
         onReady: function (selectedDates, dateStr, instance) {
-            instance.open();
+            const calendar = instance.calendarContainer;
+            const obsserver = new MutationObserver(() => {
+                calendar.style.width = "100%";
+            });
+            obsserver.observe(calendar, { attributes: true, attributeFilter: ["style"] });
+            calendar.style.width = "100%";
         }
     });
 
