@@ -251,4 +251,80 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('Server or network error');
     }
   })
+
+  // User update place
+  const placeItems = document.querySelectorAll(".place-item");
+
+  placeItems.forEach(item => {
+    item.addEventListener("click", (e) => {
+      e.stopPropagation(); // Empêche la fermeture immédiate par le listener global
+
+      // Cacher tous les autres formulaires
+      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.add("hidden"));
+
+      const formContainer = item.querySelector(".edit-form-container");
+      formContainer.innerHTML = ""; // Nettoyer l'ancien contenu s'il y en a
+
+      const placeId = item.dataset.placeId;
+      const title = item.dataset.title;
+      const description = item.dataset.description;
+      const price = item.dataset.price;
+
+      const formHTML = `
+        <form class="edit-place-form">
+          <h3>Edit Place</h3>
+          <input type="hidden" name="place_id" value="${placeId}" />
+          <label>Title:</label>
+          <input type="text" name="title" value="${title}" required />
+          <label>Description:</label>
+          <textarea name="description" required>${description}</textarea>
+          <label>Price (€):</label>
+          <input type="number" name="price" value="${price}" required min="0" step="0.01" />
+          <div class="form-buttons">
+            <button type="submit">Save</button>
+          </div>
+        </form>
+      `;
+
+      formContainer.innerHTML = formHTML;
+      formContainer.classList.remove("hidden");
+
+      const form = formContainer.querySelector(".edit-place-form");
+
+      // Submit
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const body = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch(`/api/places/${body.place_id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+          });
+
+          if (response.ok) {
+            alert("Place updated!");
+            location.reload();
+          } else {
+            alert("Failed to update place");
+          }
+        } catch (err) {
+          console.error("Error updating place:", err);
+          alert("Unexpected error");
+        }
+      });
+    });
+  });
+
+  // Clic en dehors => cacher les formulaires
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".place-item")) {
+      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.add("hidden"));
+    }
+  });
+
 });

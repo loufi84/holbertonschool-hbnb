@@ -44,21 +44,26 @@
       <button id="save-place">Create your place</button>
       <button type="button" id="cancel-place">Cancel</button>
     </form>
-
     <h2 class="user-places">Your places:</h2>
     {% if user.places and user.places | length > 0 %}
-    <ul id="user-places-list">
+      <ul id="user-places-list">
       {% for place in user.places %}
-        <li>
-          <img src="{{ place.photos_url[0] }}" /><strong>{{ place.title }}</strong> - {{ place.description }} - Price: {{ place.price }}€
-        </li>
+      <li class="place-item"
+      data-place-id="{{ place.id }}"
+      data-title="{{ place.title }}"
+      data-description="{{ place.description }}"
+      data-price="{{ place.price }}">
+        <img src="{{ place.photos_url[0] }}" />
+        <strong>{{ place.title }}</strong> - {{ place.description }} - Price: {{ place.price }}€
+        <div class="edit-form-container hidden"></div>
+      </li>
+  
       {% endfor %}
     </ul>
     {% else %}
       <p>You don't have places for the moment</p>
     {% endif %}
   </main>
-
   <script type="module" src="../static/JS/profile.js"></script>
   {% include 'footer.html' %}
 </body>
