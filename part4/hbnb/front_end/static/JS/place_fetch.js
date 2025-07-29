@@ -1,6 +1,9 @@
+import apiClient from "./apiClient.js";
+const { fetchWithAutoRefresh } = apiClient || {};
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    fetch('http://127.0.0.1:5001/api/v1/users/me', {
+    fetchWithAutoRefresh('/users/me', {
         method: 'GET',
         credentials: 'include'
     })
@@ -45,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutLink.addEventListener('click', async (e) => {
             e.preventDefault();
             try {
-                await fetch('http://127.0.0.1:5001/api/v1/users/logout', {
+                await fetchWithAutoRefresh('/users/logout', {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -84,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Load places from API
-    fetch('http://127.0.0.1:5001/api/v1/places/')
+    fetchWithAutoRefresh('/places')
         .then(response => {
             if (!response.ok) throw new Error('Error while fetching places');
             return response.json();

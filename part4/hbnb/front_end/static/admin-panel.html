@@ -50,6 +50,17 @@
 
     <section id="amenities-section">
       <h2>Amenities</h2>
+      <button id="show-create-amenity">Create a new amenity</button>
+      <section id="create-amenity-section" class="hidden">
+        <h3>Create a new amenity</h3>
+        <form id="create-amenity-form">
+          <label for="new-amenity-name">Amenity Name</label><br />
+          <input type="text" id="new-amenity-name" name="new-amenity-name" required><br />
+
+          <button type="submit">Create Amenity</button>
+          <button type="button" id="cancel-create-amenity">Cancel</button>
+        </form>
+      </section>
       <!-- Liste des équipements injectée ici -->
     </section>
 
@@ -76,6 +87,20 @@
 
         <button type="submit">Save changes</button>
         <button type="button" id="cancel-edit">Cancel</button>
+      </form>
+    </section>
+
+    <!-- Section édition amenity, cachée par défaut -->
+    <section id="edit-amenity-section" style="display:none;">
+      <h2>Edit Amenity</h2>
+      <form id="edit-amenity-form">
+        <input type="hidden" id="amenity-id" name="amenity_id" />
+        
+        <label for="amenity-name">Amenity Name:</label><br/>
+        <input type="text" id="amenity-name" name="amenity-name" required minlength="1" maxlength="100" /><br/>
+
+        <button type="submit">Save changes</button>
+        <button type="button" id="cancel-edit-amenity">Cancel</button>
       </form>
     </section>
   </main>

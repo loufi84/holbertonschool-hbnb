@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     prefillForm(user);
   } catch (err) {
     console.error('Error fetching user data:', err);
-    alert('Vous devez être connecté pour accéder à votre profil');
+    alert('You must be connected to access profile');
     window.location.href = '/login';
     return;
   }

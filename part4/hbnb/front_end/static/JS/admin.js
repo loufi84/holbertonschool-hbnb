@@ -36,10 +36,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         
     // Submit du formulaire
     document.getElementById('create-admin-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    await createAdmin();
+        event.preventDefault();
+        await createAdmin();
     });
 
+    // Show add amenity form
+    document.getElementById('show-create-amenity').addEventListener('click', () => {
+        const section = document.getElementById('create-amenity-section');
+        section.classList.remove('hidden');
+    });
+
+    // Cancel add amenity form
+    document.getElementById('cancel-create-amenity').addEventListener('click', () => {
+        const section = document.getElementById('create-amenity-section');
+        section.classList.add('hidden');
+    });
+
+    // Submit add amenity form
+    document.getElementById('create-amenity-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await addAmenity();
+    });
+
+    // Cancel edit amenity form
+    document.getElementById('cancel-edit-amenity').addEventListener('click', () => {
+        document.getElementById('edit-amenity-section').style.display = 'none';
+    });
+
+    // Submit edit amenity form
+    document.getElementById('edit-amenity-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await editAmenity();
+    });
 });
 
 async function loadAdminDashboard() {
@@ -104,18 +132,20 @@ function openEditPlaceFormById(id) {
 window.openEditPlaceFormById = openEditPlaceFormById;
 window.deletePlace = deletePlace;
 
-
+const amenitiesCache = new Map();
 
 function renderAmenities(amenities) {
     const section = document.getElementById('amenities-section');
     section.innerHTML = '<h2>Amenities</h2>';
+    amenitiesCache.clear();
 
     amenities.forEach(amenity => {
+        amenitiesCache.set(amenity.id, amenity);
         const div = document.createElement('div');
         div.classList.add('amenity-item');
         div.innerHTML = `
         <strong>${amenity.name}</strong>
-        <button onclick="editAmenity('${amenity.id}')">Edit</button>
+        <button onclick="openEditAmenityFormById('${amenity.id}')">Edit</button>
         <button onclick="deleteAmenity('${amenity.id}')">Delete</button>
         `;
         section.appendChild(div);
@@ -219,6 +249,94 @@ function openEditPlaceForm(place) {
     document.getElementById('longitude').value = place.longitude ?? '';
 }
 
+function openEditAmenityFormById(id) {
+    const amenity = amenitiesCache.get(id);
+    if (!amenity) return alert('Amenity not found');
+    openEditAmenityForm(amenity);
+}
+
+function openEditAmenityForm(amenity) {
+    console.log('Opening edit amenity form with:', amenity);
+
+    const section = document.getElementById('edit-amenity-section');
+    section.style.display = 'block';
+    section.style.position = 'fixed';
+    section.style.top = '50px';
+    section.style.left = '50px';
+    section.style.zIndex = '9999';
+    section.style.backgroundColor = 'white';
+    section.style.border = '2px solid black';
+    section.style.padding = '20px';
+
+    document.getElementById('amenity-id').value = amenity.id || '';
+    document.getElementById('amenity-name').value = amenity.name || '';
+}
+
+async function addAmenity() {
+    const newAmenity = {
+        name: document.getElementById('new-amenity-name').value.trim()
+    };
+
+    if (!newAmenity.name) {
+        alert('Please enter an amenity name');
+        return;
+    }
+
+    try {
+        const res = await fetchWithAutoRefresh('/amenities', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newAmenity)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => null);
+            throw new Error(errData?.error || 'Error while creating amenity');
+        }
+
+        alert('Amenity created successfully');
+        document.getElementById('create-amenity-form').reset();
+        document.getElementById('create-amenity-section').classList.add('hidden');
+        await loadAdminDashboard();
+    } catch (err) {
+        console.error('Error while creating amenity:', err);
+        alert('Failed to create amenity: ' + err.message);
+    }
+}
+
+async function editAmenity() {
+    const amenityId = document.getElementById('amenity-id').value;
+    const updatedAmenity = {
+        name: document.getElementById('amenity-name').value.trim()
+    };
+
+    if (!updatedAmenity.name) {
+        alert('Please enter an amenity name');
+        return;
+    }
+
+    try {
+        const res = await fetchWithAutoRefresh(`/amenities/${amenityId}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedAmenity)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => null);
+            throw new Error(errData?.error || 'Failed to update amenity');
+        }
+
+        alert('Amenity updated successfully');
+        document.getElementById('edit-amenity-section').style.display = 'none';
+        await loadAdminDashboard();
+    } catch (err) {
+        console.error('Error updating amenity:', err);
+        alert('Error updating amenity: ' + err.message);
+    }
+}
 
 document.getElementById('cancel-edit').addEventListener('click', () => {
     document.getElementById('edit-place-section').style.display = 'none';
@@ -246,26 +364,28 @@ document.getElementById('edit-place-form').addEventListener('submit', async (eve
     };
 
     try {
-    const res = await fetchWithAutoRefresh(`/places/${placeID}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(updateData),
-    });
+        const res = await fetchWithAutoRefresh(`/places/${placeID}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updateData),
+        });
 
-    if (!res.ok) {
-        const errJson = await res.json().catch(() => null);
-        throw new Error(errJson?.error || 'Failed to update place');
-    }
+        if (!res.ok) {
+            const errJson = await res.json().catch(() => null);
+            throw new Error(errJson?.error || 'Failed to update place');
+        }
 
-    alert('Place updated successfully');
-    document.getElementById('edit-place-section').style.display = 'none';
-    await loadAdminDashboard();
+        alert('Place updated successfully');
+        document.getElementById('edit-place-section').style.display = 'none';
+        await loadAdminDashboard();
     } catch (err) {
-    console.error(err);
-    alert('Error updating place: ' + err.message);
+        console.error(err);
+        alert('Error updating place: ' + err.message);
     }
 });
 
 window.deleteUser = deleteUser;
+window.deleteAmenity = deleteAmenity;
+window.openEditAmenityFormById = openEditAmenityFormById;
 window.openEditPlaceForm = openEditPlaceForm;
