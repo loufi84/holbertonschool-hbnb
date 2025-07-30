@@ -312,12 +312,12 @@ class PlaceUpdate(BaseModel):
     @field_validator("photos_url")
     @classmethod
     def validate_image(cls, photos):
-        if photos is None:
+        if not photos:
             return []
         validated = []
         for url in photos:
             if url is None:
-                return None
+                continue
             try:
                 response = requests.head(str(url), timeout=5, allow_redirects=True)
                 if response.status_code == 200:

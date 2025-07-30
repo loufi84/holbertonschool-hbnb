@@ -77,20 +77,6 @@ class PlaceList(Resource):
                 'description': amenity.description
             })
 
-        try:
-            photos_url = new_place.photos_url
-            if isinstance(photos_url, AnyUrl):
-                photos_url = [photos_url]
-            elif photos_url is None:
-                photos_url = []
-
-            if not PlaceCreate.validate_image(photos_url):
-                return {'message': 'L\'URL ne pointe pas'
-                        ' vers une image valide'}, 400
-        except ValidationError as e:
-            return {'error': json.loads(e.json())}, 400
-        
-
         response_data = PlacePublic.model_validate(new_place).model_dump()
 
         if 'photos_url' in response_data and response_data['photos_url'] is not None:

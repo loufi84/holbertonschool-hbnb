@@ -22,6 +22,18 @@ html, body {
     background-color: transparent;
 }
 
+.light-effect::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuMiIgZmlsbD0icmdiYSgyMCwgMjAsIDIwLCAwLjEzKSIgLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxLjIiIGZpbGw9InJnYmEoMTUsIDE1LCAxNSwgMC4xKSIgLz48Y2lyY2xlIGN4PSIyMiIgY3k9IjIyIiByPSIxLjIiIGZpbGw9InJnYmEoMjUsIDI1LCAyNSwgMC4xNSkiIC8+PC9zdmc+");
+    opacity: 0.04;
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+}
+
 .light-effect {
     position: fixed;
     top: 0;
@@ -29,32 +41,39 @@ html, body {
     width: 100vw;
     height: 100vh;
     background: radial-gradient(
-        ellipse at 50% 20%,
-        rgba(255, 255, 255, 0.02) 0%,
-        rgba(0, 0, 0, 0.4) 30%,
-        rgba(0, 0, 0, 0.7) 60%,
-        rgba(0, 0, 0, 1) 85%,
-        rgba(0, 0, 0, 1) 100%
-    );
-    z-index: 0;
-    opacity: 0.8;
-    animation: glow 10s ease-in-out infinite;
+    ellipse at 50% 15%, 
+    rgba(255, 255, 255, 0.04) 0%,    
+    rgba(255, 255, 255, 0.025) 8%,
+    rgba(0, 0, 0, 0.35) 20%, 
+    rgba(0, 0, 0, 0.65) 40%,
+    rgba(0, 0, 0, 0.85) 60%,
+    rgba(0, 0, 0, 0.95) 80%,
+    rgba(0, 0, 0, 1) 100%
+);
+    z-index: -1;
+    opacity: 0.5;
+    animation: glow 14s ease-in-out infinite;
     pointer-events: none;
     isolation: isolate;
-    will-change: opacity, transform;
-    transform-origin: center;
+    will-change: opacity;
+    transform-origin: top;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    filter: blur(20px);
+    margin-top: 80px;
 }
 
 @keyframes glow {
     0%, 100% { 
         opacity: 0.75;
         transform: scale(1);
-        }
+    }
     50% {
         opacity: 0.95;
-        transform: scale(1.05);
-        }
+        transform: scale(1.07);
+    }
 }
+
 
 header, main, footer {
     position: relative;
@@ -225,8 +244,8 @@ header a::before {
     z-index: -1;
     opacity: 0.2;
     transition:
-        transform 0.9s ease,
-        opacity 0.9s ease;
+        transform 1.4s ease,
+        opacity 1.4s ease;
 }
 
 header a:hover::before {
@@ -248,21 +267,36 @@ header a:hover {
 
 .place-card {
     position: relative;
-    cursor: pointer;
-    transition: width 0.5s ease, height 0.5s ease, box-shadow 0.5s ease;
-    transform-origin: center center;
     width: 250px;
     height: 250px;
     background: #444444;
     border-radius: 8px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid #D63C3C;
-    z-index: 1;
+    cursor: pointer;
     transition: all 0.5s ease;
-}
+    z-index: 1;
+  }
+  
+  .place-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1.5px;
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, #DDDDDD 0%, transparent 50%) top left,
+      linear-gradient(-45deg, #DDDDDD 0%, transparent 50%) bottom right;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+  }
+  
 
 .place-card.collapsing {
     position: fixed;
@@ -283,7 +317,7 @@ header a:hover {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     border-radius: 12px;
     z-index: 10001;
-    background-color: #BBBBBB;
+    background-color: #777777;
     color: #fff;
     overflow-y: auto;
     padding: 1rem;
@@ -347,8 +381,8 @@ header a:hover {
     padding: 1rem 1.5rem;
     flex-grow: 1;
     overflow-y: auto;
-    color: #333333;
-    background: #BBBBBB;
+    color: #FFFFFF;
+    background: #777777;
     border-radius: 0 0 12px 12px;
     text-align: center;
     position: relative;
@@ -389,7 +423,7 @@ header a:hover {
 }
 
 .rating .star.filled {
-    color: #00ff00;
+    color: #c30000;
 }
 
 .rating .score {
@@ -443,27 +477,44 @@ header a:hover {
 }
 
 .details-button {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    font-family: sans-serif;
-    color: #FFFFFF;
-    background-color: #D63C3C;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    margin: 1rem auto;
-    text-transform: uppercase;
-    z-index: 10003;
-    pointer-events: auto;
     position: relative;
+    overflow: hidden;
+    display: inline-block;
+    z-index: 1;
+    color: #FFFFFF;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid #FFFFFF;
+    border-radius: 5px;
+    transition: color 0.5s ease;
+    background-color: #555555;
+}
+
+.details-button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background-color: #064789;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: -1;
+    opacity: 0.2;
+    transition:
+        transform 1.4s ease,
+        opacity 1.4s ease;
+}
+
+.details-button:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
 }
 
 .details-button:hover {
-    background-color: #B32F2F;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #F9ECCC;
+    border: 2px solid #F9ECCC;
 }
 
 .details-button:active {
@@ -994,7 +1045,7 @@ form#account_creation button {
   /* Effet hover */
   #user-places-list li:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.4);
   }
   
   /* Image */
@@ -1011,7 +1062,7 @@ form#account_creation button {
   #user-places-list li strong {
     font-size: 1.2rem;
     margin-bottom: 0.3rem;
-    color: #ffd700; /* or doré */
+    color: #c30000; /* or doré */
     text-align: center;
   }
   
@@ -1024,13 +1075,12 @@ form#account_creation button {
   
   /* Titre section */
   h2.user-places {
-    color: #ffd700;
+    color: #c30000;
     text-align: center;
     font-weight: 700;
     font-size: 2rem;
     margin-top: 2rem;
     margin-bottom: 1rem;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
     z-index: 1;
   }
   

@@ -5,6 +5,22 @@
   <title>Admin Dashboard - HBnB</title>
   <link rel="icon" href="../static/images/icon.png">
   <link rel="stylesheet" href="../static/CSS/styles.css">
+  <style>
+    #show-create-place, #show-create-amenity, #places-section, #amenities-section,
+    #cancel-create-place, #create-place-form, #cancel-create-amenity, #create-amenity-form {
+        display: block !important;
+        visibility: visible !important;
+    }
+    .collapsible-content.hidden {
+        display: none !important;
+    }
+    .collapsible-content {
+        display: block !important;
+    }
+    #edit-amenity-section, #edit-place-section, #edit-user-section {
+        display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="light-effect"></div>
@@ -17,97 +33,130 @@
   </header>
 
   <main class="container">
-    <section id="users-section">
-      <h2>Users</h2>
-      <!-- Liste des utilisateurs injectée ici -->
+
+    <section id="users-section" class="collapsible-section">
+      <h2 class="collapsible-title">Users</h2>
+      <div class="collapsible-content">
+        <!-- Tableau des utilisateurs sera injecté ici -->
+      </div>
     </section>
-    <h2>Admin Creation</h2>
+  
+    <section id="create-admin-section" class="hidden">
+      <h3>Create a new admin</h3>
+      <form id="create-admin-form">
+        <label for="first_name">Prénom:</label>
+        <input type="text" id="first_name" name="first_name" required><br>
+        <label for="last_name">Nom:</label>
+        <input type="text" id="last_name" name="last_name" required><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button type="submit">Créer Admin</button>
+        <button type="button" id="cancel-create-admin">Annuler</button>
+      </form>
+    </section>
     <button id="show-create-admin">Create a new admin</button>
-      <section id="create-admin-section" class="hidden">
-        <h3>Create a new admin</h3>
-        <form id="create-admin-form">
-          <label for="first_name">First name</label><br />
-          <input type="text" id="first_name" name="first_name" required><br />
-
-          <label for="last_name">Last name</label><br />
-          <input type="text" id="last_name" name="last_name" required><br />
-
-          <label for="email">Email</label><br />
-          <input type="email" id="email" name="email" required><br />
-
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required><br />
-
-          <button type="submit">Create the admin</button>
-          <button type="button" id="cancel-create-admin">Cancel</button>
-        </form>
-      </section>
-
-    <section id="places-section">
-      <h2>Places</h2>
-      <!-- Liste des lieux injectée ici -->
+  
+    <section id="places-section" class="collapsible-section">
+      <h2 class="collapsible-title">Places</h2>
+      <div class="collapsible-content">
+        <button id="show-create-place">Create a new place</button>
+        <section id="create-place-section" class="hidden">
+          <form id="create-place-form">
+            <label for="new-place-title">Titre:</label>
+            <input type="text" id="new-place-title" name="title" required><br>
+            <label for="new-place-description">Description:</label>
+            <textarea id="new-place-description" name="description" required></textarea><br>
+            <label for="new-place-price">Prix:</label>
+            <input type="number" id="new-place-price" name="price" required><br>
+            <label for="new-place-latitude">Latitude:</label>
+            <input type="number" id="new-place-latitude" name="latitude" step="any" required><br>
+            <label for="new-place-longitude">Longitude:</label>
+            <input type="number" id="new-place-longitude" name="longitude" step="any" required><br>
+            <button type="submit">Créer Lieu</button>
+            <button type="button" id="cancel-create-place">Annuler</button>
+          </form>
+        </section>
+        <div id="places-table-container"></div>
+      </div>
     </section>
-
-    <section id="amenities-section">
-      <h2>Amenities</h2>
-      <button id="show-create-amenity">Create a new amenity</button>
-      <section id="create-amenity-section" class="hidden">
-        <h3>Create a new amenity</h3>
-        <form id="create-amenity-form">
-          <label for="new-amenity-name">Amenity Name</label><br />
-          <input type="text" id="new-amenity-name" name="new-amenity-name" required><br />
-
-          <button type="submit">Create Amenity</button>
-          <button type="button" id="cancel-create-amenity">Cancel</button>
-        </form>
-      </section>
-      <!-- Liste des équipements injectée ici -->
+  
+    <section id="amenities-section" class="collapsible-section">
+      <h2 class="collapsible-title">Amenities</h2>
+      <div class="collapsible-content">
+        <button id="show-create-amenity">Create a new amenity</button>
+        <section id="create-amenity-section" class="hidden">
+          <form id="create-amenity-form">
+            <label for="new-amenity-name">Nom:</label>
+            <input type="text" id="new-amenity-name" name="name" required><br>
+            <button type="submit">Créer Équipement</button>
+            <button type="button" id="cancel-create-amenity">Annuler</button>
+          </form>
+        </section>
+        <div id="amenities-table-container"></div>
+      </div>
     </section>
-
-    <!-- Section édition place, cachée par défaut -->
-    <section id="edit-place-section" style="display:none;">
-      <h2>Edit Place</h2>
+  
+    <section id="edit-place-section" class="hidden">
+      <h3>Modifier un lieu</h3>
       <form id="edit-place-form">
-        <input type="hidden" id="place-id" name="place_id" />
-        
-        <label for="title">Title:</label><br/>
-        <input type="text" id="title" name="title" required minlength="1" maxlength="100" /><br/>
-
-        <label for="description">Description:</label><br/>
-        <textarea id="description" name="description" required minlength="1" maxlength="1000"></textarea><br/>
-
-        <label for="price">Price:</label><br/>
-        <input type="number" id="price" name="price" min="0" step="0.01" required/><br/>
-
-        <label for="latitude">Latitude:</label><br/>
-        <input type="number" id="latitude" name="latitude" min="-90" max="90" step="0.000001" required/><br/>
-
-        <label for="longitude">Longitude:</label><br/>
-        <input type="number" id="longitude" name="longitude" min="-180" max="180" step="0.000001" required/><br/>
-
-        <button type="submit">Save changes</button>
-        <button type="button" id="cancel-edit">Cancel</button>
+        <input type="hidden" id="place-id" name="id">
+        <label for="title">Titre:</label>
+        <input type="text" id="title" name="title" required><br>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea><br>
+        <label for="price">Prix:</label>
+        <input type="number" id="price" name="price" required><br>
+        <label for="latitude">Latitude:</label>
+        <input type="number" id="latitude" name="latitude" step="any" required><br>
+        <label for="longitude">Longitude:</label>
+        <input type="number" id="longitude" name="longitude" step="any" required><br>
+        <button type="submit">Modifier Lieu</button>
+        <button type="button" id="cancel-edit">Annuler</button>
       </form>
     </section>
-
-    <!-- Section édition amenity, cachée par défaut -->
-    <section id="edit-amenity-section" style="display:none;">
-      <h2>Edit Amenity</h2>
+  
+    <section id="edit-amenity-section" class="hidden">
+      <h3>Modifier un équipement</h3>
       <form id="edit-amenity-form">
-        <input type="hidden" id="amenity-id" name="amenity_id" />
-        
-        <label for="amenity-name">Amenity Name:</label><br/>
-        <input type="text" id="amenity-name" name="amenity-name" required minlength="1" maxlength="100" /><br/>
-
-        <button type="submit">Save changes</button>
-        <button type="button" id="cancel-edit-amenity">Cancel</button>
+        <input type="hidden" id="amenity-id" name="id">
+        <label for="amenity-name">Nom:</label>
+        <input type="text" id="amenity-name" name="name" required><br>
+        <button type="submit">Modifier Équipement</button>
+        <button type="button" id="cancel-edit-amenity">Annuler</button>
       </form>
     </section>
+  
+    <section id="edit-user-section" class="hidden">
+      <h3>Modifier un utilisateur</h3>
+      <form id="edit-user-form">
+        <input type="hidden" id="user-id" name="id">
+        <label for="user-first-name">Prénom:</label>
+        <input type="text" id="user-first-name" name="first_name" required><br>
+        <label for="user-last-name">Nom:</label>
+        <input type="text" id="user-last-name" name="last_name" required><br>
+        <label for="user-email">Email:</label>
+        <input type="email" id="user-email" name="email" required><br>
+        <label for="user-is-admin">Admin:</label>
+        <input type="checkbox" id="user-is-admin" name="is_admin"><br>
+        <button type="submit">Modifier Utilisateur</button>
+        <button type="button" id="cancel-edit-user">Annuler</button>
+      </form>
+    </section>
+  
+    <section id="bookings-section" class="collapsible-section">
+      <h2 class="collapsible-title">Bookings</h2>
+      <div class="collapsible-content hidden">
+        <div id="bookings-table-container"></div>
+      </div>
+    </section>
+  
   </main>
 
   <footer id="footer">
     HBnB&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Front-end: <strong>Quentin LATASTE</strong>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Back-end: <a href="https://github.com/Proser-V" target="_blank" rel="noopener noreferrer"><strong>Valentin DUMONT</strong></a> & <a href="https://github.com/loufi84" target="_blank" rel="noopener noreferrer"><strong>Quentin LATASTE</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;For Holberton School Dijon - July 2025&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;All rights reserved.
   </footer>
-  <script type="module" src="../static/JS/admin.js"></script>
+  <script type="module" src="../static/JS/admin2.js"></script>
 </body>
 </html>

@@ -20,8 +20,20 @@
     pointer-events: none;
     isolation: isolate;
     will-change: opacity, transform;
-    transform-origin: center;
+    transform-origin: center top;
 }
+
+@keyframes glow {
+    0%, 100% { 
+        opacity: 0.75;
+        transform: scale(1);
+        }
+    50% {
+        opacity: 0.95;
+        transform: scale(1.05);
+        }
+}
+
 
 body {
     min-height: 100vh;
@@ -63,17 +75,6 @@ main {
 main, #review-card-container, fieldset.rating {
     position: relative;
     z-index: 1;
-}
-
-@keyframes glow {
-    0%, 100% { 
-        opacity: 0.75;
-        transform: scale(1);
-        }
-    50% {
-        opacity: 0.95;
-        transform: scale(1.05);
-        }
 }
 
 #header {
@@ -151,7 +152,7 @@ h1 { font-size: 1.5em; margin: 10px; }
 }
 
 .rating > label { 
-  color: #ddd; 
+  color: #555555; 
  float: right; 
 }
 
@@ -159,19 +160,19 @@ h1 { font-size: 1.5em; margin: 10px; }
 
 .rating > input:checked ~ label, /* show gold star when clicked */
 .rating:not(:checked) > label:hover, /* hover current star */
-.rating:not(:checked) > label:hover ~ label { color: #FFD700;  } /* hover previous stars in list */
+.rating:not(:checked) > label:hover ~ label { color: #c30000;  } /* hover previous stars in list */
 
 .rating > input:checked + label:hover, /* hover current star when changing rating */
 .rating > input:checked ~ label:hover,
 .rating > label:hover ~ input:checked ~ label, /* lighten current selection */
-.rating > input:checked ~ label:hover ~ label { color: #FFED85;  }
+.rating > input:checked ~ label:hover ~ label { color: #c30000;  }
 
 .place-average-rating {
     display: flex;
     align-items: center;
     gap: 0.3rem;
     font-size: 1.2rem;
-    color: #f5c518;
+    color: #c30000;
 }
 
 .place-average-rating .star {

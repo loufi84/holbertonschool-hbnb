@@ -242,6 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const newPlace = await response.json();
       alert(`Place created successfully: ${newPlace.title}`);
+      location.reload();
 
       addPlaceForm.reset();
       addPlaceForm.classList.add('hidden');
