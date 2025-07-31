@@ -14,6 +14,7 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
+    OPENCAGE_KEY = "b91687667bcc491281c1cbfd8f028651"
 
 
 class DevelopmentConfig(Config):

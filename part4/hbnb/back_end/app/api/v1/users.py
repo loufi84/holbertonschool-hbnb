@@ -164,9 +164,10 @@ class UserResource(Resource):
             except ValidationError:
                 return {"error": "Invalid email format"}, 400
 
-        if ("email" in update_data and
-           facade.get_user_by_email(update_data["email"])):
-            return {'error': 'Email already registered'}, 400
+        if "email" in update_data:
+            existing_by_email = facade.get_user_by_email(update_data["email"])
+            if existing_by_email and str(existing_by_email.id) != str(user_id):
+                return {'error': 'Email already registered'}, 400
 
         try:
             updated_user = facade.update_user(user_id, update_data)

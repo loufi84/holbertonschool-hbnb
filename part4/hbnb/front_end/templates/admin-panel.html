@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - HBnB</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/icon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles.css') }}">
+</head>
+<body>
+  <div class="light-effect"></div>
+  <header id="header">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" id="logo" />
+    <h1>HBnB Admin Dashboard</h1>
+    <nav>
+      <a href="{{ url_for('static', filename='index.html') }}">Home page</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <section id="users-section" class="collapsible-section">
+      <h2 class="collapsible-title">Users</h2>
+      <div class="collapsible-content">
+        {% if users and users|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Admin</th>
+                <th>Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              {% for user in users %}
+                <tr>
+                  <td>{{ user.id }}</td>
+                  <td>{{ user.first_name }}</td>
+                  <td>{{ user.last_name }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+                  <td>{{ 'Yes' if user.is_active else 'No' }}</td>
+                  <td>
+                    <button class="edit-user" data-id="{{ user.id }}">Edit</button>
+                    <button class="delete-user" data-id="{{ user.id }}">Delete</button>
+                    <button class="moderate-user" data-id="{{ user.id }}" data-is-active="{{ user.is_active | lower }}">Moderate</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>No users found.</p>
+        {% endif %}
+      </div>
+    </section>
+    <section id="edit-user-section" class="hidden">
+      <h3>Edit User</h3>
+      <form id="edit-user-form">
+        <input type="hidden" id="user-id" name="id">
+        <label for="user-first-name">First Name:</label>
+        <input type="text" id="user-first-name" name="first_name" required><br>
+        <label for="user-last-name">Last Name:</label>
+        <input type="text" id="user-last-name" name="last_name" required><br>
+        <label for="user-email">Email:</label>
+        <input type="email" id="user-email" name="email" required><br>
+        <label for="user-is-admin">Admin:</label>
+        <input type="checkbox" id="user-is-admin" name="is_admin"><br>
+        <button type="submit">Edit User</button>
+        <button type="button" id="cancel-edit-user">Cancel</button>
+      </form>
+    </section>
+
+
+    <section id="create-admin-section" class="hidden">
+      <h3>Create a New Admin</h3>
+      <form id="create-admin-form">
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" required><br>
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button type="submit">Create Admin</button>
+        <button type="button" id="cancel-create-admin">Cancel</button>
+      </form>
+    </section>
+    <button id="show-create-admin">Create a New Admin</button>
+
+    <section id="places-section" class="collapsible-section">
+      <h2 class="collapsible-title">Places</h2>
+      <div id="places-table-container">
+        {% if places and places|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="places-table-body">
+              {% for place in places %}
+                <tr>
+                  <td>{{ place.id }}</td>
+                  <td>{{ place.title }}</td>
+                  <td>{{ place.price }}</td>
+                  <td>
+                    <button class="edit-place" data-id="{{ place.id }}" onclick="openEditPlaceFormById('{{ place.id }}')">Edit</button>
+                    <button class="delete-place" data-id="{{ place.id }}" onclick="deletePlace('{{ place.id }}')">Delete</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>No places found.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section id="edit-place-section" class="hidden">
+      <h3>Edit Place</h3>
+      <form id="edit-place-form">
+        <input type="hidden" id="place-id" name="id">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea><br>
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" lang="en" step="any" required><br>
+        <label for="latitude">Latitude:</label>
+        <input type="number" id="latitude" name="latitude" lang="en" step="any" required><br>
+        <label for="longitude">Longitude:</label>
+        <input type="number" id="longitude" name="longitude" lang="en" step="any" required><br>
+        <button type="submit">Edit Place</button>
+        <button type="button" id="cancel-edit">Cancel</button>
+      </form>
+    </section>
+
+    <div class="collapsible-content">
+      <button id="show-create-amenity">Create a New Amenity</button>
+      <section id="create-amenity-section" class="hidden">
+        <form id="create-amenity-form">
+          <label for="new-amenity-name">Name:</label>
+          <input type="text" id="new-amenity-name" name="name" required><br>
+          <label for="new-amenity-description">Description:</label>
+          <input type="text" id="new-amenity-description" name="description" required><br>
+          <button type="submit">Create Amenity</button>
+          <button type="button" id="cancel-create-amenity">Cancel</button>
+        </form>
+      </section>
+    </div>
+
+    <section id="amenities-section" class="collapsible-section">
+      <h2 class="collapsible-title">Amenities</h2>
+      <div id="amenities-table-container">
+        {% if amenities and amenities|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="amenities-table-body">
+              {% for amenity in amenities %}
+                <tr>
+                  <td>{{ amenity.id }}</td>
+                  <td>{{ amenity.name }}</td>
+                  <td>{{ amenity.description }}</td>
+                  <td>
+                    <button class="edit-amenity" data-id="{{ amenity.id }}" onclick="openEditAmenityFormById('{{ amenity.id }}')">Edit</button>
+                    <button class="delete-amenity" data-id="{{ amenity.id }}" onclick="deleteAmenity('{{ amenity.id }}')">Delete</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>No amenities found.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section id="edit-amenity-section" class="hidden">
+      <h3>Edit Amenity</h3>
+      <form id="edit-amenity-form">
+        <input type="hidden" id="amenity-id" name="id">
+        <label for="amenity-name">Name:</label>
+        <input type="text" id="amenity-name" name="name" required><br>
+        <button type="submit">Edit Amenity</button>
+        <button type="button" id="cancel-edit-amenity">Cancel</button>
+      </form>
+    </section>
+
+    <section id="bookings-section" class="collapsible-section">
+      <h2 class="collapsible-title">Bookings</h2>
+      <div id="bookings-table-container">
+        {% if bookings and bookings|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Place</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-table-body">
+              {% for booking in bookings %}
+                <tr>
+                  <td>{{ booking.id }}</td>
+                  <td>{{ booking.user_email }}</td>
+                  <td>{{ booking.place_title }}</td>
+                  <td>{{ booking.start_date }}</td>
+                  <td>{{ booking.end_date }}</td>
+                  <td>{{ booking.status }}</td>
+                  <td>
+                    <button class="cancel-booking" data-id="{{ booking.id }}" onclick="cancelBooking('{{ booking.id }}')">Cancel</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>No bookings found.</p>
+        {% endif %}
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="footer">
+    HBnB&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Front-end: <strong>Quentin LATASTE</strong>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Back-end: <a href="https://github.com/Proser-V" target="_blank" rel="noopener noreferrer"><strong>Valentin DUMONT</strong></a> & <a href="https://github.com/loufi84" target="_blank" rel="noopener noreferrer"><strong>Quentin LATASTE</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;For Holberton School Dijon - July 2025&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;All rights reserved.
+  </footer>
+  <script type="module" src="{{ url_for('static', filename='JS/admin2.js') }}"></script>
+</body>
+</html>

@@ -13,10 +13,27 @@
         <header id="header">
             <img src="/static/images/logo.png" alt="Logo HBnB" id="logo">
             <section id="filter">
-                <section id="price-filter">
-                    <label for="price-slider">Max price : <span id="price-value">35</span> €</label>
-                    <input type="range" id="price-slider" min="5" max="120" step="5" value="35">
-                </section>
+                <form id="search-form">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" placeholder="City">
+
+                    <label for="distance">Max distance (km):</label>
+                    <select id="distance" name="distance">
+                        <option value="5">5 km</option>
+                        <option value="10" selected>10 km</option>
+                        <option value="25">25 km</option>
+                        <option value="50">50 km</option>
+                        <option value="100">100 km</option>
+                    </select>
+
+                    <label for="min-price">Min price (€):</label>
+                    <input type="number" id="min-price" name="min-price" min="0" step="1" value="5">
+
+                    <label for="max-price">Max price (€):</label>
+                    <input type="number" id="max-price" name="max-price" min="0" step="1" value="500">
+
+                    <button type="submit">Search</button>
+                </form>
             </section>
             <nav id="userNav">
             </nav>

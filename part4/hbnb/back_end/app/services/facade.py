@@ -135,6 +135,9 @@ class HBnBFacade:
 
     # ------------------ Place management ------------------
 
+    def get_all_places(self):
+        return db.session.query(Place).all()
+
     def create_place(self, place_data):
         """
         Create a new place and validate amenities existence.

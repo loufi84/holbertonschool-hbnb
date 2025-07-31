@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function displayUserInfo(user) {
     const photo = user.photo_url && user.photo_url.trim() !== ''
       ? user.photo_url
-      : '/static/images/default_profile.png';
+      : '/static/images/default_profile_b.png';
 
     console.log('Displaying user info with photo URL:', photo);
 
