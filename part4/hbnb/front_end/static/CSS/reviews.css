@@ -150,15 +150,6 @@ main, #review-card-container, fieldset.rating {
 fieldset, label { margin: 0; padding: 0; }
 h1 { font-size: 1.5em; margin: 10px; }
 
-.desc-text {
-    border: 2px solid #BBBBBB;
-}
-
-.desc-price {
-    border: 2px solid #BBBBBB;
-}
-
-
 /* ===== STYLE FOR STAR RATING ===== */
 
 .rating {
@@ -204,7 +195,6 @@ h1 { font-size: 1.5em; margin: 10px; }
     gap: 0.3rem;
     font-size: 1.2rem;
     color: #c30000;
-    border: 2px solid #C30000;
 }
 
 .place-average-rating .star {
@@ -332,7 +322,6 @@ h1 { font-size: 1.5em; margin: 10px; }
     font-family: inherit;
     color: #ffffff;
     background-color: transparent;
-    border: 2px solid #ffffff;
     border-radius: 5px;
     resize: vertical;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -366,7 +355,6 @@ h1 { font-size: 1.5em; margin: 10px; }
 
 #reviews-list li {
     padding: 0.5rem;
-    border: 1px solid #BBBBBB;
     margin-bottom: 1rem;
     position: relative;
 }
@@ -400,4 +388,42 @@ h1 { font-size: 1.5em; margin: 10px; }
     list-style-type: none;
     padding-left: 0;
     margin-left: 0;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #F9ECCC;
+    box-shadow: 0 0 8px rgba(249, 236, 204, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+label {
+    display: block;
+    margin: 0.5rem 0 0.25rem;
+    font-weight: bold;
+    color: #F9ECCC;
 }
