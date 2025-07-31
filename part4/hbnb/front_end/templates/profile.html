@@ -23,29 +23,32 @@
       <button id="add-place-btn">Add a new place</button>
     </div>
 
-    <form id="edit-form" class="hidden">
-      <input type="text" id="edit_first_name" placeholder="First name" />
-      <input type="text" id="edit_last_name" placeholder="Last name" />
-      <input type="email" id="edit_email" placeholder="Email" />
-      <input type="text" id="edit_photo_url" placeholder="Photo URL" />
-
+    <form id="edit-form">
+      <input type="text" id="edit_first_name" placeholder="First name" class="form-control" />
+      <input type="text" id="edit_last_name" placeholder="Last name" class="form-control" />
+      <input type="email" id="edit_email" placeholder="Email" class="form-control" />
+      <input type="text" id="edit_photo_url" placeholder="Photo URL" class="form-control" />
+    
       <button id="save-edit">Save</button>
       <button type="button" id="cancel-edit">Cancel</button>
     </form>
+    
+    <form id="add-place">
+      <input type="text" id="place-title" placeholder="Title" class="form-control" />
+      <input type="text" id="place-description" placeholder="Description" class="form-control" />
+      <input type="number" id="price" placeholder="Price" class="form-control" />
+      <input type="number" id="latitude" placeholder="Latitude" class="form-control" />
+      <input type="number" id="longitude" placeholder="Longitude" class="form-control" />
+      <label for="amenity_ids">Amenities</label>
+      <select id="amenity_ids" multiple class="form-control" style="height: 150px;">
 
-
-    <form id="add-place" class="hidden">
-      <input type="text" id="place-title" placeholder="Title" />
-      <input type="text" id="place-description" placeholder="Description" />
-      <input type="number" id="price" placeholder="Price" />
-      <input type="number" id="latitude" placeholder="Latitude" />
-      <input type="number" id="longitude" placeholder="Longitude" />
-      <input type="text" id="amenity_ids" placeholder="Amenities" />
-      <input type="text" id="photos_url" placeholder="Photos (URL)" />
+      </select>
+      <input type="text" id="photos_url" placeholder="Photos (URL)" class="form-control" />
 
       <button id="save-place">Create your place</button>
       <button type="button" id="cancel-place">Cancel</button>
     </form>
+    
     <h2 class="user-places">Your places:</h2>
     {% if user.places and user.places | length > 0 %}
       <ul id="user-places-list">
@@ -57,13 +60,12 @@
       data-price="{{ place.price }}">
         <img src="{{ place.photos_url[0] }}" />
         <strong>{{ place.title }}</strong> - {{ place.description }} - Price: {{ place.price }}€
-        <div class="edit-form-container hidden"></div>
+        <div class="edit-form-container visible"></div>
       </li>
   
       {% endfor %}
     </ul>
     {% else %}
-      <p>You don't have places for the moment</p>
     {% endif %}
   </main>
   <script type="module" src="../static/JS/profile.js"></script>

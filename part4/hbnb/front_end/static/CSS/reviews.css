@@ -1,5 +1,19 @@
 @import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
 
+/* MANAGING LIGHT EFFECT ANIMATION */
+
+.light-effect::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuMiIgZmlsbD0icmdiYSgyMCwgMjAsIDIwLCAwLjEzKSIgLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxLjIiIGZpbGw9InJnYmEoMTUsIDE1LCAxNSwgMC4xKSIgLz48Y2lyY2xlIGN4PSIyMiIgY3k9IjIyIiByPSIxLjIiIGZpbGw9InJnYmEoMjUsIDI1LCAyNSwgMC4xNSkiIC8+PC9zdmc+");
+    opacity: 0.04;
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+}
+
 .light-effect {
     position: fixed;
     top: 0;
@@ -7,31 +21,37 @@
     width: 100vw;
     height: 100vh;
     background: radial-gradient(
-        ellipse at 50% 20%,
-        rgba(255, 255, 255, 0.02) 0%,
-        rgba(0, 0, 0, 0.4) 30%,
-        rgba(0, 0, 0, 0.7) 60%,
-        rgba(0, 0, 0, 1) 85%,
-        rgba(0, 0, 0, 1) 100%
-    );
+    ellipse at 50% 15%, 
+    rgba(255, 255, 255, 0.04) 0%,    
+    rgba(255, 255, 255, 0.025) 8%,
+    rgba(0, 0, 0, 0.35) 20%, 
+    rgba(0, 0, 0, 0.65) 40%,
+    rgba(0, 0, 0, 0.85) 60%,
+    rgba(0, 0, 0, 0.95) 80%,
+    rgba(0, 0, 0, 1) 100%
+);
     z-index: -1;
-    opacity: 0.8;
-    animation: glow 10s ease-in-out infinite;
+    opacity: 0.5;
+    animation: glow 14s ease-in-out infinite;
     pointer-events: none;
     isolation: isolate;
-    will-change: opacity, transform;
-    transform-origin: center top;
+    will-change: opacity;
+    transform-origin: top;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    filter: blur(20px);
+    margin-top: 80px;
 }
 
 @keyframes glow {
     0%, 100% { 
         opacity: 0.75;
         transform: scale(1);
-        }
+    }
     50% {
         opacity: 0.95;
-        transform: scale(1.05);
-        }
+        transform: scale(1.07);
+    }
 }
 
 
@@ -63,7 +83,7 @@ main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center; /* tout centré horizontalement */
+    align-items: center;
     gap: 2rem;
     padding: 2rem;
 }
@@ -130,41 +150,52 @@ main, #review-card-container, fieldset.rating {
 fieldset, label { margin: 0; padding: 0; }
 h1 { font-size: 1.5em; margin: 10px; }
 
-/****** Style Star Rating Widget *****/
+.desc-text {
+    border: 2px solid #BBBBBB;
+}
 
-.rating { 
-  border: none;
-  float: left;
+.desc-price {
+    border: 2px solid #BBBBBB;
+}
+
+
+/* ===== STYLE FOR STAR RATING ===== */
+
+.rating {
+    display: inline-block;
+    margin-top: 0.3rem;
+    margin-bottom: 0;
+    padding-bottom: 0.5rem;
 }
 
 .rating > input { display: none; } 
 .rating > label:before { 
-  margin: 5px;
-  font-size: 1.25em;
-  font-family: FontAwesome;
-  display: inline-block;
-  content: "\f005";
+    margin: 5px;
+    font-size: 1.25em;
+    font-family: FontAwesome;
+    display: inline-block;
+    content: "\f005";
 }
 
 .rating > .half:before { 
-  content: "\f089";
-  position: absolute;
+    content: "\f089";
+    position: absolute;
 }
 
 .rating > label { 
-  color: #555555; 
- float: right; 
+    color: #555555; 
+    float: right; 
 }
 
-/***** CSS Magic to Highlight Stars on Hover *****/
+/*===== CSS TO HIGHLIGHT STAR ON HOVER ======*/
 
-.rating > input:checked ~ label, /* show gold star when clicked */
-.rating:not(:checked) > label:hover, /* hover current star */
-.rating:not(:checked) > label:hover ~ label { color: #c30000;  } /* hover previous stars in list */
+.rating > input:checked ~ label,
+.rating:not(:checked) > label:hover,
+.rating:not(:checked) > label:hover ~ label { color: #c30000;  }
 
-.rating > input:checked + label:hover, /* hover current star when changing rating */
+.rating > input:checked + label:hover,
 .rating > input:checked ~ label:hover,
-.rating > label:hover ~ input:checked ~ label, /* lighten current selection */
+.rating > label:hover ~ input:checked ~ label,
 .rating > input:checked ~ label:hover ~ label { color: #c30000;  }
 
 .place-average-rating {
@@ -173,6 +204,7 @@ h1 { font-size: 1.5em; margin: 10px; }
     gap: 0.3rem;
     font-size: 1.2rem;
     color: #c30000;
+    border: 2px solid #C30000;
 }
 
 .place-average-rating .star {
@@ -187,4 +219,185 @@ h1 { font-size: 1.5em; margin: 10px; }
 .place-average-rating .no-reviews {
     font-style: italic;
     color: #777;
+}
+
+/* ===== PHOTO GALLERY ===== */
+
+.gallery-carousel {
+    margin-top: 90px;
+    max-width: 600px;
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel {
+    position: relative;
+}
+
+.carousel-track-container {
+    overflow: hidden;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-radius: 8px;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: white;
+    background-color: rgba(0,0,0,0.4);
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+    padding: 0 12px;
+}
+
+.carousel-btn.prev {
+    left: 0;
+}
+
+.carousel-btn.next {
+    right: 0;
+}
+
+/*===== MANAGING BUTTONS =====*/
+
+.cool-button {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    z-index: 1;
+    color: #FFFFFF;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    transition: color 0.5s ease, border 0.5s ease;
+    background-color: transparent;
+    font: inherit;
+    cursor: pointer;
+}
+
+.cool-button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background-color: #064789;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: -1;
+    opacity: 0.2;
+    transition:
+        transform 1.4s ease,
+        opacity 1.4s ease;
+}
+
+.cool-button:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.cool-button:hover {
+    color: #F9ECCC;
+    border: 2px solid #F9ECCC;
+}
+
+/*===== REVIEW FORM =====*/
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #ffffff;
+    background-color: transparent;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    resize: vertical;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #F9ECCC;
+    box-shadow: 0 0 8px rgba(249, 236, 204, 0.3);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/*===== OTHER STUFF =====*/
+
+#review-card-container {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-height 0.6s ease, opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+}
+
+#review-card-container.visible {
+    max-height: 1000px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+#reviews-list li {
+    padding: 0.5rem;
+    border: 1px solid #BBBBBB;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+#reviews-list li:last-child {
+    margin-bottom: 0;
+}
+
+.side-by-side-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+#reviews-section {
+    flex: 3;
+    min-width: 0;
+    overflow-wrap: break-word;
+    padding-right: 300px;
+}
+
+#amenities-section {
+    flex: 2;
+    min-width: 0;
+    max-width: 400px;
+    padding-left: 300px;
+}
+
+#amenities-list,
+#reviews-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
 }

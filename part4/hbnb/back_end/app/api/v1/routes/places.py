@@ -36,13 +36,12 @@ def reverse_geocode():
     """
     Endpoint to reverse geocode latitude and longitude into a location (city, etc) using OpenCage API.
     """
-    print("Route geocode appelée")
     data = request.get_json()
     lat = data.get("lat")
     lon = data.get("lon")
 
     if lat is None or lon is None:
-        return jsonify({"error": "Latitude et longitude required"}), 400
+        return jsonify({"error": "Latitude and longitude required"}), 400
 
     try:
         api_key = current_app.config['OPENCAGE_KEY']
@@ -85,7 +84,7 @@ def geocode():
     city = data.get("city")
 
     if not city:
-        return jsonify({"error": "Le nom de la ville est requis"}), 400
+        return jsonify({"error": "City name required"}), 400
 
     try:
         api_key = current_app.config['OPENCAGE_KEY']
@@ -94,19 +93,18 @@ def geocode():
             params={
                 "q": city,
                 "key": api_key,
-                "language": "fr",
+                "language": "en",
                 "no_annotations": 1,
-                "limit": 5  # Augmenter à 5 pour obtenir plusieurs résultats
+                "limit": 5
             }
         )
         response.raise_for_status()
         data = response.json()
 
         if not data["results"]:
-            return jsonify({"error": "Ville non trouvée"}), 404
+            return jsonify({"error": "City not found"}), 404
 
         if len(data["results"]) > 1:
-            # Retourner plusieurs résultats pour les suggestions
             choices = [
                 {
                     "lat": result["geometry"]["lat"],
@@ -120,7 +118,6 @@ def geocode():
                 "choices": choices
             })
         else:
-            # Retourner un seul résultat
             geometry = data["results"][0]["geometry"]
             return jsonify({
                 "multiple_results": False,

@@ -6,49 +6,67 @@
         <link rel="stylesheet" href="../static/CSS/reviews.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="iconc" href="../static/images/icon.png">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>   
     <body data-place-id="{{ place.id }}">
         <header id="header">
             <img src="../static/images/logo.png" id="logo">
-            <a href="../static/index.html">Back home</a>
             <h1 class="title">{{ place.title }}</h1>
+            <a href="../static/index.html" class="cool-button">Back home</a>
         </header>
         <main>
             <div class="light-effect"></div>
-            <section class="gallery">
+            <section class="gallery-carousel">
                 {% if place.photos_url %}
-                    {% for url in place.photos_url %}
-                        <img src="{{ url }}" alt="Photos du logement">
-                    {% endfor %}
+                    <div class="carousel">
+                    <button class="carousel-btn prev">‹</button>
+                    <div class="carousel-track-container">
+                        <div class="carousel-track">
+                        {% for url in place.photos_url %}
+                            <div class="carousel-slide">
+                            <img src="{{ url }}" alt="Photo du logement">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <button class="carousel-btn next">›</button>
+                </div>
                 {% else %}
-                    <p>There is no photos here</p>
+                    <p>There are no photos here</p>
                 {% endif %}
             </section>
 
             <section class="description">
-                <p>{{ place.description }}</p>
+                <p class="desc-text">{{ place.description }}</p>
 
                 {% if place.price < 5 %}
-                    <p><em>Luxury have no price, but here you can spend : {{ place.price }}€ for the best time of your life.</em></p>
+                    <p class="desc-price"><em>Luxury have no price, but here you can spend : {{ place.price }}€ for the best time of your life.</em></p>
                 {% else %}
-                    <p><strong>Only {{ place.price }}€ for this luxurious place.</strong></p>
+                    <p class="desc-price"><strong>Only {{ place.price }}€ for this luxurious place.</strong></p>
                 {% endif %}
                 <div class="place-average-rating" id="rating-container" data-rating="{{ place.rating }}"></div>
             </section>
-            <section class="amenities" id="amenities-section" data-amenity="{{ place.amenities | map(attribute='id') | join(',') }}">
-                <h2>Amenities</h2>
-                <ul id="amenities-list">
-                    <li>Loading amenities</li>
-                </ul>
-            </section>
-            <div class="align">
-                <a href="{{ url_for('place_pages.booking', place_id=place.id) }}" id="book-button">Book this place now!</a>
+            <div class="side-by-side-container">
+                <section id="reviews-section" data-place-id="{{ place.id }}">
+                    <h2>Reviews</h2>
+                    <ul id="reviews-list"></ul>
+                </section>
+            
+                <section class="amenities" id="amenities-section" data-amenity="{{ place.amenities | map(attribute='id') | join(',') }}">
+                    <h2>Amenities</h2>
+                    <ul id="amenities-list">
+                        <li>Loading amenities</li>
+                    </ul>
+                </section>
             </div>
-            <button id="show-review-form-btn" class="btn btn-primary" style="display: none;">
+            <div class="align">
+                <a href="{{ url_for('place_pages.booking', place_id=place.id) }}" id="book-button" class="cool-button">Book this place now!</a>
+            </div>
+            <button id="show-review-form-btn" class="btn btn-primary cool-button" style="display: none;">
                 Add a review
             </button>
-            <div id="review-card-container" class="card mt-3" style="display: none;">
+            <div id="review-card-container" class="card mt-3">
                 <div class="card-body">
                     <form id="review-form">
                         <div class="mb-3">
@@ -69,7 +87,7 @@
                         </fieldset>
                         <input type="hidden" id="rating-input" name="rating" value="0">
                         <input type="hidden" id="review-rating-value" name="rating" value="0" />
-                        <button type="submit" class="btn btn-success">Submit</button>
+                        <button type="submit" class="btn btn-success cool-button">Submit</button>
                     </form>
                 </div>
             </div>

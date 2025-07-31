@@ -19,8 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
             payload.photo_url = photo_url;
         }
 
-        console.log('Payload: ', JSON.stringify(payload, null, 2));
-
         const response = await fetch('/api/v1/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

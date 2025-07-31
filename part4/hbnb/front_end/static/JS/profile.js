@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cancelBtn = document.getElementById('cancel-edit');
   const saveBtn = document.getElementById('save-edit');
 
-  // Champs du formulaire
   const firstNameInput = document.getElementById('edit_first_name');
   const lastNameInput = document.getElementById('edit_last_name');
   const emailInput = document.getElementById('edit_email');
   const photoUrlInput = document.getElementById('edit_photo_url');
 
-  // Vérifier que les éléments existent
+  loadAmenities();
+
   if (!profileContainer || !editButton || !editForm || !cancelBtn || !saveBtn || !firstNameInput) {
     console.error('Un ou plusieurs éléments du DOM sont manquants :', {
       profileContainer, editButton, editForm, cancelBtn, saveBtn, firstNameInput
@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function displayUserInfo(user) {
-    const photo = user.photo_url && user.photo_url.trim() !== ''
+    const photo = user.photo_url && user.photo_url.trim() !== '' && user.photo_url.trim().toLowerCase() !== 'none'
       ? user.photo_url
-      : '/static/images/default_profile_b.png';
+      : '../static/images/default_profile_b.png';
 
     console.log('Displaying user info with photo URL:', photo);
 
@@ -75,9 +75,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
     `;
 
-    profileContainer.classList.remove('hidden');
-    editButton.classList.remove('hidden');
-    editForm.classList.add('hidden');
+    profileContainer.classList.add('visible');
+    editButton.classList.add('visible');
+    editForm.classList.remove('visible');
   }
 
 
@@ -107,16 +107,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       photoUrl: photoUrlInput.value
     });
   
-    editForm.classList.add('hidden');
-    profileContainer.classList.remove('hidden');
-    editButton.classList.remove('hidden');
+    editForm.classList.remove('visible');
+    profileContainer.classList.add('visible');
+    editButton.classList.add('visible');
   }
 
   editButton.addEventListener('click', () => {
     console.log('Edit button clicked');
-    editForm.classList.remove('hidden');
-    profileContainer.classList.add('hidden');
-    editButton.classList.add('hidden');
+    editForm.classList.add('visible');
+    profileContainer.classList.remove('visible');
+    editButton.classList.remove('visible');
   });
   
 
@@ -183,18 +183,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  async function loadAmenities() {
+    try {
+      const res = await fetchWithAutoRefresh('/amenities');
+      if (!res.ok) throw new Error('Failed to load amenities');
+      const amenities = await res.json();
+
+      const select = document.getElementById('amenity_ids');
+      select.innerHTML = '';
+
+      amenities.forEach(a => {
+        const option = document.createElement('option');
+        option.value = a.id;
+        option.textContent = a.name;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      console.error('Error loading amenities:', err);
+    }
+  }
+
   const addPlaceForm = document.getElementById('add-place');
   const savePlaceBtn = document.getElementById('save-place');
   const cancelPlaceBtn = document.getElementById('cancel-place');
   const addPlaceButton = document.getElementById('add-place-btn');
 
   addPlaceButton.addEventListener('click', () => {
-    addPlaceForm.classList.remove('hidden');
+    addPlaceForm.classList.add('visible');
   })
 
   cancelPlaceBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    addPlaceForm.classList.add('hidden');
+    addPlaceForm.classList.remove('visible');
   });
 
   savePlaceBtn.addEventListener('click', async (e) => {
@@ -245,7 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       location.reload();
 
       addPlaceForm.reset();
-      addPlaceForm.classList.add('hidden');
+      addPlaceForm.classList.remove('visible');
       refreshProfile();
     } catch (error) {
       console.error('Error creating place:', error);
@@ -253,18 +273,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   })
 
-  // User update place
   const placeItems = document.querySelectorAll(".place-item");
 
   placeItems.forEach(item => {
     item.addEventListener("click", (e) => {
-      e.stopPropagation(); // Empêche la fermeture immédiate par le listener global
+      e.stopPropagation();
 
-      // Cacher tous les autres formulaires
-      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.add("hidden"));
+      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.remove("visible"));
 
       const formContainer = item.querySelector(".edit-form-container");
-      formContainer.innerHTML = ""; // Nettoyer l'ancien contenu s'il y en a
+      formContainer.innerHTML = "";
 
       const placeId = item.dataset.placeId;
       const title = item.dataset.title;
@@ -283,12 +301,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           <input type="number" name="price" value="${price}" required min="0" step="0.01" />
           <div class="form-buttons">
             <button type="submit">Save</button>
+            <button type="button" id="delete-place-btn">Delete</button>
           </div>
         </form>
       `;
 
+
       formContainer.innerHTML = formHTML;
-      formContainer.classList.remove("hidden");
+      formContainer.classList.add("visible");
 
       const form = formContainer.querySelector(".edit-place-form");
 
@@ -297,6 +317,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         const formData = new FormData(form);
         const body = Object.fromEntries(formData.entries());
+        const select = document.getElementById('amenity_ids');
+        const amenity_ids = Array.from(select.selectedOptions).map(opt => opt.value);
 
         try {
           const response = await fetch(`/api/places/${body.place_id}`, {
@@ -318,13 +340,34 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert("Unexpected error");
         }
       });
+      const deleteBtn = formContainer.querySelector("#delete-place-btn");
+      deleteBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to delete this place?")) return;
+
+        try {
+          const response = await fetch(`/api/places/${placeId}`, {
+            method: "DELETE",
+            credentials: "include"
+          });
+
+          if (response.ok) {
+            alert("Place deleted!");
+            location.reload();
+          } else {
+            alert("Failed to delete place");
+          }
+        } catch (err) {
+          console.error("Error deleting place:", err);
+          alert("Unexpected error");
+        }
+      });
     });
   });
 
-  // Clic en dehors => cacher les formulaires
+  // Hide forms when click outside the card
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".place-item")) {
-      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.add("hidden"));
+      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.remove("visible"));
     }
   });
 

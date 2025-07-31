@@ -187,13 +187,13 @@ class PlaceReviewList(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all reviews for a specific place"""
-        place = facade.get_place(place_id)
-        if not place:
-            return {'error': 'Place not found'}, 404
         try:
             UUID(place_id)
         except ValueError:
             return {'error': 'Invalid UUID format'}, 400
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
         review_list = facade.get_reviews_by_place(place_id)
         if not review_list:
             return {'message': 'No review for this place yet'}, 200

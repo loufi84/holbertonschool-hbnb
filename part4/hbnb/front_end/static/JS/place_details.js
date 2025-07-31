@@ -2,19 +2,87 @@ import apiClient from "./apiClient.js";
 const { fetchWithAutoRefresh } = apiClient || {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // === NOTE MOYENNE ===
-    const ratingContainer = document.getElementById('rating-container');
-    const ratingStr = ratingContainer?.getAttribute('data-rating');
-    const placeAverageRating = ratingStr ? parseFloat(ratingStr) : null;
+    // === RATING ===
+    const container = document.getElementById('rating-container');
+    if (!container) return;
 
-    if (placeAverageRating === null || isNaN(placeAverageRating)) {
-        ratingContainer.innerHTML = '<p>No rating for the moment</p>';
-    } else {
-        const scoreDisplay = `<span class="score">${placeAverageRating.toFixed(1)}/5</span>`;
-        ratingContainer.innerHTML = ratingContainer.innerHTML + scoreDisplay;
+    const rating = parseFloat(container.dataset.rating) || 0;
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+
+    for (let i = 0; i < 5; i++) {
+        const star = document.createElement('span');
+        star.classList.add('star');
+        if (i < fullStars) {
+        star.classList.add('filled');
+        star.textContent = '★';
+        } else {
+        star.textContent = '☆';
+        }
+        container.appendChild(star);
     }
 
-    // === AFFICHAGE DES ÉQUIPEMENTS ===
+    const score = document.createElement('span');
+    score.classList.add('score');
+    score.textContent = rating.toFixed(1);
+    container.appendChild(score);
+
+    // REVIEWS
+    const reviewsSection = document.getElementById('reviews-section');
+    const reviewsList = document.getElementById('reviews-list');
+    const placeId = reviewsSection?.getAttribute('data-place-id');
+
+    if (placeId) {
+        try {
+            const res = await fetchWithAutoRefresh(`/reviews/places/${placeId}/reviews`);
+            if (res.ok) {
+                const reviews = await res.json();
+
+                if (reviews.length > 0) {
+                    reviewsList.innerHTML = reviews.map(review => `
+                        <li>
+                            <strong>${review.user_first_name} ${review.user_last_name}</strong><br/>
+                            <p>${review.comment}</p>
+                            <span class="rating" data-rating="${review.rating}"></span>
+                        </li>
+                    `).join('');
+                    document.querySelectorAll('.rating').forEach(container => {
+                        const rating = parseFloat(container.dataset.rating) || 0;
+                        const fullStars = Math.floor(rating);
+                        const hasHalfStar = rating - fullStars >= 0.5;
+                        container.innerHTML = '';
+
+                        for (let i = 0; i < 5; i++) {
+                            const star = document.createElement('span');
+                            star.classList.add('star');
+                            if (i < fullStars) {
+                                star.classList.add('filled');
+                                star.textContent = '★';
+                            } else if (i === fullStars && hasHalfStar) {
+                                star.classList.add('half');
+                                star.textContent = '★'; // CSS half star gérée
+                            } else {
+                                star.textContent = '☆';
+                            }
+                            container.appendChild(star);
+                        }
+                    });
+
+                } else {
+                    reviewsList.innerHTML = '<li>No reviews found for this place</li>';
+                }
+            } else {
+                reviewsList.innerHTML = '<li>Error loading reviews</li>';
+            }
+        } catch (err) {
+            console.error('Failed to load reviews:', err);
+            reviewsList.innerHTML = '<li>Error loading reviews</li>';
+        }
+    } else {
+        reviewsList.innerHTML = '<li>No place specified for reviews</li>';
+    }
+
+    // === AMENITIES ===
     const amenitiesSection = document.getElementById('amenities-section');
     const amenitiesList = document.getElementById('amenities-list');
     const amenitiesIds = amenitiesSection?.getAttribute('data-amenity');
@@ -45,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         amenitiesList.innerHTML = '<li>No amenities listed for this place</li>';
     }
 
-    // === VÉRIFICATION DE L'UTILISATEUR CONNECTÉ ===
+    // === CHECK CONNECTED USER ===
     let user = null;
     try {
         const res = await fetchWithAutoRefresh('/users/me', {
@@ -62,14 +130,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loginButton = document.createElement('a');
             loginButton.href = '/login';
             loginButton.id = 'book-button';
+            loginButton.classList.add('cool-button');
             loginButton.textContent = 'You need to be connected to book this place';
             bookButton.parentNode.replaceChild(loginButton, bookButton);
         }
         return;
     }
 
-    // === FORMULAIRE DE REVIEW ===
-    const placeId = document.body.getAttribute('data-place-id');
+    // === REVIEW FORM ===
     const showFormBtn = document.getElementById('show-review-form-btn');
     const reviewCard = document.getElementById('review-card-container');
     const reviewForm = document.getElementById('review-form');
@@ -95,8 +163,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             showFormBtn.style.display = 'inline-block';
             showFormBtn.addEventListener('click', () => {
-                reviewCard.style.display = reviewCard.style.display === 'none' ? 'block' : 'none';
-                setupInteractiveStars('review-stars'); // Activate stars for review form
+                reviewCard.classList.toggle('visible');
+                setupInteractiveStars('review-stars');
             });
 
             reviewForm.addEventListener('submit', async (e) => {
@@ -141,4 +209,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
         console.warn('Erreur lors du chargement des réservations pour review:', err);
     }
+
+    // ===== PHOTO CAROUSEL =====
+    const track = document.querySelector('.carousel-track');
+    const slides = Array.from(document.querySelectorAll('.carousel-slide'));
+    const prevButton = document.querySelector('.carousel-btn.prev');
+    const nextButton = document.querySelector('.carousel-btn.next');
+
+    let currentIndex = 0;
+
+    function updateSlidePosition() {
+    const slideWidth = slides[0].offsetWidth;
+    track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+    }
+
+    prevButton.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    updateSlidePosition();
+    });
+
+    nextButton.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % slides.length;
+    updateSlidePosition();
+    });
+
+    window.addEventListener('resize', updateSlidePosition);
+    updateSlidePosition();
+
 });
