@@ -33,6 +33,7 @@ Unlike the default CSR approach suggested in the project prompt, this version us
 
 ## 📁 Project Structure
 
+```
 .
 ├── hbnb
 │   ├── back_end
@@ -125,7 +126,7 @@ Unlike the default CSR approach suggested in the project prompt, this version us
 │           ├── place.html
 │           └── profile.html
 └── README.md
-
+```
 
 ---
 
@@ -164,17 +165,17 @@ JWT-based login and account creation
 JWT tokens stored securely in cookies
 Session check and redirection logic handled via JS
 🗺️ Front-End Pages
-Page	Rendering	Description
-/	CSR	Landing page with dynamic content
-/login	SSR	Login form and session handling
-/acc_creation	SSR	Account creation page
-/profile	SSR	User dashboard
-/booking	SSR	Booking form
-/place/<id>	SSR	Place details + review form (if logged in)
-/admin-panel	SSR	Admin management page
-/add_review	SSR	Add review form (protected route)
-⚙️ API Integration
-All client-server communication is done via fetchWithAutoRefresh() defined in apiClient.js, which automatically refreshes JWT tokens when needed.
+| Page            | Rendering | Description                                |
+| --------------- | --------- | ------------------------------------------ |
+| `/`             | CSR       | Landing page with dynamic content          |
+| `/login`        | SSR       | Login form and session handling            |
+| `/acc_creation` | SSR       | Account creation page                      |
+| `/profile`      | SSR       | User dashboard                             |
+| `/booking`      | SSR       | Booking form                               |
+| `/place/<id>`   | SSR       | Place details + review form (if logged in) |
+| `/admin-panel`  | SSR       | Admin management page                      |
+| `/add_review`   | SSR       | Add review form (protected route)          |
+
 
 📝 Notes
 
