@@ -5,7 +5,7 @@
 </p>
 <center>
 <h1>HBnB Project — Part 4:</h1>
-<em>Simple Web Client</em>
+<em>Simple Web Client</em>  
 
 This repository contains the **front-end and back-end integration** for Part 4 of the HBnB project. It implements a fully functional and interactive web client using a custom style with a mix of **JavaScript (ES6), HTML5, CSS3** and **Jinja2 templating (SSR)**. It connects to a RESTful API built with **Flask**, with session-based authentication via **JWT tokens**.
 
@@ -200,8 +200,8 @@ Unit tests for front-end logic
 
 ✅ Part 1: Project Design  
 ✅ Part 2: Business Logic and API Endpoints  
-🟢 Part 3: Authentication and Database Integration (You are here)  
-🔒 Part 4: Web Client (HTML5/CSS3 + JS UI)  
+✅ Part 3: Authentication and Database Integration (You are here)  
+🟢 Part 4: Web Client (HTML5/CSS3 + JS UI)  
 
 ## 🤝 Contributions
 
