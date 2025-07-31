@@ -664,11 +664,12 @@ header a:hover {
     max-width: 900px;
     min-width: 320px;
     backdrop-filter: blur(8px);
-    background-color: rgba(18, 18, 18, 0.85);
+    background-color: rgba(90, 90, 90, 0.55);
     border-radius: 20px;
     padding: 1.5rem 1.5rem 2rem 1.5rem;
     box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
     text-align: center;
+    max-height: 330px;
 }
 
 #booking-form h2,
@@ -692,6 +693,7 @@ header a:hover {
     padding: 0.5rem 1rem;
     margin: 0;
     box-sizing: border-box;
+    color: #CCCCCC;
 }
 
 @media (min-width: 768px) {

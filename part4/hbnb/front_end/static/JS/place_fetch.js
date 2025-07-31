@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in km
-        console.log(`Calculated distance: ${distance} km between (${lat1}, ${lon1}) and (${lat2}, ${lon2})`);
         return distance;
     }
 
@@ -39,10 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const minPrice = minPriceInput.value.trim() ? parseFloat(minPriceInput.value) : undefined;
         const maxPrice = maxPriceInput.value.trim() ? parseFloat(maxPriceInput.value) : undefined;
         const maxDistance = distanceInput.value.trim() ? parseFloat(distanceInput.value) : undefined;
-
-        console.log('Applied filters:', { address, minPrice, maxPrice, maxDistance, lat, lon });
-        console.log(`Number of cards: ${placeCards.length}`);
-
         let visibleCount = 0;
 
         placeCards.forEach(card => {
@@ -51,28 +46,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const latPlace = parseFloat(card.dataset.lat);
             const lonPlace = parseFloat(card.dataset.lon);
 
-            console.log(`Card: ${placeLocation}, Price: ${price}, Coord: (${latPlace}, ${lonPlace})`);
-
             let priceOk = true;
             if (minPrice !== undefined && (isNaN(price) || price < minPrice)) {
                 priceOk = false;
-                console.log(`Card ${placeLocation} rejected: price ${price} < minPrice ${minPrice} or invalid`);
             }
             if (maxPrice !== undefined && (isNaN(price) || price > maxPrice)) {
                 priceOk = false;
-                console.log(`Card ${placeLocation} rejected: price ${price} > maxPrice ${maxPrice} or invalid`);
             }
 
             let distanceOk = true;
             if (maxDistance !== undefined && lat !== null && lon !== null && !isNaN(latPlace) && !isNaN(lonPlace)) {
                 if (latPlace < -90 || latPlace > 90 || lonPlace < -180 || lonPlace > 180) {
-                    console.log(`Card ${placeLocation} rejected: invalid coordinates (${latPlace}, ${lonPlace})`);
                     distanceOk = false;
                 } else {
                     const dist = haversineDistance(lat, lon, latPlace, lonPlace);
                     distanceOk = dist <= maxDistance;
                     if (!distanceOk) {
-                        console.log(`Card ${placeLocation} rejected: distance ${dist} > maxDistance ${maxDistance}`);
                     }
                 }
             }
@@ -82,16 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const searchCity = address.split(',')[0].trim().toLowerCase();
                 locationOk = placeLocation.includes(searchCity);
                 if (!locationOk) {
-                    console.log(`Card ${placeLocation} rejected: does not match ${searchCity}`);
                 }
             }
 
             if (priceOk && distanceOk && locationOk) {
-                console.log(`Card ${placeLocation} accepted`);
                 card.style.display = '';
                 visibleCount++;
             } else {
-                console.log(`Card ${placeLocation} rejected: priceOk=${priceOk}, distanceOk=${distanceOk}, locationOk=${locationOk}`);
                 card.style.display = 'none';
             }
         });
@@ -154,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             item.addEventListener("click", () => {
                                 addressInput.value = item.textContent;
                                 choicesContainer.innerHTML = "";
-                                console.log(`Before applyFilters: ${document.querySelectorAll('.place-card').length} cards`);
                                 applyFilters(parseFloat(item.dataset.lat), parseFloat(item.dataset.lon));
                             });
                         });
@@ -167,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.querySelectorAll('.place-card').forEach(card => card.style.display = 'none');
                     } else if (!data.error) {
                         choicesContainer.innerHTML = "";
-                        console.log(`Before applyFilters: ${document.querySelectorAll('.place-card').length} cards`);
                         applyFilters(parseFloat(data.lat), parseFloat(data.lon));
                     } else {
                         choicesContainer.innerHTML = "";
@@ -181,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 choicesContainer.innerHTML = "";
-                console.log(`Before applyFilters: ${document.querySelectorAll('.place-card').length} cards`);
                 applyFilters();
             }
         });
@@ -194,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            console.log('Places data:', data);
             placesList.innerHTML = '';
 
             data.forEach(place => {
@@ -204,8 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeCard.dataset.lon = place.longitude;
                 placeCard.dataset.price = place.price;
                 placeCard.dataset.location = '';
-
-                console.log(`Creating card: ${place.title}, Price: ${place.price}, Lat: ${place.latitude}, Lon: ${place.longitude}`);
 
                 const rating = place.rating !== null ? place.rating : 0;
                 const maxRating = 5;
@@ -294,17 +274,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 placesList.appendChild(placeCard);
-                console.log(`Card added: ${place.title}, Total cards: ${placesList.querySelectorAll('.place-card').length}`);
             });
 
             async function fetchAndDisplayCities() {
                 const placeCards = document.querySelectorAll('.place-card');
-                console.log(`Number of cards after loading: ${placeCards.length}`);
                 for (const card of placeCards) {
                     const lat = card.dataset.lat;
                     const lon = card.dataset.lon;
                     if (!lat || !lon) {
-                        console.warn(`Invalid coordinates for a card: lat=${lat}, lon=${lon}`);
                         continue;
                     }
 
@@ -324,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         const city = data.city || 'Unknown city';
                         citySpan.textContent = city;
                         card.dataset.location = city;
-                        console.log(`City loaded: ${city}, lat: ${lat}, lon: ${lon}`);
                     } catch (err) {
                         citySpan.textContent = 'Error';
                         card.dataset.location = 'Error';
@@ -334,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             fetchAndDisplayCities().then(() => {
-                console.log(`Cards after fetchAndDisplayCities: ${document.querySelectorAll('.place-card').length}`);
                 setupSearch();
             });
         })
