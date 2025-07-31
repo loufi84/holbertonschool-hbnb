@@ -141,6 +141,17 @@
     box-shadow: 0 4px 8px rgba(179, 47, 47, 0.7);
   }
 
+#form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+    box-sizing: border-box;
+    gap: 1rem;
+    flex-direction: column;
+}
+
 #header {
     position: fixed;
     top: 0;

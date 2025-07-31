@@ -15,23 +15,60 @@
             <a href="{{ url_for('static', filename='index.html') }}">Go back home</a>
         </header>
         <main class="container">
-            <section class="place_details">
+            <section class="booking-infos">
+            <section class="place-details-book">
+                <section class="gallery-carousel gallery-bookings">
                 {% if place.photos_url %}
-                    <img src="{{ place.photos_url[0] }}" alt="Photo of the place">
-                {% endif %}
+                    <div class="carousel">
+                    <button class="carousel-btn prev">‹</button>
+                    <div class="carousel-track-container">
+                        <div class="carousel-track">
+                            {% for url in place.photos_url %}
+                            <div class="carousel-slide">
+                                <img src="{{ url }}" alt="Photo du logement">
+                            </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                        <button class="carousel-btn next">›</button>
+                    </div>
+                    {% else %}
+                        <p>There are no photos here</p>
+                    {% endif %}
+                </section>
 
-                {% if place.owner.photo_url %}
-                    <img src="{{ place.owner.photo_url }}" alt="Owner photo">
+                <section class="host-info">
+                    {% if place.owner.photo_url %}
+                        <img src="{{ place.owner.photo_url }}" alt="Owner photo">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='/images/default_profile.png') }}" alt="Default owner photo">
+                    {% endif %}
+                    <p>Host: {{ place.owner.first_name }} {{ place.owner.last_name }}</p>
+                    <p>Rating: {{ place.rating if place.rating is not none else "No rating yet" }}</p>
+                </section>
+
+                </section>
+
+                <section class="amenities" id="amenities-section"
+                data-amenity="{{ place.amenities | map(attribute='id') | join(',') }}">
+                <h2>Amenities</h2>
+                {% if place.amenities | length > 0 %}
+                    <ul>
+                    {% for amenity in place.amenities %}
+                        <li>{{ amenity.name }}</li>
+                    {% endfor %}
+                    </ul>
                 {% else %}
-                    <img src="{{ url_for('static', filename='/images/default_profile.png') }}" alt="Default owner photo">
+                    <p>This place doesn't have amenities.</p>
                 {% endif %}
-                <p>Host: {{ place.owner.first_name }} {{ place.owner.last_name }}</p>
-                <p>Rating: {{ place.rating if place.rating is not none else "No rating yet" }}</p>
             </section>
 
-            <form id="booking-form">
+            </section>
+
+            <!-- Booking form -->
+            <form id="booking-form" class="visible">
                 <div id="date-range-container">
-                    <input id="date-range" readonly placeholder="Select your stay" />
+                <input id="date-range" readonly placeholder="Select your stay" />
                 </div>
                 <button type="submit" id="book-button" style="display:none;">Confirm your booking</button>
             </form>

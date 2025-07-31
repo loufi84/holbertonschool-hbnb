@@ -46,12 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span class="rating" data-rating="${review.rating}"></span>
                         </li>
                     `).join('');
-                    document.querySelectorAll('.rating').forEach(container => {
+                    document.querySelectorAll('.rating:not(.interactive-rating)').forEach(container => {
                         const rating = parseFloat(container.dataset.rating) || 0;
                         const fullStars = Math.floor(rating);
                         const hasHalfStar = rating - fullStars >= 0.5;
                         container.innerHTML = '';
-
+                    
                         for (let i = 0; i < 5; i++) {
                             const star = document.createElement('span');
                             star.classList.add('star');
@@ -60,14 +60,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 star.textContent = '★';
                             } else if (i === fullStars && hasHalfStar) {
                                 star.classList.add('half');
-                                star.textContent = '★'; // CSS half star gérée
+                                star.textContent = '★';
                             } else {
                                 star.textContent = '☆';
                             }
                             container.appendChild(star);
                         }
                     });
-
                 } else {
                     reviewsList.innerHTML = '<li>No reviews found for this place</li>';
                 }
@@ -138,77 +137,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // === REVIEW FORM ===
-    const showFormBtn = document.getElementById('show-review-form-btn');
-    const reviewCard = document.getElementById('review-card-container');
-    const reviewForm = document.getElementById('review-form');
+const showFormBtn = document.getElementById('show-review-form-btn');
+const reviewCard = document.getElementById('review-card-container');
+const reviewForm = document.getElementById('review-form');
 
-    try {
-        const bookingsRes = await fetchWithAutoRefresh(`/bookings/users/${user.user_id}/booking`);
-        if (!bookingsRes.ok) throw new Error('Failed to fetch bookings');
-        const bookings = await bookingsRes.json();
+try {
+    const bookingsRes = await fetchWithAutoRefresh(`/bookings/users/${user.user_id}/booking`);
+    if (!bookingsRes.ok) throw new Error('Failed to fetch bookings');
+    const bookings = await bookingsRes.json();
 
-        const userBookingsForPlace = bookings.filter(
-            b => b.place === placeId && b.status === 'DONE'
-        );
+    const userBookingsForPlace = bookings.filter(
+        b => b.place === placeId && b.status === 'DONE'
+    );
 
-        if (userBookingsForPlace.length > 0) {
-            if (!showFormBtn || !reviewCard || !reviewForm) {
-                console.error('One or more review form elements missing:', {
-                    showFormBtn: !!showFormBtn,
-                    reviewCard: !!reviewCard,
-                    reviewForm: !!reviewForm
-                });
+    if (userBookingsForPlace.length > 0) {
+        if (!showFormBtn || !reviewCard || !reviewForm) {
+            console.error('One or more review form elements missing:', {
+                showFormBtn: !!showFormBtn,
+                reviewCard: !!reviewCard,
+                reviewForm: !!reviewForm
+            });
+            return;
+        }
+
+        showFormBtn.style.display = 'inline-block';
+        showFormBtn.addEventListener('click', () => {
+            reviewCard.classList.toggle('visible');
+            setupInteractiveStars(); // Appel corrigé
+        });
+
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const reviewText = document.getElementById('review-text').value;
+            const ratingToSend = parseFloat(document.getElementById('review-rating-value').value) || 0;
+
+            if (ratingToSend === 0) {
+                alert('Please select a rating.');
                 return;
             }
 
-            showFormBtn.style.display = 'inline-block';
-            showFormBtn.addEventListener('click', () => {
-                reviewCard.classList.toggle('visible');
-                setupInteractiveStars('review-stars');
-            });
+            try {
+                const res = await fetchWithAutoRefresh(`/reviews/from_booking/${userBookingsForPlace[0].id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        credentials: 'include'
+                    },
+                    body: JSON.stringify({
+                        comment: reviewText,
+                        rating: ratingToSend
+                    })
+                });
 
-            reviewForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const reviewText = document.getElementById('review-text').value;
-                const ratingToSend = parseFloat(document.getElementById('review-rating-value').value) || 0;
-
-                if (ratingToSend === 0) {
-                    alert('Please select a rating.');
-                    return;
+                if (res.ok) {
+                    alert('Review submitted successfully!');
+                    reviewForm.reset();
+                    document.getElementById('review-rating-value').value = 0;
+                    // Réinitialiser les étoiles visuellement
+                    document.querySelectorAll('.rating input').forEach(input => input.checked = false);
+                    reviewCard.classList.remove('visible');
+                    location.reload();
+                } else {
+                    const errorData = await res.json();
+                    alert(`Error submitting review: ${errorData.error}`);
                 }
-
-                try {
-                    const res = await fetchWithAutoRefresh(`/reviews/from_booking/${userBookingsForPlace[0].id}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            credentials: 'include'
-                        },
-                        body: JSON.stringify({
-                            comment: reviewText,
-                            rating: ratingToSend
-                        })
-                    });
-
-                    if (res.ok) {
-                        alert('Review submitted successfully!');
-                        reviewForm.reset();
-                        document.getElementById('review-rating-value').value = 0;
-                        reviewCard.style.display = 'none';
-                        location.reload();
-                    } else {
-                        const errorData = await res.json();
-                        alert(`Error submitting review: ${errorData.error}`);
-                    }
-                } catch (err) {
-                    console.error('Error submitting review:', err);
-                    alert('An error occurred while submitting the review.');
-                }
-            });
-        }
-    } catch (err) {
-        console.warn('Erreur lors du chargement des réservations pour review:', err);
+            } catch (err) {
+                console.error('Error submitting review:', err);
+                alert('An error occurred while submitting the review.');
+            }
+        });
     }
+} catch (err) {
+    console.warn('Erreur lors du chargement des réservations pour review:', err);
+}
 
     // ===== PHOTO CAROUSEL =====
     const track = document.querySelector('.carousel-track');
@@ -236,4 +237,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('resize', updateSlidePosition);
     updateSlidePosition();
 
+    function setupInteractiveStars() {
+        const ratingInputs = document.querySelectorAll('.interactive-rating input');
+        const reviewRatingValue = document.getElementById('review-rating-value');
+    
+        if (!reviewRatingValue) {
+            console.error('Champ review-rating-value non trouvé');
+            return;
+        }
+    
+        if (ratingInputs.length === 0) {
+            console.error('Aucun input radio trouvé dans .interactive-rating');
+            return;
+        }
+    
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                const selectedValue = parseFloat(input.value);
+                reviewRatingValue.value = selectedValue;
+            });
+        });
+    }
 });

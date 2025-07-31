@@ -13,26 +13,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let expandedCard = null;
     let lastScrollTop = 0;
 
-    // Créer un conteneur pour les suggestions d'adresses
+    // Create a container for address suggestions
     const choicesContainer = document.createElement("div");
     choicesContainer.id = "choices-container";
     addressInput.parentNode.appendChild(choicesContainer);
 
-    // Fonction pour calculer la distance (Haversine)
+    // Function to calculate distance (Haversine)
     function haversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Rayon de la Terre en km
+        const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c; // Distance en km
-        console.log(`Distance calculée: ${distance} km entre (${lat1}, ${lon1}) et (${lat2}, ${lon2})`);
+        const distance = R * c; // Distance in km
+        console.log(`Calculated distance: ${distance} km between (${lat1}, ${lon1}) and (${lat2}, ${lon2})`);
         return distance;
     }
 
-    // Fonction pour appliquer les filtres
+    // Function to apply filters
     function applyFilters(lat = null, lon = null) {
         const placeCards = document.querySelectorAll('.place-card');
         const address = addressInput.value.trim().toLowerCase() || undefined;
@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxPrice = maxPriceInput.value.trim() ? parseFloat(maxPriceInput.value) : undefined;
         const maxDistance = distanceInput.value.trim() ? parseFloat(distanceInput.value) : undefined;
 
-        console.log('Filtres appliqués:', { address, minPrice, maxPrice, maxDistance, lat, lon });
-        console.log(`Nombre de cartes: ${placeCards.length}`);
+        console.log('Applied filters:', { address, minPrice, maxPrice, maxDistance, lat, lon });
+        console.log(`Number of cards: ${placeCards.length}`);
 
         let visibleCount = 0;
 
@@ -51,28 +51,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const latPlace = parseFloat(card.dataset.lat);
             const lonPlace = parseFloat(card.dataset.lon);
 
-            console.log(`Carte: ${placeLocation}, Prix: ${price}, Coord: (${latPlace}, ${lonPlace})`);
+            console.log(`Card: ${placeLocation}, Price: ${price}, Coord: (${latPlace}, ${lonPlace})`);
 
             let priceOk = true;
             if (minPrice !== undefined && (isNaN(price) || price < minPrice)) {
                 priceOk = false;
-                console.log(`Carte ${placeLocation} rejetée: prix ${price} < minPrice ${minPrice} ou invalide`);
+                console.log(`Card ${placeLocation} rejected: price ${price} < minPrice ${minPrice} or invalid`);
             }
             if (maxPrice !== undefined && (isNaN(price) || price > maxPrice)) {
                 priceOk = false;
-                console.log(`Carte ${placeLocation} rejetée: prix ${price} > maxPrice ${maxPrice} ou invalide`);
+                console.log(`Card ${placeLocation} rejected: price ${price} > maxPrice ${maxPrice} or invalid`);
             }
 
             let distanceOk = true;
             if (maxDistance !== undefined && lat !== null && lon !== null && !isNaN(latPlace) && !isNaN(lonPlace)) {
                 if (latPlace < -90 || latPlace > 90 || lonPlace < -180 || lonPlace > 180) {
-                    console.log(`Carte ${placeLocation} rejetée: coordonnées invalides (${latPlace}, ${lonPlace})`);
+                    console.log(`Card ${placeLocation} rejected: invalid coordinates (${latPlace}, ${lonPlace})`);
                     distanceOk = false;
                 } else {
                     const dist = haversineDistance(lat, lon, latPlace, lonPlace);
                     distanceOk = dist <= maxDistance;
                     if (!distanceOk) {
-                        console.log(`Carte ${placeLocation} rejetée: distance ${dist} > maxDistance ${maxDistance}`);
+                        console.log(`Card ${placeLocation} rejected: distance ${dist} > maxDistance ${maxDistance}`);
                     }
                 }
             }
@@ -82,23 +82,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const searchCity = address.split(',')[0].trim().toLowerCase();
                 locationOk = placeLocation.includes(searchCity);
                 if (!locationOk) {
-                    console.log(`Carte ${placeLocation} rejetée: ne correspond pas à ${searchCity}`);
+                    console.log(`Card ${placeLocation} rejected: does not match ${searchCity}`);
                 }
             }
 
             if (priceOk && distanceOk && locationOk) {
-                console.log(`Carte ${placeLocation} acceptée`);
+                console.log(`Card ${placeLocation} accepted`);
                 card.style.display = '';
                 visibleCount++;
             } else {
-                console.log(`Carte ${placeLocation} rejetée: priceOk=${priceOk}, distanceOk=${distanceOk}, locationOk=${locationOk}`);
+                console.log(`Card ${placeLocation} rejected: priceOk=${priceOk}, distanceOk=${distanceOk}, locationOk=${locationOk}`);
                 card.style.display = 'none';
             }
         });
 
         const noResultMessage = document.createElement('p');
         noResultMessage.id = 'no-results-msg';
-        noResultMessage.textContent = 'Aucun résultat trouvé pour ces critères.';
+        noResultMessage.textContent = 'No results found for these criteria.';
         noResultMessage.style.display = visibleCount === 0 ? 'block' : 'none';
 
         if (placesList.querySelector('#no-results-msg')) {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fonction pour gérer le filtrage avec géocodage
+    // Function to handle filtering with geocoding
     function setupSearch() {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -128,17 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     let data;
 
                     if (!response.ok) {
-                        alert("Erreur serveur : " + (data?.error || response.status));
-                        placesList.innerHTML = '<p>Erreur lors de la recherche. Veuillez réessayer.</p>';
+                        alert("Server error: " + (data?.error || response.status));
+                        placesList.innerHTML = '<p>Error during search. Please try again.</p>';
                         return;
                     }
 
                     try {
                         data = JSON.parse(text);
                     } catch (jsonError) {
-                        console.error("Réponse non-JSON :", text);
-                        alert('Erreur: Réponse invalide du serveur');
-                        placesList.innerHTML = '<p>Erreur lors de la recherche. Veuillez réessayer.</p>';
+                        console.error("Non-JSON response:", text);
+                        alert('Error: Invalid server response');
+                        placesList.innerHTML = '<p>Error during search. Please try again.</p>';
                         return;
                     }
 
@@ -148,13 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${choice.display_name}
                             </div>
                         `).join("");
-                        choicesContainer.innerHTML += '<button class="close-choices">Fermer</button>';
+                        choicesContainer.innerHTML += '<button class="close-choices">Close</button>';
 
                         choicesContainer.querySelectorAll(".choice-item").forEach(item => {
                             item.addEventListener("click", () => {
                                 addressInput.value = item.textContent;
                                 choicesContainer.innerHTML = "";
-                                console.log(`Avant applyFilters: ${document.querySelectorAll('.place-card').length} cartes`);
+                                console.log(`Before applyFilters: ${document.querySelectorAll('.place-card').length} cards`);
                                 applyFilters(parseFloat(item.dataset.lat), parseFloat(item.dataset.lon));
                             });
                         });
@@ -163,25 +163,25 @@ document.addEventListener('DOMContentLoaded', () => {
                             document.querySelectorAll('.place-card').forEach(card => card.style.display = '');
                         });
 
-                        // Ne pas vider placesList, juste afficher les suggestions
+                        // Do not clear placesList, just show suggestions
                         document.querySelectorAll('.place-card').forEach(card => card.style.display = 'none');
                     } else if (!data.error) {
                         choicesContainer.innerHTML = "";
-                        console.log(`Avant applyFilters: ${document.querySelectorAll('.place-card').length} cartes`);
+                        console.log(`Before applyFilters: ${document.querySelectorAll('.place-card').length} cards`);
                         applyFilters(parseFloat(data.lat), parseFloat(data.lon));
                     } else {
                         choicesContainer.innerHTML = "";
-                        placesList.innerHTML = '<p>Ville non trouvée. Veuillez réessayer.</p>';
+                        placesList.innerHTML = '<p>City not found. Please try again.</p>';
                         console.error(data.error);
                     }
                 } catch (e) {
-                    console.error("Erreur réseau :", e);
-                    alert("Erreur réseau ou serveur inaccessible.");
-                    placesList.innerHTML = '<p>Erreur réseau. Veuillez réessayer.</p>';
+                    console.error("Network error:", e);
+                    alert("Network error or server unreachable.");
+                    placesList.innerHTML = '<p>Network error. Please try again.</p>';
                 }
             } else {
                 choicesContainer.innerHTML = "";
-                console.log(`Avant applyFilters: ${document.querySelectorAll('.place-card').length} cartes`);
+                console.log(`Before applyFilters: ${document.querySelectorAll('.place-card').length} cards`);
                 applyFilters();
             }
         });
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            console.log('Données des lieux:', data);
+            console.log('Places data:', data);
             placesList.innerHTML = '';
 
             data.forEach(place => {
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeCard.dataset.price = place.price;
                 placeCard.dataset.location = '';
 
-                console.log(`Création carte: ${place.title}, Prix: ${place.price}, Lat: ${place.latitude}, Lon: ${place.longitude}`);
+                console.log(`Creating card: ${place.title}, Price: ${place.price}, Lat: ${place.latitude}, Lon: ${place.longitude}`);
 
                 const rating = place.rating !== null ? place.rating : 0;
                 const maxRating = 5;
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 placeCard.innerHTML = `
-                    <img src="${imageUrl}" alt="Image de ${place.title}" class="place-image" />
+                    <img src="${imageUrl}" alt="Image of ${place.title}" class="place-image" />
                     <div class="place-summary">
                         <h3>${place.title}</h3>
                         <p class="price">${place.price}€ per night</p>
@@ -294,17 +294,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 placesList.appendChild(placeCard);
-                console.log(`Carte ajoutée: ${place.title}, Total cartes: ${placesList.querySelectorAll('.place-card').length}`);
+                console.log(`Card added: ${place.title}, Total cards: ${placesList.querySelectorAll('.place-card').length}`);
             });
 
             async function fetchAndDisplayCities() {
                 const placeCards = document.querySelectorAll('.place-card');
-                console.log(`Nombre de cartes après chargement: ${placeCards.length}`);
+                console.log(`Number of cards after loading: ${placeCards.length}`);
                 for (const card of placeCards) {
                     const lat = card.dataset.lat;
                     const lon = card.dataset.lon;
                     if (!lat || !lon) {
-                        console.warn(`Coordonnées invalides pour une carte: lat=${lat}, lon=${lon}`);
+                        console.warn(`Invalid coordinates for a card: lat=${lat}, lon=${lon}`);
                         continue;
                     }
 
@@ -318,23 +318,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             body: JSON.stringify({ lat, lon }),
                         });
 
-                        if (!res.ok) throw new Error('Erreur réseau');
+                        if (!res.ok) throw new Error('Network error');
 
                         const data = await res.json();
-                        const city = data.city || 'Ville inconnue';
+                        const city = data.city || 'Unknown city';
                         citySpan.textContent = city;
                         card.dataset.location = city;
-                        console.log(`Ville chargée: ${city}, lat: ${lat}, lon: ${lon}`);
+                        console.log(`City loaded: ${city}, lat: ${lat}, lon: ${lon}`);
                     } catch (err) {
-                        citySpan.textContent = 'Erreur';
-                        card.dataset.location = 'Erreur';
-                        console.error('Erreur géocodage:', err);
+                        citySpan.textContent = 'Error';
+                        card.dataset.location = 'Error';
+                        console.error('Geocoding error:', err);
                     }
                 }
             }
 
             fetchAndDisplayCities().then(() => {
-                console.log(`Cartes après fetchAndDisplayCities: ${document.querySelectorAll('.place-card').length}`);
+                console.log(`Cards after fetchAndDisplayCities: ${document.querySelectorAll('.place-card').length}`);
                 setupSearch();
             });
         })
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Authentification utilisateur
+    // User authentication
     fetchWithAutoRefresh('/users/me', {
         method: 'GET',
         credentials: 'include'

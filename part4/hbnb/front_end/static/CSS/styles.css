@@ -356,7 +356,7 @@ header a:hover {
 
 .place-card.expanded {
     position: fixed;
-    top: 30px;
+    top: 90px;
     left: 50%;
     transform: translateX(-50%);
     width: 70vw;
@@ -392,14 +392,57 @@ header a:hover {
     user-select: none;
 }
 
-.place-details {
-    display: none;
-    padding: 1rem;
-    text-align: left;
-    overflow-y: auto;
-    flex-grow: 1;
-    pointer-events: auto;
+.place-details-book {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-height: 400px;
+    overflow: hidden;
 }
+
+.gallery-carousel {
+    flex-basis: 60%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+.host-info {
+    flex-basis: 40%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    background-color: rgba(90, 90, 90, 0.55);
+    padding: 1rem;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.host-info img {
+    max-width: 100%;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    object-fit: contain;
+}
+
+#amenities-section {
+    background-color: transparent;
+    padding: 1rem;
+    border-radius: 8px;
+    color: white;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
 
 .place-card:hover:not(.expanded) {
     transform: scale(1.05);
@@ -645,13 +688,15 @@ header a:hover {
     box-shadow:
         0 0 12px 2px rgba(100, 210, 255, 0.25),
         inset 0 0 10px rgba(255, 255, 255, 0.05);
-    padding: 12px 10px 10px 10px;
     text-align: center;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
     .container {
-        width: 85%;
+        width: 100%;
         padding: 0 2rem;
     }
 }
@@ -722,6 +767,7 @@ header a:hover {
     align-items: center;
     gap: 1rem;
 }
+
 /* ===== Profile CSS ===== */
 
 .profile-pic {
@@ -934,10 +980,6 @@ header a:hover {
     font-size: 0.95rem;
     color: #555555;
     text-align: center;
-}
-
-.hidden {
-    display: none !important;
 }
 
 #edit-form {
@@ -1217,9 +1259,93 @@ form {
     opacity: 0;
     overflow: hidden;
     transition: max-height 0.5s ease, opacity 0.5s ease;
-  }
+}
 
 form.visible {
     max-height: 1000px;
     opacity: 1;
+}
+
+.visible {
+    display: block;
+    max-height: 1000px;
+    opacity: 1;
+}
+
+/*===== GALLERY FOR BOOKINGS =====*/
+
+.gallery-carousel {
+    flex-grow: 1;
+    min-width: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel {
+    position: relative;
+}
+
+.carousel-track-container {
+    overflow: hidden;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+.carousel-slide img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-radius: 8px;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: white;
+    background-color: rgba(0,0,0,0.4);
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+    padding: 0 12px;
+}
+
+.carousel-btn.prev {
+    left: 0;
+}
+
+.carousel-btn.next {
+    right: 0;
+}
+
+/* Afficher les sections avec .visible */
+section.visible {
+    display: block !important;
+    max-height: 1000px !important;
+    opacity: 1 !important;
+}
+
+/* S'assurer que le parent collapsible-content est visible */
+.collapsible-content:has(section.visible) {
+    display: block !important;
+    max-height: none !important;
+    opacity: 1 !important;
+}
+
+/* Ajuster la règle pour les formulaires à l'intérieur des sections */
+section.visible form {
+    max-height: 1000px !important;
+    opacity: 1 !important;
+    display: block !important;
 }
