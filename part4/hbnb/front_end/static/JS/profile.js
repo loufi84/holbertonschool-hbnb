@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let user = null;
 
   try {
-    console.log('Fetching user data from /api/v1/users/me');
     const response = await fetchWithAutoRefresh('/users/me', {
       method: 'GET',
       credentials: 'include'
@@ -43,7 +42,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     user = await response.json();
-    console.log('User data received:', JSON.stringify(user, null, 2));
 
     if (!user || !user.user_id) {
       throw new Error('Invalid user data');
@@ -63,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       ? user.photo_url
       : '../static/images/default_profile_b.png';
 
-    console.log('Displaying user info with photo URL:', photo);
 
     profileContainer.innerHTML = `
       <div class="profile-card">
@@ -80,7 +77,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     editForm.classList.remove('visible');
   }
 
-
   async function refreshProfile() {
     try {
       const response = await fetchWithAutoRefresh('/users/me', {
@@ -95,17 +91,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function prefillForm(user) {
-    console.log('Prefilling form with user data:', user);
     firstNameInput.value = user.first_name || '';
     lastNameInput.value = user.last_name || '';
     emailInput.value = user.email || '';
     photoUrlInput.value = user.photo_url === 'None' ? '' : user.photo_url || '';
-    console.log('Form fields:', {
-      firstName: firstNameInput.value,
-      lastName: lastNameInput.value,
-      email: emailInput.value,
-      photoUrl: photoUrlInput.value
-    });
   
     editForm.classList.remove('visible');
     profileContainer.classList.add('visible');
@@ -113,22 +102,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   editButton.addEventListener('click', () => {
-    console.log('Edit button clicked');
     editForm.classList.add('visible');
     profileContainer.classList.remove('visible');
     editButton.classList.remove('visible');
   });
-  
 
   cancelBtn.addEventListener('click', () => {
-    console.log('Cancel button clicked');
     prefillForm(user);
   });
 
   saveBtn.addEventListener('click', async (e) => {
     e.preventDefault();
-    console.log('Save button clicked');
-    console.log('user.user_id:', user.user_id);
   
     const updatedUser = {
       first_name: firstNameInput.value.trim(),
@@ -136,8 +120,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       email: emailInput.value.trim(),
       photo_url: photoUrlInput.value.trim()
     };
-  
-    console.log('Updated user data:', updatedUser);
   
     for (const key in updatedUser) {
       const newVal = updatedUser[key];
@@ -149,7 +131,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   
     if (Object.keys(updatedUser).length === 0) {
-      console.log('No changes detected');
       alert("Aucune modification détectée.");
       prefillForm(user);
       return;
@@ -157,7 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   
     try {
       const updateUrl = `/users/${user.user_id}`;
-      console.log('Sending update request to:', updateUrl);
       const response = await fetchWithAutoRefresh(updateUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -166,7 +146,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
   
       const result = await response.json();
-      console.log('Update response:', result);
   
       if (response.ok) {
         alert('Profil mis à jour avec succès');
@@ -210,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   addPlaceButton.addEventListener('click', () => {
     addPlaceForm.classList.add('visible');
-  })
+  });
 
   cancelPlaceBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -271,90 +250,179 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Error creating place:', error);
       alert('Server or network error');
     }
-  })
+  });
 
-  const placeItems = document.querySelectorAll(".place-item");
-
-  placeItems.forEach(item => {
+  document.querySelectorAll(".place-item").forEach(item => {
     item.addEventListener("click", (e) => {
-      e.stopPropagation();
+        e.stopPropagation();
 
-      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.remove("visible"));
+        document.querySelectorAll(".edit-form-container").forEach(container => {
+            container.classList.remove("expanded", "collapsing");
+            container.innerHTML = "";
+        });
 
-      const formContainer = item.querySelector(".edit-form-container");
-      formContainer.innerHTML = "";
+        const formContainer = document.getElementById("global-edit-form-container");
+        if (!formContainer) {
+            console.error('Global edit form container not found');
+            alert('Erreur : conteneur de formulaire global introuvable');
+            return;
+        }
 
-      const placeId = item.dataset.placeId;
-      const title = item.dataset.title;
-      const description = item.dataset.description;
-      const price = item.dataset.price;
+        const placeId = item.dataset.placeId;
+        const title = item.dataset.title || 'No title';
+        const description = item.dataset.description || 'No description';
+        const price = parseFloat(item.dataset.price || '0');
+        const latitudeRaw = item.dataset.latitude;
+        const longitudeRaw = item.dataset.longitude;
 
-      const formHTML = `
-        <form class="edit-place-form">
-          <h3>Edit Place</h3>
-          <input type="hidden" name="place_id" value="${placeId}" />
-          <label>Title:</label>
-          <input type="text" name="title" value="${title}" required />
-          <label>Description:</label>
-          <textarea name="description" required>${description}</textarea>
-          <label>Price (€):</label>
-          <input type="number" name="price" value="${price}" required min="0" step="0.01" />
-          <div class="form-buttons">
-            <button type="submit">Save</button>
-            <button type="button" id="delete-place-btn">Delete</button>
-          </div>
-        </form>
-      `;
+        const latitude = (latitudeRaw && latitudeRaw !== "null" && latitudeRaw !== "undefined") ? Number(latitudeRaw) : '';
+        const longitude = (longitudeRaw && longitudeRaw !== "null" && longitudeRaw !== "undefined") ? Number(longitudeRaw) : '';
+
+        let photos_url = item.dataset.photosUrl || '';
+        photos_url = photos_url.trim().toLowerCase();
+
+        if (photos_url === '' || photos_url === 'none' || photos_url === 'null' || photos_url === '[]') {
+          photos_url = '';
+}
 
 
-      formContainer.innerHTML = formHTML;
-      formContainer.classList.add("visible");
 
-      const form = formContainer.querySelector(".edit-place-form");
+        if (!placeId) {
+            console.error('Missing placeId:', item.dataset);
+            alert('Erreur : ID de la place manquant');
+            return;
+        }
 
-      // Submit
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const body = Object.fromEntries(formData.entries());
-        const select = document.getElementById('amenity_ids');
-        const amenity_ids = Array.from(select.selectedOptions).map(opt => opt.value);
+        const formHTML = `
+          <div class="edit-form place-card">
+            <button type="button" class="close-form-btn" title="Close">✖</button>
+            <form class="edit-place-form" id="edit-place-form-${placeId}">
+              <h3>Edit Place</h3>
+              <input type="hidden" name="place_id" value="${placeId}" />
+              <label for="edit-title-${placeId}">Title:</label>
+              <input type="text" id="edit-title-${placeId}" name="title" value="${title}" required />
+              <label for="edit-description-${placeId}">Description:</label>
+              <textarea id="edit-description-${placeId}" name="description" required>${description}</textarea>
+              <label for="edit-price-${placeId}">Price (€):</label>
+              <input type="number" id="edit-price-${placeId}" name="price" value="${price}" required min="0" step="0.01" />
+              <label for="edit-latitude-${placeId}">Latitude:</label>
+              <input type="number" step="any" id="edit-latitude-${placeId}" name="latitude" value="${latitude}" />
+              <label for="edit-longitude-${placeId}">Longitude:</label>
+              <input type="number" step="any" id="edit-longitude-${placeId}" name="longitude" value="${longitude}" />
+              <label for="edit-amenity_ids-${placeId}">Amenities:</label>
+              <select id="edit-amenity_ids-${placeId}" name="amenity_ids" multiple class="form-control" style="height: 150px;">
+              </select>
+              <label for="edit-photos_url-${placeId}">Photos (URL):</label>
+              <input type="text" id="edit-photos_url-${placeId}" name="photos_url" value="${photos_url}" />
+              <div class="form-buttons">
+                <button type="submit">Save</button>
+                <button type="button" class="delete-place-btn">Delete</button>
+            </div>
+            </form>
+        </div>
+        `;
 
         try {
-          const response = await fetch(`/api/places/${body.place_id}`, {
+            formContainer.innerHTML = formHTML;
+            formContainer.classList.add("visible");
+            formContainer.classList.add("expanded");
+        } catch (error) {
+            console.error('Error inserting form HTML:', error);
+            alert('Error: can\'t insert form');
+            return;
+        }
+
+      formContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      const form = formContainer.querySelector(`#edit-place-form-${placeId}`);
+      const closeBtn = formContainer.querySelector(".close-form-btn");
+      const deleteBtn = formContainer.querySelector(".delete-place-btn");
+
+      if (!form || !closeBtn || !deleteBtn) {
+        console.error('Form elements not found:', { form, closeBtn, deleteBtn });
+        alert('Erreur : éléments du formulaire introuvables');
+        return;
+      }
+
+      closeBtn.addEventListener("click", () => {
+        formContainer.classList.remove("expanded");
+        formContainer.innerHTML = "";
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+      
+        const formData = new FormData(form);
+        const raw = Object.fromEntries(formData.entries());
+            
+        const payload = {
+          place_id: raw.place_id,
+          title: raw.title,
+          description: raw.description,
+          price: raw.price ? parseFloat(raw.price) : undefined,
+          latitude: raw.latitude ? parseFloat(raw.latitude) : undefined,
+          longitude: raw.longitude ? parseFloat(raw.longitude) : undefined,
+        };
+      
+        const rawPhotos = raw.photos_url;
+
+        if (rawPhotos && typeof rawPhotos === 'string') {
+          const photos = rawPhotos
+            .split(/[\n,]+/)
+            .map(s => s.trim())
+            .filter(Boolean);
+
+          if (photos.length > 0) {
+            payload.photos_url = photos;
+          }
+        } else {
+
+        }
+        try {
+          const response = await fetchWithAutoRefresh(`/places/${payload.place_id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify(body)
+            credentials: "include",
+            body: JSON.stringify(payload)
           });
-
-          if (response.ok) {
-            alert("Place updated!");
-            location.reload();
-          } else {
-            alert("Failed to update place");
+      
+          const data = await response.json();
+      
+          if (!response.ok) {
+            console.error("Update failed:", data);
+            alert("Erreur lors de la mise à jour : " + (data.error || "inconnue"));
+            return;
           }
-        } catch (err) {
-          console.error("Error updating place:", err);
-          alert("Unexpected error");
+      
+          alert("Place updated successfully");
+          formContainer.classList.remove("expanded");
+          formContainer.classList.remove("visible")
+        } catch (error) {
+          console.error("System error", error);
+          alert("Système error");
         }
       });
-      const deleteBtn = formContainer.querySelector("#delete-place-btn");
+
       deleteBtn.addEventListener("click", async () => {
         if (!confirm("Are you sure you want to delete this place?")) return;
 
         try {
-          const response = await fetch(`/api/places/${placeId}`, {
+          const response = await fetchWithAutoRefresh(`/places/${placeId}`, {
             method: "DELETE",
             credentials: "include"
           });
 
           if (response.ok) {
             alert("Place deleted!");
+            formContainer.classList.remove("expanded");
+            formContainer.innerHTML = "";
             location.reload();
           } else {
-            alert("Failed to delete place");
+            const err = await response.json();
+            console.error('Delete failed:', err);
+            alert(err.error || "Failed to delete place");
           }
         } catch (err) {
           console.error("Error deleting place:", err);
@@ -364,11 +432,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Hide forms when click outside the card
+  // Fermer le formulaire si clic à l'extérieur
   document.addEventListener("click", (event) => {
-    if (!event.target.closest(".place-item")) {
-      document.querySelectorAll(".edit-form-container").forEach(c => c.classList.remove("visible"));
+    if (!event.target.closest(".place-item") && !event.target.closest(".edit-form-container")) {
+      document.querySelectorAll(".edit-form-container").forEach(c => {
+        c.classList.remove("expanded");
+        c.innerHTML = "";
+      });
     }
   });
-
 });

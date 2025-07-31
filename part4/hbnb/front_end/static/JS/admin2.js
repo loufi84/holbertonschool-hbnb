@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
     } catch (err) {
-        console.log('Error in DOM loading');
         console.error(err);
         alert('Access denied');
         window.location.href = '/';
@@ -22,105 +21,82 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Toggle create admin form
     document.getElementById('show-create-admin').addEventListener('click', () => {
-        console.log('Show create admin button clicked');
         const section = document.getElementById('create-admin-section');
-        console.log('Section classes before:', section.classList.toString());
         section.classList.add('visible');
-        console.log('Section classes after:', section.classList.toString());
     });
 
     // Cancel create admin form
     document.getElementById('cancel-create-admin').addEventListener('click', () => {
-        console.log('Cancel create admin clicked');
         const section = document.getElementById('create-admin-section');
         section.classList.remove('visible');
-        console.log('Section classes after cancel:', section.classList.toString());
     });
 
     // Submit create admin form
     document.getElementById('create-admin-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        console.log('Create admin form submitted');
         await createAdmin();
     });
 
     // Toggle create amenity form
     document.getElementById('show-create-amenity').addEventListener('click', () => {
-        console.log('Show create amenity button clicked');
         const section = document.getElementById('create-amenity-section');
         const parent = section.closest('.collapsible-content');
-        console.log('Section classes before:', section.classList.toString());
         section.classList.add('visible');
         if (parent) {
             parent.classList.add('visible');
-            console.log('Parent classes after:', parent.classList.toString());
         }
-        console.log('Section classes after:', section.classList.toString());
     });
 
     // Cancel create amenity form
     document.getElementById('cancel-create-amenity').addEventListener('click', () => {
-        console.log('Cancel create amenity clicked');
         const section = document.getElementById('create-amenity-section');
         const parent = section.closest('.collapsible-content');
         section.classList.remove('visible');
         if (parent) {
             parent.classList.remove('visible');
-            console.log('Parent classes after cancel:', parent.classList.toString());
         }
-        console.log('Section classes after cancel:', section.classList.toString());
     });
 
     // Submit create amenity form
     document.getElementById('create-amenity-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        console.log('Create amenity form submitted');
         await addAmenity();
     });
 
     // Cancel edit place form
     document.getElementById('cancel-edit').addEventListener('click', () => {
-        console.log('Cancel edit place clicked');
         const section = document.getElementById('edit-place-section');
         section.classList.remove('visible');
-        console.log('Section classes after cancel:', section.classList.toString());
     });
 
     // Submit edit place form
     document.getElementById('edit-place-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        console.log('Edit place form submitted');
         await editPlace();
     });
 
     // Cancel edit amenity form
     document.getElementById('cancel-edit-amenity').addEventListener('click', () => {
-        console.log('Cancel edit amenity clicked');
         const section = document.getElementById('edit-amenity-section');
         section.classList.remove('visible');
-        console.log('Section classes after cancel:', section.classList.toString());
     });
 
     // Submit edit amenity form
     document.getElementById('edit-amenity-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        console.log('Edit amenity form submitted');
         await editAmenity();
     });
 
     // Cancel edit user form
     document.getElementById('cancel-edit-user').addEventListener('click', () => {
-        console.log('Cancel edit user clicked');
         const section = document.getElementById('edit-user-section');
         section.classList.remove('visible');
         section.classList.add('hidden');
-        console.log('Section classes after cancel:', section.classList.toString());
     });
 
     // Submit edit user form
     document.getElementById('edit-user-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        console.log('Edit user form submitted');
         await editUser();
     });
 
@@ -129,7 +105,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (event.target.classList.contains('moderate-user')) {
             const userId = event.target.dataset.id;
             const isActiveStr = event.target.dataset.isActive;
-            console.log('Moderate button clicked:', { userId, isActiveStr });
             moderateUser(userId, isActiveStr);
         }
     });
@@ -146,7 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('click', function (e) {
         if (e.target && e.target.classList.contains('edit-user')) {
             const userId = e.target.dataset.id;
-            console.log('Edit user clicked:', userId);
             const row = e.target.closest('tr');
             document.getElementById('user-id').value = userId;
             document.getElementById('user-first-name').value = row.children[1].textContent;
@@ -155,7 +129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('user-is-admin').checked = row.children[4].textContent === 'Yes';
             document.getElementById('edit-user-section').classList.remove('hidden');
             document.getElementById('edit-user-section').classList.add('visible');
-            console.log('Edit user section classes:', document.getElementById('edit-user-section').classList.toString());
         }
     });
 });
@@ -466,10 +439,8 @@ async function moderateUser(userId, isActiveStr) {
     }
 
     const isActive = isActiveStr === 'true';
-    console.log('Computed isActive:', isActive);
 
     const moderate = { is_active: !isActive };
-    console.log('Sending payload:', moderate);
 
     try {
         const res = await fetchWithAutoRefresh(`/users/${userId}/moderate`, {
@@ -479,7 +450,6 @@ async function moderateUser(userId, isActiveStr) {
             body: JSON.stringify(moderate)
         });
 
-        console.log('Response status:', res.status);
 
         if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
@@ -488,13 +458,11 @@ async function moderateUser(userId, isActiveStr) {
         }
 
         const updatedUser = await res.json();
-        console.log('Updated user:', updatedUser);
 
         const action = updatedUser.is_active ? 'activated' : 'deactivated';
         alert(`User ${updatedUser.email} ${action} successfully`);
 
         const users = await fetchData('/users');
-        console.log('Refreshed users:', users);
         renderUsers(users);
     } catch (err) {
         console.error('Error moderating user:', err);

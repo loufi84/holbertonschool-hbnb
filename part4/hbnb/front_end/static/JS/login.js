@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginForm.addEventListener('submit', async(e) => {
         e.preventDefault();
-        console.log('Submitting login form');
 
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;

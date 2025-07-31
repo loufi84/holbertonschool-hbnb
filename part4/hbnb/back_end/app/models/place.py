@@ -328,16 +328,18 @@ class PlaceUpdate(BaseModel):
 
                 headers = {'Range': 'bytes=0-1023'}
                 response = requests.get(str(url), headers=headers, timeout=5,
-                                        stream=True, allow_redirects=True)
+                                    stream=True, allow_redirects=True)
                 if response.status_code in (200, 206):
                     content_type = response.headers.get('Content-Type', '')
                     if content_type.startswith('image/'):
-                        return url
+                        validated.append(str(url))
+                        continue
+
                 raise ValueError("The URL is not a valid image")
             except requests.RequestException as e:
-                raise ValueError(f"An error occured while the verification"
-                                " of the image")
+                raise ValueError("An error occurred while verifying the image URL")
         return validated
+
 
     @field_validator('price')
     def round_price(cls, value: float) -> float:

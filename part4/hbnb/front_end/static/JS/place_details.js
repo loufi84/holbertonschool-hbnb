@@ -121,7 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if (!res.ok) throw new Error('Unauthorized');
         user = await res.json();
-        console.log('User connecté :', user);
     } catch (err) {
         console.warn('Utilisateur non connecté', err);
         const bookButton = document.getElementById('book-button');

@@ -848,6 +848,7 @@ header a:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
+
 #edit-form, #add-place {
     display: flex;
     flex-direction: column;
@@ -1331,21 +1332,18 @@ form.visible {
     right: 0;
 }
 
-/* Afficher les sections avec .visible */
 section.visible {
     display: block !important;
     max-height: 1000px !important;
     opacity: 1 !important;
 }
 
-/* S'assurer que le parent collapsible-content est visible */
 .collapsible-content:has(section.visible) {
     display: block !important;
     max-height: none !important;
     opacity: 1 !important;
 }
 
-/* Ajuster la règle pour les formulaires à l'intérieur des sections */
 section.visible form {
     max-height: 1000px !important;
     opacity: 1 !important;

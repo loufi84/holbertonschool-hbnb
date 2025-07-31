@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="../static/CSS/styles.css" />
+  <link rel="stylesheet" href="../static/CSS/profile.css" />
   <link rel="icon" href="../static/images/icon.png" />
   <title>Profile</title>
 </head>
@@ -17,6 +17,7 @@
 
   <main class="container">
     <div id="profile-container"></div>
+    <div id="global-edit-form-container" class="edit-form-container"></div>
 
     <div class="button-container">
       <button id="edit-profile-btn">Edit your profile</button>
@@ -41,7 +42,6 @@
       <input type="number" id="longitude" placeholder="Longitude" class="form-control" />
       <label for="amenity_ids">Amenities</label>
       <select id="amenity_ids" multiple class="form-control" style="height: 150px;">
-
       </select>
       <input type="text" id="photos_url" placeholder="Photos (URL)" class="form-control" />
 
@@ -57,12 +57,12 @@
       data-place-id="{{ place.id }}"
       data-title="{{ place.title }}"
       data-description="{{ place.description }}"
-      data-price="{{ place.price }}">
+      data-price="{{ place.price }}"
+      data-latitude="{{ place.latitude }}"
+      data-longitude="{{ place.longitude }}">
         <img src="{{ place.photos_url[0] }}" />
         <strong>{{ place.title }}</strong> - {{ place.description }} - Price: {{ place.price }}€
-        <div class="edit-form-container visible"></div>
       </li>
-  
       {% endfor %}
     </ul>
     {% else %}

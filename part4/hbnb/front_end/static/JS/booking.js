@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (res.ok) {
             const bookings = await res.json();
-            console.log('Booking response:', bookings)
             
             if (!Array.isArray(bookings)) {
                 disabeldRanges = [];

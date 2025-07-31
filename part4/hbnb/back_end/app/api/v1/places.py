@@ -182,14 +182,13 @@ class PlaceResource(Resource):
             })
         try:
             photos_url = updated_place.photos_url
-            if isinstance(photos_url, AnyUrl):
-                photos_url = [photos_url]
-            elif photos_url is None:
+            if photos_url is None:
                 photos_url = []
 
-            if not PlaceCreate.validate_image(photos_url):
-                return {'message': 'L\'URL ne pointe pas'
-                        ' vers une image valide'}, 400
+            if photos_url:
+                if not PlaceCreate.validate_image(photos_url):
+                    return {'message': 'L\'URL ne pointe pas vers une image valide'}, 400
+
         except ValidationError as e:
             return {'error': json.loads(e.json())}, 400
 
