@@ -387,6 +387,7 @@ async function editUser() {
         first_name: document.getElementById('user-first-name').value.trim(),
         last_name: document.getElementById('user-last-name').value.trim(),
         email: document.getElementById('user-email').value.trim(),
+        password: document.getElementById('user-password').value.trim(),
         is_admin: document.getElementById('user-is-admin').checked
     };
 

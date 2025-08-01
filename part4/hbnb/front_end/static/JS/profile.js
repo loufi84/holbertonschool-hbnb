@@ -253,108 +253,128 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.querySelectorAll(".place-item").forEach(item => {
-    item.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        document.querySelectorAll(".edit-form-container").forEach(container => {
-            container.classList.remove("expanded", "collapsing");
-            container.innerHTML = "";
-        });
-
-        const formContainer = document.getElementById("global-edit-form-container");
-        if (!formContainer) {
-            console.error('Global edit form container not found');
-            alert('Erreur : conteneur de formulaire global introuvable');
-            return;
-        }
-
-        const placeId = item.dataset.placeId;
-        const title = item.dataset.title || 'No title';
-        const description = item.dataset.description || 'No description';
-        const price = parseFloat(item.dataset.price || '0');
-        const latitudeRaw = item.dataset.latitude;
-        const longitudeRaw = item.dataset.longitude;
-
-        const latitude = (latitudeRaw && latitudeRaw !== "null" && latitudeRaw !== "undefined") ? Number(latitudeRaw) : '';
-        const longitude = (longitudeRaw && longitudeRaw !== "null" && longitudeRaw !== "undefined") ? Number(longitudeRaw) : '';
-
-        let photos_url = item.dataset.photosUrl || '';
-        photos_url = photos_url.trim().toLowerCase();
-
-        if (photos_url === '' || photos_url === 'none' || photos_url === 'null' || photos_url === '[]') {
-          photos_url = '';
-}
-
-
-
-        if (!placeId) {
-            console.error('Missing placeId:', item.dataset);
-            alert('Erreur : ID de la place manquant');
-            return;
-        }
-
-        const formHTML = `
-          <div class="edit-form place-card">
-            <button type="button" class="close-form-btn" title="Close">✖</button>
-            <form class="edit-place-form" id="edit-place-form-${placeId}">
-              <h3>Edit Place</h3>
-              <input type="hidden" name="place_id" value="${placeId}" />
-              <label for="edit-title-${placeId}">Title:</label>
-              <input type="text" id="edit-title-${placeId}" name="title" value="${title}" required />
-              <label for="edit-description-${placeId}">Description:</label>
-              <textarea id="edit-description-${placeId}" name="description" required>${description}</textarea>
-              <label for="edit-price-${placeId}">Price (€):</label>
-              <input type="number" id="edit-price-${placeId}" name="price" value="${price}" required min="0" step="0.01" />
-              <label for="edit-latitude-${placeId}">Latitude:</label>
-              <input type="number" step="any" id="edit-latitude-${placeId}" name="latitude" value="${latitude}" />
-              <label for="edit-longitude-${placeId}">Longitude:</label>
-              <input type="number" step="any" id="edit-longitude-${placeId}" name="longitude" value="${longitude}" />
-              <label for="edit-amenity_ids-${placeId}">Amenities:</label>
-              <select id="edit-amenity_ids-${placeId}" name="amenity_ids" multiple class="form-control" style="height: 150px;">
-              </select>
-              <label for="edit-photos_url-${placeId}">Photos (URL):</label>
-              <input type="text" id="edit-photos_url-${placeId}" name="photos_url" value="${photos_url}" />
-              <div class="form-buttons">
-                <button type="submit">Save</button>
-                <button type="button" class="delete-place-btn">Delete</button>
+    item.addEventListener("click", async (e) => {
+      e.stopPropagation();
+  
+      document.querySelectorAll(".edit-form-container").forEach(container => {
+        container.classList.remove("expanded", "collapsing");
+        container.innerHTML = "";
+      });
+  
+      const formContainer = document.getElementById("global-edit-form-container");
+      if (!formContainer) {
+        console.error('Global edit form container not found');
+        alert('Erreur : conteneur de formulaire global introuvable');
+        return;
+      }
+  
+      const placeId = item.dataset.placeId;
+      const title = item.dataset.title || 'No title';
+      const description = item.dataset.description || 'No description';
+      const price = parseFloat(item.dataset.price || '0');
+      const latitudeRaw = item.dataset.latitude;
+      const longitudeRaw = item.dataset.longitude;
+      const amenityIdsRaw = item.dataset.amenityIds || ''; // Récupérer les IDs des amenities
+  
+      const latitude = (latitudeRaw && latitudeRaw !== "null" && latitudeRaw !== "undefined") ? Number(latitudeRaw) : '';
+      const longitude = (longitudeRaw && longitudeRaw !== "null" && longitudeRaw !== "undefined") ? Number(longitudeRaw) : '';
+      const amenityIds = amenityIdsRaw ? amenityIdsRaw.split(',').map(id => id.trim()).filter(Boolean) : [];
+  
+      let photos_url = item.dataset.photosUrl || '';
+      photos_url = photos_url.trim();
+      if (photos_url === 'none' || photos_url === 'null' || photos_url === '[]') {
+        photos_url = '';
+      }
+  
+      if (!placeId) {
+        console.error('Missing placeId:', item.dataset);
+        alert('Erreur : ID de la place manquant');
+        return;
+      }
+  
+      const formHTML = `
+        <div class="edit-form place-card">
+          <button type="button" class="close-form-btn" title="Close">✖</button>
+          <form class="edit-place-form" id="edit-place-form-${placeId}">
+            <h3>Edit Place</h3>
+            <input type="hidden" name="place_id" value="${placeId}" />
+            <label for="edit-title-${placeId}">Title:</label>
+            <input type="text" id="edit-title-${placeId}" name="title" value="${title}" required />
+            <label for="edit-description-${placeId}">Description:</label>
+            <textarea id="edit-description-${placeId}" name="description" required>${description}</textarea>
+            <label for="edit-price-${placeId}">Price (€):</label>
+            <input type="number" id="edit-price-${placeId}" name="price" value="${price}" required min="0" step="0.01" />
+            <label for="edit-latitude-${placeId}">Latitude:</label>
+            <input type="number" step="any" id="edit-latitude-${placeId}" name="latitude" value="${latitude}" />
+            <label for="edit-longitude-${placeId}">Longitude:</label>
+            <input type="number" step="any" id="edit-longitude-${placeId}" name="longitude" value="${longitude}" />
+            <label for="edit-amenity_ids-${placeId}">Amenities:</label>
+            <select id="edit-amenity_ids-${placeId}" name="amenity_ids" multiple class="form-control" style="height: 150px;">
+            </select>
+            <label for="edit-photos_url-${placeId}">Photos (URL):</label>
+            <input type="text" id="edit-photos_url-${placeId}" name="photos_url" value="${photos_url}" />
+            <div class="form-buttons">
+              <button type="submit">Save</button>
+              <button type="button" class="delete-place-btn">Delete</button>
             </div>
-            </form>
+          </form>
         </div>
-        `;
-
-        try {
-            formContainer.innerHTML = formHTML;
-            formContainer.classList.add("visible");
-            formContainer.classList.add("expanded");
-        } catch (error) {
-            console.error('Error inserting form HTML:', error);
-            alert('Error: can\'t insert form');
-            return;
-        }
-
+      `;
+  
+      try {
+        formContainer.innerHTML = formHTML;
+        formContainer.classList.add("visible", "expanded");
+      } catch (error) {
+        console.error('Error inserting form HTML:', error);
+        alert('Error: can\'t insert form');
+        return;
+      }
+  
+      // Charger les amenities et pré-sélectionner celles associées
+      try {
+        const res = await fetchWithAutoRefresh('/amenities');
+        if (!res.ok) throw new Error('Failed to load amenities');
+        const amenities = await res.json();
+  
+        const select = formContainer.querySelector(`#edit-amenity_ids-${placeId}`);
+        select.innerHTML = '';
+        amenities.forEach(a => {
+          const option = document.createElement('option');
+          option.value = a.id;
+          option.textContent = a.name;
+          if (amenityIds.includes(String(a.id))) {
+            option.selected = true; // Pré-sélectionner les amenities associées
+          }
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error('Error loading amenities for edit form:', err);
+        alert('Erreur lors du chargement des amenities');
+      }
+  
       formContainer.scrollIntoView({ behavior: "smooth", block: "center" });
-
+  
       const form = formContainer.querySelector(`#edit-place-form-${placeId}`);
       const closeBtn = formContainer.querySelector(".close-form-btn");
       const deleteBtn = formContainer.querySelector(".delete-place-btn");
-
+  
       if (!form || !closeBtn || !deleteBtn) {
         console.error('Form elements not found:', { form, closeBtn, deleteBtn });
         alert('Erreur : éléments du formulaire introuvables');
         return;
       }
-
+  
       closeBtn.addEventListener("click", () => {
-        formContainer.classList.remove("expanded");
+        formContainer.classList.remove("expanded", "visible");
         formContainer.innerHTML = "";
       });
-
+  
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-      
+  
         const formData = new FormData(form);
         const raw = Object.fromEntries(formData.entries());
-            
+  
         const payload = {
           place_id: raw.place_id,
           title: raw.title,
@@ -362,22 +382,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           price: raw.price ? parseFloat(raw.price) : undefined,
           latitude: raw.latitude ? parseFloat(raw.latitude) : undefined,
           longitude: raw.longitude ? parseFloat(raw.longitude) : undefined,
+          amenity_ids: Array.from(form.querySelector(`#edit-amenity_ids-${placeId}`).selectedOptions).map(option => option.value),
         };
-      
+  
         const rawPhotos = raw.photos_url;
-
         if (rawPhotos && typeof rawPhotos === 'string') {
           const photos = rawPhotos
             .split(/[\n,]+/)
             .map(s => s.trim())
             .filter(Boolean);
-
           if (photos.length > 0) {
             payload.photos_url = photos;
           }
-        } else {
-
         }
+  
         try {
           const response = await fetchWithAutoRefresh(`/places/${payload.place_id}`, {
             method: "PUT",
@@ -387,36 +405,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials: "include",
             body: JSON.stringify(payload)
           });
-      
+  
           const data = await response.json();
-      
+  
           if (!response.ok) {
             console.error("Update failed:", data);
             alert("Erreur lors de la mise à jour : " + (data.error || "inconnue"));
             return;
           }
-      
+  
           alert("Place updated successfully");
-          formContainer.classList.remove("expanded");
-          formContainer.classList.remove("visible")
+          formContainer.classList.remove("expanded", "visible");
+          formContainer.innerHTML = "";
+          location.reload();
         } catch (error) {
           console.error("System error", error);
           alert("Système error");
         }
       });
-
+  
       deleteBtn.addEventListener("click", async () => {
         if (!confirm("Are you sure you want to delete this place?")) return;
-
+  
         try {
           const response = await fetchWithAutoRefresh(`/places/${placeId}`, {
             method: "DELETE",
             credentials: "include"
           });
-
+  
           if (response.ok) {
             alert("Place deleted!");
-            formContainer.classList.remove("expanded");
+            formContainer.classList.remove("expanded", "visible");
             formContainer.innerHTML = "";
             location.reload();
           } else {
@@ -432,7 +451,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Fermer le formulaire si clic à l'extérieur
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".place-item") && !event.target.closest(".edit-form-container")) {
       document.querySelectorAll(".edit-form-container").forEach(c => {

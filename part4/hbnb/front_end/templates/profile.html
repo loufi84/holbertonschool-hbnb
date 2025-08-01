@@ -59,7 +59,9 @@
       data-description="{{ place.description }}"
       data-price="{{ place.price }}"
       data-latitude="{{ place.latitude }}"
-      data-longitude="{{ place.longitude }}">
+      data-longitude="{{ place.longitude }}"
+      data-amenities="{{ place.amenities }}"
+      data-photos-url="{{ place.photos_url | join(',') }}">
         <img src="{{ place.photos_url[0] }}" />
         <strong>{{ place.title }}</strong> - {{ place.description }} - Price: {{ place.price }}€
       </li>
