@@ -13,23 +13,23 @@
     gap: 1.5rem;
     text-align: center;
     margin: 0 auto;/
-  }
-  
-  #account_creation h2 {
+}
+
+#account_creation h2 {
     margin: 0 0 1rem 0;
     font-weight: 700;
     font-size: 2rem;
     color: #D63C3C;
     text-shadow: 0 0 8px rgba(214, 60, 60, 0.6);
-  }
-  
-  #account_creation label {
+}
+
+#account_creation label {
     text-align: left;
     font-weight: 600;
     color: #eee;
-  }
-  
-  #account_creation input {
+}
+
+#account_creation input {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     border: none;
@@ -39,14 +39,14 @@
     color: #eee;
     transition: box-shadow 0.3s ease;
     outline-offset: 2px;
-  }
-  
-  #account_creation input:focus {
+}
+
+#account_creation input:focus {
     box-shadow: 0 0 8px 2px #D63C3C;
     outline: none;
-  }
-  
-  #account_creation button {
+}
+
+#account_creation button {
     margin-top: 1rem;
     padding: 0.75rem 0;
     font-size: 1.2rem;
@@ -59,20 +59,20 @@
     text-transform: uppercase;
     box-shadow: 0 6px 12px rgba(214, 60, 60, 0.8);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  #account_creation button:hover {
+}
+
+#account_creation button:hover {
     background-color: #B32F2F;
     box-shadow: 0 8px 16px rgba(179, 47, 47, 0.9);
-  }
-  
-  #account_creation button:active {
+}
+
+#account_creation button:active {
     box-shadow: 0 4px 8px rgba(179, 47, 47, 0.7);
-  }
+}
 
 /*===== LOGIN =====*/
 
-  #login-form {
+#login-form {
     background: rgba(20, 20, 20, 0.9);
     padding: 2.5rem 3rem;
     border-radius: 15px;
@@ -84,23 +84,23 @@
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;
-  }
-  
-  #login-form h2 {
+}
+
+#login-form h2 {
     margin: 0 0 1rem 0;
     font-weight: 700;
     font-size: 2rem;
     color: #D63C3C;
     text-shadow: 0 0 8px rgba(214, 60, 60, 0.6);
-  }
-  
-  #login-form label {
+}
+
+#login-form label {
     text-align: left;
     font-weight: 600;
     color: #eee;
-  }
-  
-  #login-form input {
+}
+
+#login-form input {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     border: none;
@@ -110,14 +110,14 @@
     color: #eee;
     transition: box-shadow 0.3s ease;
     outline-offset: 2px;
-  }
-  
-  #login-form input:focus {
+}
+
+#login-form input:focus {
     box-shadow: 0 0 8px 2px #D63C3C;
     outline: none;
-  }
-  
-  #login-form button {
+}
+
+#login-form button {
     margin-top: 1rem;
     padding: 0.75rem 0;
     font-size: 1.2rem;
@@ -130,16 +130,16 @@
     text-transform: uppercase;
     box-shadow: 0 6px 12px rgba(214, 60, 60, 0.8);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  #login-form button:hover {
+}
+
+#login-form button:hover {
     background-color: #B32F2F;
     box-shadow: 0 8px 16px rgba(179, 47, 47, 0.9);
-  }
-  
-  #login-form button:active {
+}
+
+#login-form button:active {
     box-shadow: 0 4px 8px rgba(179, 47, 47, 0.7);
-  }
+}
 
 #form {
     display: flex;

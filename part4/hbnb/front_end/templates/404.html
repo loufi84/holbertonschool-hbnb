@@ -12,9 +12,16 @@
             <img src="../static/images/logo.png" id="logo">
         </header>
         <main id="container">
-            <h1>Error 404: Page not found!</h1>
-            <p>Woops, it seems the page you're looking for doesn't exist anymore (or yet?)</p>
-            <p><a href="{{ url_for('static', filename='index.html') }}">Why don't you take a look at our amazing places?</a></p>
+            <section class="error">
+                <h1>Error 404: Page not found!</h1>
+                <img src="../static/images/logo.png">
+                <p>Woops, it seems the page you're looking for doesn't exist anymore (or yet?)</p>
+                <p>
+                    <a href="{{ url_for('static', filename='index.html') }}" class="cool-button">
+                    Why don't you take a look at our amazing places?
+                    </a>
+                </p>
+            </section>
         </main>
         {% include 'footer.html' %}
     </body>

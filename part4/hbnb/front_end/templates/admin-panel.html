@@ -68,8 +68,6 @@
         <input type="email" id="user-email" name="email" required><br>
         <label for="user-password">Password:</label>
         <input type="password" id="user-password" name="password" required><br>
-        <label for="user-is-admin">Admin:</label>
-        <input type="checkbox" id="user-is-admin" name="is_admin"><br>
         <button type="submit">Edit User</button>
         <button type="button" id="cancel-edit-user">Cancel</button>
       </form>
@@ -242,10 +240,7 @@
     </section>
 
   </main>
-
-  <footer id="footer">
-    HBnB&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Front-end: <strong>Quentin LATASTE</strong>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;Back-end: <a href="https://github.com/Proser-V" target="_blank" rel="noopener noreferrer"><strong>Valentin DUMONT</strong></a> & <a href="https://github.com/loufi84" target="_blank" rel="noopener noreferrer"><strong>Quentin LATASTE</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;For Holberton School Dijon - July 2025&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;All rights reserved.
-  </footer>
-  <script type="module" src="{{ url_for('static', filename='JS/admin2.js') }}"></script>
+  {% include 'footer.html' %}
+  <script type="module" src="{{ url_for('static', filename='JS/admin.js') }}"></script>
 </body>
 </html>

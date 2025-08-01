@@ -1,4 +1,4 @@
-import apiClient from "../JS/apiClient.js";
+import apiClient from "./apiClient.js";
 const { fetchWithAutoRefresh } = apiClient;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -126,8 +126,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('user-first-name').value = row.children[1].textContent;
             document.getElementById('user-last-name').value = row.children[2].textContent;
             document.getElementById('user-email').value = row.children[3].textContent;
-            document.getElementById('user-is-admin').checked = row.children[4].textContent === 'Yes';
-            document.getElementById('edit-user-section').classList.remove('hidden');
             document.getElementById('edit-user-section').classList.add('visible');
         }
     });
@@ -388,7 +386,6 @@ async function editUser() {
         last_name: document.getElementById('user-last-name').value.trim(),
         email: document.getElementById('user-email').value.trim(),
         password: document.getElementById('user-password').value.trim(),
-        is_admin: document.getElementById('user-is-admin').checked
     };
 
     try {
@@ -578,7 +575,6 @@ function openEditUserFormById(id) {
             document.getElementById('user-first-name').value = user.first_name || '';
             document.getElementById('user-last-name').value = user.last_name || '';
             document.getElementById('user-email').value = user.email || '';
-            document.getElementById('user-is-admin').checked = user.is_admin || false;
         })
         .catch(err => {
             console.error('Error fetching user:', err);

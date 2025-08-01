@@ -3,7 +3,7 @@ const { fetchWithAutoRefresh } = apiClient || {};
 
 if (!fetchWithAutoRefresh) {
   console.error('fetchWithAutoRefresh is not defined. Check apiClient.js export.');
-  alert('Erreur de configuration du client API.');
+  alert('Configuration error on API');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -21,10 +21,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadAmenities();
 
   if (!profileContainer || !editButton || !editForm || !cancelBtn || !saveBtn || !firstNameInput) {
-    console.error('Un ou plusieurs éléments du DOM sont manquants :', {
+    console.error('One or several DOM elements missing:', {
       profileContainer, editButton, editForm, cancelBtn, saveBtn, firstNameInput
     });
-    alert('Erreur : certains éléments de la page sont introuvables.');
+    alert('Error; Some elements on the page not found');
     return;
   }
 
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   
     if (Object.keys(updatedUser).length === 0) {
-      alert("Aucune modification détectée.");
+      alert("No modifications detected");
       prefillForm(user);
       return;
     }
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const result = await response.json();
   
       if (response.ok) {
-        alert('Profil mis à jour avec succès');
+        alert('Profile updated successfully');
         user = result;
         displayUserInfo(user);
         prefillForm(user);
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (error) {
       console.error('Profile update failed:', error);
-      alert('Erreur serveur lors de la mise à jour');
+      alert('Server error');
     }
   });
 
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const formContainer = document.getElementById("global-edit-form-container");
       if (!formContainer) {
         console.error('Global edit form container not found');
-        alert('Erreur : conteneur de formulaire global introuvable');
+        alert('Error global form container not found');
         return;
       }
   
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const price = parseFloat(item.dataset.price || '0');
       const latitudeRaw = item.dataset.latitude;
       const longitudeRaw = item.dataset.longitude;
-      const amenityIdsRaw = item.dataset.amenityIds || ''; // Récupérer les IDs des amenities
+      const amenityIdsRaw = item.dataset.amenityIds || '';
   
       const latitude = (latitudeRaw && latitudeRaw !== "null" && latitudeRaw !== "undefined") ? Number(latitudeRaw) : '';
       const longitude = (longitudeRaw && longitudeRaw !== "null" && longitudeRaw !== "undefined") ? Number(longitudeRaw) : '';
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
       if (!placeId) {
         console.error('Missing placeId:', item.dataset);
-        alert('Erreur : ID de la place manquant');
+        alert('Place ID missing');
         return;
       }
   
@@ -330,7 +330,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
   
-      // Charger les amenities et pré-sélectionner celles associées
       try {
         const res = await fetchWithAutoRefresh('/amenities');
         if (!res.ok) throw new Error('Failed to load amenities');
@@ -343,13 +342,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           option.value = a.id;
           option.textContent = a.name;
           if (amenityIds.includes(String(a.id))) {
-            option.selected = true; // Pré-sélectionner les amenities associées
+            option.selected = true;
           }
           select.appendChild(option);
         });
       } catch (err) {
         console.error('Error loading amenities for edit form:', err);
-        alert('Erreur lors du chargement des amenities');
+        alert('Error loading amenities');
       }
   
       formContainer.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -360,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
       if (!form || !closeBtn || !deleteBtn) {
         console.error('Form elements not found:', { form, closeBtn, deleteBtn });
-        alert('Erreur : éléments du formulaire introuvables');
+        alert('Error: form elements not found');
         return;
       }
   
@@ -410,7 +409,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
           if (!response.ok) {
             console.error("Update failed:", data);
-            alert("Erreur lors de la mise à jour : " + (data.error || "inconnue"));
+            alert("Error during upadte " + (data.error || "unknown"));
             return;
           }
   

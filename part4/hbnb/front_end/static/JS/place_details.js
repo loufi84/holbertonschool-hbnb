@@ -162,7 +162,7 @@ try {
         showFormBtn.style.display = 'inline-block';
         showFormBtn.addEventListener('click', () => {
             reviewCard.classList.toggle('visible');
-            setupInteractiveStars(); // Appel corrigé
+            setupInteractiveStars();
         });
 
         reviewForm.addEventListener('submit', async (e) => {
@@ -192,7 +192,6 @@ try {
                     alert('Review submitted successfully!');
                     reviewForm.reset();
                     document.getElementById('review-rating-value').value = 0;
-                    // Réinitialiser les étoiles visuellement
                     document.querySelectorAll('.rating input').forEach(input => input.checked = false);
                     reviewCard.classList.remove('visible');
                     location.reload();
